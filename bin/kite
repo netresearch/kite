@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+/**
+ * See class comment
+ *
+ * PHP Version 5
+ *
+ * @category   Netresearch
+ * @package    Netresearch\Console
+ * @subpackage Application
+ * @author     Christian Opitz <christian.opitz@netresearch.de>
+ * @license    http://www.netresearch.de Netresearch Copyright
+ * @link       http://www.netresearch.de
+ */
+
+require_once __DIR__ . '/../bootstrap.php';
+
+use Netresearch\Kite\Console\Application;
+
+$application = new Application();
+$application->run();
