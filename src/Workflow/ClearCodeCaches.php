@@ -13,6 +13,7 @@
 
 namespace Netresearch\Kite\Workflow;
 use Netresearch\Kite\Workflow;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Class ClearCodeCaches
@@ -115,7 +116,7 @@ class ClearCodeCaches extends Workflow
     {
         $url = rtrim($baseUrl, '/') . '/' . ltrim($scriptPath, '/');
 
-        $this->console->output('Calling ' . $url, LOG_DEBUG);
+        $this->console->output('Calling ' . $url, OutputInterface::VERBOSITY_DEBUG);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -125,7 +126,7 @@ class ClearCodeCaches extends Workflow
         $caches = explode('|', $content);
         if (array_pop($caches) !== 'SUCCESS') {
             $this->console->output("<error>Clearcache not run successfully</error>");
-            $this->console->output($content, LOG_DEBUG);
+            $this->console->output($content, OutputInterface::VERBOSITY_DEBUG);
         } else {
             if ($caches) {
                 $this->console->output('Cleared code caches (' . implode(', ', $caches) . ')');

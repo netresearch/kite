@@ -272,33 +272,33 @@ class Console
     /**
      * Set a new minimum severity for messages to be shown
      *
-     * @param int $severity The severity
+     * @param int $verbosity The verbosity
      *
      * @return $this
      */
-    public function setSeverity($severity)
+    public function setVerbosity($verbosity)
     {
         $this->previousVerbosities[] = $this->output->getVerbosity();
-        $this->output->setVerbosity($severity - 4);
+        $this->output->setVerbosity($verbosity);
         return $this;
     }
 
     /**
-     * Get a new minimum severity for messages to be shown
+     * Get verbosity for messages to be shown
      *
      * @return int
      */
-    public function getSeverity()
+    public function getVerbosity()
     {
-        return $this->output->getVerbosity() + 4;
+        return $this->output->getVerbosity();
     }
 
     /**
-     * Restore the severity that was set before the last call to setSeverity
+     * Restore the verbosity that was set before the last call to setSeverity
      *
      * @return $this
      */
-    public function restoreSeverity()
+    public function restoreVerbosity()
     {
         if ($this->previousVerbosities) {
             $this->output->setVerbosity(array_pop($this->previousVerbosities));
@@ -309,18 +309,18 @@ class Console
     /**
      * Output a string
      *
-     * @param string   $message           The message
-     * @param int|bool $severityOrNewLine Severity or whether to print a newline
-     * @param bool     $newLine           Whether to print a newline
-     * @param bool     $raw               If true, don't style the output
+     * @param string   $message            The message
+     * @param int|bool $verbosityOrNewLine Severity or whether to print a newline
+     * @param bool     $newLine            Whether to print a newline
+     * @param bool     $raw                If true, don't style the output
      *
      * @return void
      */
-    public function output($message, $severityOrNewLine = LOG_NOTICE, $newLine = true, $raw = false)
+    public function output($message, $verbosityOrNewLine = OutputInterface::VERBOSITY_NORMAL, $newLine = true, $raw = false)
     {
-        if (is_bool($severityOrNewLine)) {
-            $newLine = $severityOrNewLine;
-            $severityOrNewLine = LOG_NOTICE;
+        if (is_bool($verbosityOrNewLine)) {
+            $newLine = $verbosityOrNewLine;
+            $verbosityOrNewLine = OutputInterface::VERBOSITY_NORMAL;
         }
 
         if ($this->debugOutput) {
@@ -329,7 +329,7 @@ class Console
 
         $verbosity = $this->output->getVerbosity();
 
-        if ($verbosity !== 0 && $severityOrNewLine <= $verbosity + 4) {
+        if ($verbosity !== 0 && $verbosityOrNewLine <= $verbosity) {
             $this->output->write($message, $newLine, $raw ? OutputInterface::OUTPUT_RAW : $this->outputType);
         }
     }

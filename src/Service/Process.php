@@ -137,7 +137,7 @@ class Process extends \Symfony\Component\Process\Process
     {
         $command = $this->getCommandLine();
 
-        $this->console->output('<cmd>' . $this->getWorkingDirectory() . ' > ' . $command . '</cmd>', LOG_INFO);
+        $this->console->output('<cmd>' . $this->getWorkingDirectory() . ' > ' . $command . '</cmd>', OutputInterface::VERBOSITY_VERBOSE);
 
         if ($this->dryRun) {
             return null;
@@ -146,13 +146,13 @@ class Process extends \Symfony\Component\Process\Process
         parent::run(
             function ($type, $buffer) {
                 if (!$this->shy) {
-                    $this->console->output($buffer, $this->pt ? $this->console->getSeverity() : LOG_DEBUG, false, !$this->pt);
+                    $this->console->output($buffer, $this->pt ? $this->console->getVerbosity() : OutputInterface::VERBOSITY_DEBUG, false, !$this->pt);
                 }
             }
         );
 
         if ($this->getExitCode() !== 0) {
-            if ($this->console->getSeverity() <= LOG_DEBUG && !$this->pt) {
+            if ($this->console->getVerbosity() <= OutputInterface::VERBOSITY_DEBUG && !$this->pt) {
                 $this->console->getOutput()->write($this->getErrorOutput(), false, OutputInterface::OUTPUT_RAW);
             }
             throw new \Netresearch\Kite\Exception(

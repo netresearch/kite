@@ -19,6 +19,7 @@ use Netresearch\Kite\Variables;
 use Netresearch\Kite\Workflow;
 use Netresearch\Kite\Exception;
 use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Run a task for each stage until the selected stage
@@ -151,7 +152,7 @@ class StageSelect extends Workflow
                     }
                 }
 
-                $this->console->output("Selected stage <comment>$selectedStage</comment>", LOG_INFO);
+                $this->console->output("Selected stage <comment>$selectedStage</comment>", OutputInterface::VERBOSITY_VERBOSE);
 
                 $selectedStages = array();
                 if ($this->get('sliding')) {

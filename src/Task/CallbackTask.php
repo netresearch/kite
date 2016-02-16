@@ -13,6 +13,7 @@
  */
 
 namespace Netresearch\Kite\Task;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Execute a callback
@@ -79,7 +80,7 @@ class CallbackTask extends \Netresearch\Kite\Task
         } else {
             $name = 'anonymous function';
         }
-        $this->console->output('Calling ' . $name, LOG_DEBUG);
+        $this->console->output('Calling ' . $name, OutputInterface::VERBOSITY_DEBUG);
     }
 }
 ?>

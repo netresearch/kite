@@ -13,6 +13,7 @@
  */
 
 namespace Netresearch\Kite\Task;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Output the message
@@ -36,8 +37,8 @@ class OutputTask extends \Netresearch\Kite\Task
         return array(
             'severity' => array(
                 'type' => 'int',
-                'label' => 'Severity of message (use LOG_* constants)',
-                'default' => LOG_NOTICE
+                'label' => 'Severity of message (use OutputInterface::VERBOSITY_* constants)',
+                'default' => OutputInterface::VERBOSITY_NORMAL
             ),
             'newLine' => array(
                 'type' => 'bool',

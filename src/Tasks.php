@@ -16,6 +16,7 @@ use Netresearch\Kite\Exception\BreakException;
 use Netresearch\Kite\Exception\ExitException;
 use Netresearch\Kite\Exception\ForcedTaskException;
 use Netresearch\Kite\Task\SchemaMigrationTask;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A task to aggregate and run a bunch of tasks
@@ -612,11 +613,11 @@ class Tasks extends Task
      *
      * @return mixed|\Netresearch\Kite\Task\OutputTask
      */
-    public function output($message, $severityOrNewLine = LOG_NOTICE, $newLine = true)
+    public function output($message, $severityOrNewLine = OutputInterface::VERBOSITY_NORMAL, $newLine = true)
     {
         if (is_bool($severityOrNewLine)) {
             $newLine = $severityOrNewLine;
-            $severity = LOG_NOTICE;
+            $severity = OutputInterface::VERBOSITY_NORMAL;
         } else {
             $severity = $severityOrNewLine;
         }
