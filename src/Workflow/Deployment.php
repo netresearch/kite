@@ -14,10 +14,10 @@
 
 namespace Netresearch\Kite\Workflow;
 use Netresearch\Kite\Task;
-use Netresearch\Kite\Tasks;
+
 use Netresearch\Kite\Workflow;
 use Netresearch\Kite\Exception;
-use Symfony\Component\Console\Input\InputArgument;
+
 use Symfony\Component\Console\Input\InputOption;
 
 /**

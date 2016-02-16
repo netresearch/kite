@@ -14,7 +14,7 @@
 
 namespace Netresearch\Kite\ExpressionLanguage;
 use Netresearch\Kite\Task;
-use Netresearch\Kite\Variables;
+
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;

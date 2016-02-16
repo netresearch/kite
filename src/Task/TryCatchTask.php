@@ -15,7 +15,7 @@
 namespace Netresearch\Kite\Task;
 use Netresearch\Kite\Exception;
 use Netresearch\Kite\Task;
-use Netresearch\Kite\Tasks;
+
 
 /**
  * Catch exceptions while executing tasks

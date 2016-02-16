@@ -14,7 +14,7 @@
 namespace Netresearch\Kite\Task;
 use Netresearch\Kite\Task;
 use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Process\PhpProcess;
+
 
 /**
  * Class PharTask

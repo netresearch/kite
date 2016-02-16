@@ -13,7 +13,7 @@
 
 namespace Netresearch\Kite\Workflow\Composer;
 use Netresearch\Kite\Exception;
-use Netresearch\Kite\Exception\BreakException;
+
 use Netresearch\Kite\Workflow;
 
 /**

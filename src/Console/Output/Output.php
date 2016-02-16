@@ -13,7 +13,7 @@
 
 namespace Netresearch\Kite\Console\Output;
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 

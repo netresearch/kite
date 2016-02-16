@@ -241,7 +241,7 @@ class Filesystem
         if (defined('PHP_WINDOWS_VERSION_BUILD')) {
             // Try to copy & delete - this is a workaround for random "Access denied" errors.
             $command = sprintf('xcopy %s %s /E /I /Q', escapeshellarg($source), escapeshellarg($target));
-            $result = $this->processExecutor->execute($command, $output);
+            $result = $this->console->createProcess($command)->run();
 
             // clear stat cache because external processes aren't tracked by the php stat cache
             clearstatcache();

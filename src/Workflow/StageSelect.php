@@ -15,10 +15,10 @@
 namespace Netresearch\Kite\Workflow;
 use Netresearch\Kite\Service\Factory;
 use Netresearch\Kite\Task;
-use Netresearch\Kite\Variables;
+
 use Netresearch\Kite\Workflow;
 use Netresearch\Kite\Exception;
-use Symfony\Component\Console\Input\InputDefinition;
+
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**

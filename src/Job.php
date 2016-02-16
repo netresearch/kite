@@ -13,7 +13,7 @@
 
 namespace Netresearch\Kite;
 
-use Netresearch\Kite\Service\Config;
+
 use Netresearch\Kite\Service\Console;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;

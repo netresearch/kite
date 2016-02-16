@@ -15,7 +15,7 @@
 namespace Netresearch\Kite\Workflow\Composer;
 use Netresearch\Kite\Task;
 use Netresearch\Kite\Workflow;
-use Symfony\Component\Console\Input\InputArgument;
+
 
 /**
  * Go through all packages and merge the given branch into the current, when it exists

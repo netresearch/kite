@@ -15,7 +15,7 @@
 namespace Netresearch\Kite\Service;
 
 use Netresearch\Kite\Console\Output\Output;
-use Netresearch\Kite\Service\Config;
+
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper;
 use Symfony\Component\Console\Input\InputInterface;
