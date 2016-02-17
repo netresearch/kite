@@ -148,7 +148,7 @@ class Deployment extends Workflow
             ->when('job.initialBranch != composer.rootPackage.branch');
 
         $cleanup->git('checkout', null, '{job.initialBranch}');
-        $cleanup->fs()->copy('config["workspace"]}/composer.lock.tmp', 'composer.lock');
+        $cleanup->fs()->copy('{config["workspace"]}/composer.lock.tmp', 'composer.lock');
         $cleanup->composer('install');
 
         return $cleanup;
