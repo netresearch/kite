@@ -11,6 +11,7 @@
     "support": {
         "issues": "https://github.com/netresearch/kite/issues"
     },
+    "license": "MIT",
     "require": {
         "symfony/expression-language": "~2.7",
         "symfony/console": "~2.7",
