@@ -119,14 +119,17 @@ class ClearCodeCaches extends Workflow
         $this->console->output('Calling ' . $url, OutputInterface::VERBOSITY_DEBUG);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $content = curl_exec($ch);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $response = curl_exec($ch);
+        $content = substr($response, curl_getinfo($ch, CURLINFO_HEADER_SIZE));
 
         $caches = explode('|', $content);
         if (array_pop($caches) !== 'SUCCESS') {
             $this->console->output("<error>Clearcache not run successfully</error>");
-            $this->console->output($content, OutputInterface::VERBOSITY_DEBUG);
+            $this->console->indent();
+            $this->console->output($response, OutputInterface::VERBOSITY_DEBUG);
+            $this->console->outdent();
         } else {
             if ($caches) {
                 $this->console->output('Cleared code caches (' . implode(', ', $caches) . ')');
