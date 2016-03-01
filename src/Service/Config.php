@@ -26,6 +26,18 @@ use Netresearch\Kite\Exception;
 class Config extends \ArrayObject
 {
     /**
+     * Config constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct(
+            [
+                'jobs' => []
+            ]
+        );
+    }
+
+    /**
      * Include the main or any other config file
      *
      * @param string $path Path to file
@@ -62,9 +74,6 @@ class Config extends \ArrayObject
      */
     public function getJobConfiguration($job = null)
     {
-        if (!isset($this['jobs'])) {
-            $this['jobs'] = array();
-        }
         if ($job) {
             if (!array_key_exists($job, $this['jobs'])) {
                 throw new Exception("Job $job is not configured");
@@ -85,6 +94,28 @@ class Config extends \ArrayObject
     public function configureJob($name, array $config)
     {
         $this['jobs'][$name] = $config;
+    }
+
+    /**
+     * Recursively merge an array into another
+     *
+     * @param array $to   To (by reference)
+     * @param array $from From
+     *
+     * @return void
+     */
+    public function merge(array &$to, array $from)
+    {
+        foreach ($from as $key => $fromValue) {
+            if (is_numeric($key)) {
+                $to[] = $fromValue;
+            } elseif (isset($to[$key]) && is_array($to[$key]) && is_array($fromValue)) {
+                $this->merge($to[$key], $fromValue);
+            } else {
+                $to[$key] = $fromValue;
+            }
+        }
+        reset($to);
     }
 }
 ?>

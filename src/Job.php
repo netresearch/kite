@@ -81,6 +81,68 @@ class Job extends Tasks
     }
 
     /**
+     * Variable configuration
+     *
+     * @return array
+     */
+    protected function configureVariables()
+    {
+        return [
+            'options' => [
+                'type' => 'array',
+                'label' => 'Options to expose on the console app - keys are camelCase '
+                    . " variable names, which are used as option names lowercase-dashed.\n"
+                    . "Values contain variable configuration with keys:\n"
+                    . "  'type': Variable type (array, string, etc.)\n"
+                    . "  'label': The label to show on --help\n"
+                    . "  'default': Default value (if any, invalid for booleans without explicit mode)\n"
+                    . "  'mode': Mode for the \\Symfony\\Component\\Console\\Input\\InputOption\n"
+                    . "  'shortcut': Shortcut for the \\Symfony\\Component\\Console\\Input\\InputOption"
+            ],
+            'arguments' => [
+                'type' => 'array',
+                'label' => 'Arguments to expose on the console app - keys are camelCase '
+                    . " variable names, which are used as argument names lowercase-dashed.\n"
+                    . "Values contain variable configuration with keys:\n"
+                    . "  'type': Variable type (array, string, etc.)\n"
+                    . "  'label': The label to show on --help\n"
+                    . "  'default': Default value (if any, invalid for booleans without explicit mode)\n"
+                    . "  'mode': Mode for the \\Symfony\\Component\\Console\\Input\\InputArgument"
+            ]
+        ] + parent::configureVariables();
+    }
+
+    /**
+     * Configure options and arguments
+     *
+     * @param string $name  The name
+     * @param mixed  $value The value
+     *
+     * @return void
+     */
+    public function offsetSet($name, $value)
+    {
+        if ($name === 'options' || $name === 'arguments') {
+            $type = substr($name, 0, -1);
+            if (!is_array($value)) {
+                throw new Exception($name . ' must be array');
+            }
+            foreach ($value as $variable => $config) {
+                $from = $this->camelCaseToLowerCaseDashed($variable);
+                $this->definitions[$from] = array(
+                    'context' => $this,
+                    'variable' => $variable,
+                    'type' => $type,
+                    'config' => $config
+                );
+            }
+            return;
+        }
+        parent::offsetSet($name, $value);
+    }
+
+
+    /**
      * Run an array of tasks
      *
      * @return $this
