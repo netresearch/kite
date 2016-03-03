@@ -23,9 +23,17 @@ if (PHP_SAPI !== 'cli') {
 $currentDir = getcwd();
 $selfDir = realpath(dirname($_SERVER['PHP_SELF']));
 $subDir = '';
+$selfDirPrev = '';
+
 while ($selfDir !== $currentDir) {
     $subDir = basename($selfDir) . '/' . $subDir;
+    $selfDirPrev = $selfDir;
     $selfDir = dirname($selfDir);
+    if ($selfDirPrev === $selfDir) {
+        define('PATH_site', getcwd() . DIRECTORY_SEPARATOR);
+        $subDir = '';
+        break;
+    }
 }
 
 require 'typo3/sysext/core/Classes/Core/CliBootstrap.php';
