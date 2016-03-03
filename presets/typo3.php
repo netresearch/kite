@@ -76,7 +76,7 @@ $this->merge(
         'onReady' => '{config["jobs"]["ccr"]["task"]}',
         'rsync' => [
             'exclude' => [
-                '/typo3temp/*',
+                '/typo3temp',
                 '/fileadmin',
                 '/uploads',
                 'build.xml',
@@ -93,7 +93,8 @@ $this->merge(
         'shared' => [
             'dirs' => [
                 'fileadmin',
-                'uploads'
+                'uploads',
+                'typo3temp',
             ]
         ]
     ]
