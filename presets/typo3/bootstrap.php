@@ -20,28 +20,14 @@ if (PHP_SAPI !== 'cli') {
     die('Access denied');
 }
 
-$currentDir = getcwd();
-$selfDir = realpath(dirname($_SERVER['PHP_SELF']));
-$subDir = '';
-$selfDirPrev = '';
-
-while ($selfDir !== $currentDir) {
-    $subDir = basename($selfDir) . '/' . $subDir;
-    $selfDirPrev = $selfDir;
-    $selfDir = dirname($selfDir);
-    if ($selfDirPrev === $selfDir) {
-        define('PATH_site', getcwd() . DIRECTORY_SEPARATOR);
-        $subDir = '';
-        break;
-    }
-}
+define('PATH_site', getcwd() . DIRECTORY_SEPARATOR);
 
 require 'typo3/sysext/core/Classes/Core/CliBootstrap.php';
 \TYPO3\CMS\Core\Core\CliBootstrap::checkEnvironmentOrDie();
 
 require 'typo3/sysext/core/Classes/Core/Bootstrap.php';
 \TYPO3\CMS\Core\Core\Bootstrap::getInstance()
-    ->baseSetup($subDir)
+    ->baseSetup()
     ->loadConfigurationAndInitialize()
     ->loadTypo3LoadedExtAndExtLocalconf(true)
     ->applyAdditionalConfigurationSettings()
