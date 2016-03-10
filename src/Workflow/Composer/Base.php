@@ -111,9 +111,10 @@ abstract class Base extends Workflow
                             if (!array_key_exists($package->name, $packages)) {
                                 $this->checkoutPackage($package, $branch, true);
                                 $checkedOutPackages[] = $package->name;
-                                $packages[$package->name] = $branch;
+                                $packages[$package->name] = $package;
                             }
 
+                            $this->pushPackages[$packageName] = $packages[$packageName];
                             $this->rewriteRequirement($package, $packageName, $version);
                         } else {
                             $unfixedRequirements++;
@@ -198,12 +199,12 @@ abstract class Base extends Workflow
      * @param string $branch  The branch
      * @param bool   $create  Create the branch if it doesn't exist
      *
-     * @return bool Whether checkout was successful
+     * @return bool|null Whether checkout was successful or null when package is already at this branch
      */
     protected function checkoutPackage($package, $branch, $create = false)
     {
         if ($package->branch === $branch) {
-            return false;
+            return null;
         }
         $remoteBranch = 'origin/' . $branch;
         $isRemote = in_array($remoteBranch, $package->branches, true);
