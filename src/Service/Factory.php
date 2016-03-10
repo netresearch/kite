@@ -169,7 +169,8 @@ class Factory
     {
         $ucType = ucfirst($type);
         if (!strpos($definition, '\\')) {
-            $taskClass = ucfirst($definition) . ($postfixType ? $ucType : '');
+            $taskClass = str_replace(' ', '\\', ucwords(str_replace('-', ' ', $definition)));
+            $taskClass = $taskClass . ($postfixType ? $ucType : '');
             foreach ($this->{$type . 'Namespaces'} as $namespace) {
                 $potentialClass = '\\' . $namespace . '\\' . $taskClass;
                 if (class_exists($potentialClass)) {
