@@ -83,10 +83,7 @@ class Checkout extends Base
         foreach ($this->get('composer.packages') as $package) {
             foreach ($branches as $branch) {
                 $oldBranch = $package->branch;
-                if ($oldBranch === $branch) {
-                    break;
-                }
-                if ($this->checkoutPackage($package, $branch)) {
+                if ($this->checkoutPackage($package, $branch) !== false) {
                     $packages[$package->name] = $package;
                     if ($merge && $oldBranch !== $branch) {
                         $this->mergePackage($package, $oldBranch);
