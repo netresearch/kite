@@ -14,6 +14,7 @@
 
 namespace Netresearch\Kite\Service;
 use Netresearch\Kite\Job;
+use Netresearch\Kite\Service\Composer\Package;
 use Netresearch\Kite\Task;
 use Netresearch\Kite\Exception;
 use Netresearch\Kite\Tasks;
@@ -100,17 +101,11 @@ class Composer extends Tasks
 
         $this->output('<step>Gathering composer package information</step>');
 
-        if (!file_exists('composer.json')) {
-            throw new Exception('Could not find composer.json');
-        }
-        $composerJson = json_decode(file_get_contents('composer.json'));
-        if (!$composerJson->name) {
+        $composerJson = new Package($this, 'composer.json', true);
+        if (!isset($composerJson->name)) {
             throw new Exception('No name for project found in composer.json');
         }
         $packages[$composerJson->name] = $composerJson;
-        $composerJson->path = realpath(getcwd());
-        $composerJson->isRoot = true;
-        $composerJson->requires = isset($composerJson->require) ? get_object_vars($composerJson->require) : array();
 
         if (!file_exists('composer.lock')) {
             throw new Exception('Please install application first');
@@ -123,41 +118,7 @@ class Composer extends Tasks
             foreach ($composerLock->packages as $package) {
                 if ($package->name === $packageName && $package->type !== 'metapackage') {
                     $package->path = $packagePath;
-                    $package->isRoot = false;
-                    $package->requires = isset($package->require) ? get_object_vars($package->require) : array();
-                    $packages[$package->name] = $package;
-                }
-            }
-        }
-
-        foreach ($packages as $package) {
-            $package->branches = array();
-            $package->upstreams = array();
-            $package->branch = null;
-            $package->tag = null;
-            $gitDir = $package->path . '/.git';
-            $package->git = file_exists($gitDir) && is_dir($gitDir);
-            if ($package->git) {
-                $this->git('fetch', $package->path, array('p' => true, 'origin'));
-                $gitBr = $this->git(
-                    'for-each-ref', $package->path,
-                    array('format' => '%(HEAD)|%(refname:short)|%(upstream:short)', 'refs/heads/', 'refs/remotes/origin')
-                );
-                foreach (explode("\n", trim($gitBr)) as $line) {
-                    list($head, $branch, $upstream) = explode('|', $line);
-                    $package->branches[] = $branch;
-                    if ($head === '*') {
-                        $package->branch = $branch;
-                    }
-                    if ($upstream) {
-                        $package->upstreams[$branch] = $upstream;
-                    }
-                }
-                if (!$package->branch) {
-                    try {
-                        $package->tag = trim($this->git('describe', $package->path, array('exact-match' => true, 'tags' => true)));
-                    } catch (\Exception $e) {
-                    }
+                    $packages[$packageName] = new Package($this, $package);
                 }
             }
         }

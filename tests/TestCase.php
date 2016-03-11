@@ -38,6 +38,26 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     private static $workspacePath;
 
     /**
+     * @var string
+     */
+    private $previousCwd;
+
+    /**
+     * Change back directory if changed
+     *
+     * @return void
+     */
+    protected function tearDown()
+    {
+        parent::tearDown();
+        if ($this->previousCwd) {
+            chdir($this->previousCwd);
+            $this->previousCwd = null;
+        }
+    }
+
+
+    /**
      * Delete the workspace if it exists
      *
      * @return void
@@ -105,6 +125,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
             $this->cmd('cp -r ? ?', null, $remotesPath, $templatePath);
         }
 
+        $this->previousCwd = getcwd();
+        chdir($project->path);
+
         return $this->clonePackage($project);
     }
 
@@ -156,12 +179,14 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
                 $composerJson .= ",\n    \"type\": \"project\"";
                 $composerJson .= ",\n    \"config\": {\"cache-files-ttl\": 0}";
                 $composerJson .= ",\n    \"minimum-stability\": \"dev\"";
-                $composerJson .= ",\n    \"repositories\": [";
-                $dependentPackage = $lastPackage;
-                do {
-                    $composerJson .= "\n        {\"type\": \"git\", \"url\": \"{$dependentPackage->remote}\"},";
-                } while ($dependentPackage = current($dependentPackage->dependencies));
-                $composerJson = rtrim($composerJson, ',') . "\n    ]";
+                if ($lastPackage) {
+                    $composerJson .= ",\n    \"repositories\": [";
+                    $dependentPackage = $lastPackage;
+                    do {
+                        $composerJson .= "\n        {\"type\": \"git\", \"url\": \"{$dependentPackage->remote}\"},";
+                    } while ($dependentPackage = current($dependentPackage->dependencies));
+                    $composerJson = rtrim($composerJson, ',') . "\n    ]";
+                }
             }
             if ($lastPackage) {
                 $composerJson .= ",\n" . '    "require": {';
@@ -178,7 +203,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         }
 
         $this->cmd('git clone ? ?', null, $lastPackage->remote, $lastPackage->path);
-        $this->cmd('composer install --no-autoloader', $lastPackage->path);
+        if ($dependenciesDepth) {
+            $this->cmd('composer install --no-autoloader', $lastPackage->path);
+        }
 
         return $lastPackage;
     }

@@ -79,6 +79,8 @@ class Checkout extends Base
      */
     protected function checkoutPackages(array $branches, $merge = false)
     {
+        /* @var $packages \Netresearch\Kite\Service\Composer\Package[] */
+        /* @var $package \Netresearch\Kite\Service\Composer\Package */
         $packages = array();
         foreach ($this->get('composer.packages') as $package) {
             foreach ($branches as $branch) {

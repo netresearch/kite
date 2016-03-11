@@ -13,6 +13,7 @@
  */
 
 namespace Netresearch\Kite\Service;
+use Netresearch\Kite\Exception\ProcessFailedException;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -155,10 +156,7 @@ class Process extends \Symfony\Component\Process\Process
             if ($this->console->getVerbosity() <= OutputInterface::VERBOSITY_DEBUG && !$this->pt) {
                 $this->console->getOutput()->write($this->getErrorOutput(), false, OutputInterface::OUTPUT_RAW);
             }
-            throw new \Netresearch\Kite\Exception(
-                $this->getErrorOutput() ?: $this->getExitCodeText(),
-                $this->getExitCode()
-            );
+            throw new ProcessFailedException($this);
         }
 
         return trim($this->getOutput());

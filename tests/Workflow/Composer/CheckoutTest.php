@@ -85,8 +85,6 @@ class CheckoutTest extends TestCase
 
         call_user_func($scenario, $lastPackage);
 
-        chdir($project->path);
-
         $job = $this->getJobMock(
             function (InputInterface $input, OutputInterface $output, Question $question) {
                 if (substr(strip_tags($question->getQuestion()), 0, 4) === 'Fix ') {

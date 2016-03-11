@@ -13,6 +13,7 @@
  */
 
 namespace Netresearch\Kite\Workflow\Composer;
+use Netresearch\Kite\Service\Composer\Package;
 use Netresearch\Kite\Workflow;
 use Netresearch\Kite\Exception;
 
@@ -29,7 +30,7 @@ use Netresearch\Kite\Exception;
 abstract class Base extends Workflow
 {
     /**
-     * @var array
+     * @var Package[]
      */
     protected $pushPackages = array();
 
@@ -40,15 +41,14 @@ abstract class Base extends Workflow
      */
     protected function pushPackages()
     {
-        if ($this->pushPackages) {
-            while ($package = array_shift($this->pushPackages)) {
-                $this->console->output("Pushing <comment>$package->name</comment>", false);
-                $this->git('push', $package->path, array('u' => 'origin', $package->branch));
-                $this->console->output(
-                    str_repeat(chr(8), strlen($package->name))
-                    . '<info>' . $package->name . '</info>'
-                );
-            }
+        foreach ($this->pushPackages as $i => $package) {
+            $this->console->output("Pushing <comment>$package->name</comment>", false);
+            $this->git('push', $package->path, array('u' => 'origin', $package->branch));
+            $this->console->output(
+                str_repeat(chr(8), strlen($package->name))
+                . '<info>' . $package->name . '</info>'
+            );
+            unset($this->pushPackages[$i]);
         }
     }
 
@@ -79,8 +79,8 @@ abstract class Base extends Workflow
      * If not and $autoFix or user agrees, the require-statements in the
      * dependent packages are changed accordingly.
      *
-     * @param \stdClass[] $packages Packages
-     * @param bool        $autoFix  Whether to autofix wrong requirements
+     * @param Package[] $packages Packages
+     * @param bool      $autoFix  Whether to autofix wrong requirements
      *
      * @return void
      */
@@ -133,9 +133,9 @@ abstract class Base extends Workflow
     /**
      * Change the require statement for $requiredPackage to the newVersion in $package
      *
-     * @param \stdClass $package         The package
-     * @param string    $requiredPackage The required package
-     * @param string    $newVersion      The new version
+     * @param Package $package         The package
+     * @param string  $requiredPackage The required package
+     * @param string  $newVersion      The new version
      *
      * @return void
      */
@@ -179,7 +179,7 @@ abstract class Base extends Workflow
      * If $detectChanges, and there are changes on the requirements not in $ignorePackages
      * composer update is requested
      *
-     * @param \stdClass $package The package
+     * @param Package $package The package
      *
      * @return void
      */
@@ -195,9 +195,9 @@ abstract class Base extends Workflow
     /**
      * Checkout a package at a branch
      *
-     * @param object $package The package
-     * @param string $branch  The branch
-     * @param bool   $create  Create the branch if it doesn't exist
+     * @param Package $package The package
+     * @param string  $branch  The branch
+     * @param bool    $create  Create the branch if it doesn't exist
      *
      * @return bool|null Whether checkout was successful or null when package is already at this branch
      */
@@ -239,10 +239,10 @@ abstract class Base extends Workflow
     /**
      * Merge a $branch into $package's current branch
      *
-     * @param \stdClass $package The package
-     * @param string    $branch  The branch
-     * @param null      $message The commit message (if any)
-     * @param bool      $squash  Whether to squash the changes
+     * @param Package $package The package
+     * @param string  $branch  The branch
+     * @param null    $message The commit message (if any)
+     * @param bool    $squash  Whether to squash the changes
      *
      * @return void
      */
@@ -290,7 +290,7 @@ abstract class Base extends Workflow
     /**
      * Try to solve conflicts inside the require section of the $package composer.json
      *
-     * @param \stdClass $package The package
+     * @param Package $package The package
      *
      * @return void
      */
@@ -334,9 +334,9 @@ abstract class Base extends Workflow
     /**
      * Merge the requirements from different sides of the current $package
      *
-     * @param \stdClass $package The current package
-     * @param array     $ours    Our composer.json as array
-     * @param array     $theirs  Their composer.json as array
+     * @param Package $package The current package
+     * @param array   $ours    Our composer.json as array
+     * @param array   $theirs  Their composer.json as array
      *
      * @return array
      */
