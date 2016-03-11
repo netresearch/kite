@@ -34,6 +34,7 @@ use Netresearch\Kite\Service\Composer;
  * @property array       $branches  Git branches (including remote branches)
  * @property array       $upstreams Upstream branches (values) for local branches (keys)
  * @property string|null $branch    The currently checked out branch, if any
+ *                                  If package is on a tag this will always be null
  * @property string|null $tag       The currently checked out tag, if any
  *
  *
@@ -130,7 +131,7 @@ class Package
                     throw $e;
                 }
             }
-            if (!self::$forEachRefHeadSupported) {
+            if (!self::$forEachRefHeadSupported && !($this->tag = $this->getTag())) {
                 $this->branch = $this->composer->git('rev-parse', $this->path, ['abbrev-ref' => true, 'HEAD']) ?: null;
             }
             foreach (explode("\n", trim($gitBr)) as $line) {
@@ -146,13 +147,25 @@ class Package
                     $this->upstreams[$branch] = $upstream;
                 }
             }
-            if (!$this->branch) {
-                try {
-                    $this->tag = trim($this->composer->git('describe', $this->path, array('exact-match' => true, 'tags' => true)));
-                } catch (\Exception $e) {
-                }
+            if (self::$forEachRefHeadSupported && !$this->branch) {
+                $this->tag = $this->getTag();
             }
         }
+    }
+
+    /**
+     * Get  the currently checked out tag
+     *
+     * @return string|null
+     */
+    protected function getTag()
+    {
+        try {
+            return trim($this->composer->git('describe', $this->path, array('exact-match' => true, 'tags' => true)));
+        } catch (Exception\ProcessFailedException $e) {
+            return null;
+        }
+
     }
 }
 
