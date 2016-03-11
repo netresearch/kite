@@ -131,7 +131,7 @@ class Package
                 }
             }
             if (!self::$forEachRefHeadSupported) {
-                $this->branch = $this->composer->git('rev-parse', $this->path, 'HEAD');
+                $this->branch = $this->composer->git('rev-parse', $this->path, ['abbrev-ref' => true, 'HEAD']) ?: null;
             }
             foreach (explode("\n", trim($gitBr)) as $line) {
                 list($head, $branch, $upstream) = explode('|', $line);
