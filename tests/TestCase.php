@@ -218,7 +218,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
      *
      * @return string
      */
-    protected function cmd($cmd, $cwd = null)
+    protected static function cmd($cmd, $cwd = null)
     {
         if (func_num_args() > 2) {
             $args = func_get_args();

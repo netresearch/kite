@@ -132,9 +132,12 @@ class Process extends \Symfony\Component\Process\Process
     /**
      * Execute a shell command
      *
+     * @param callable|null $callback A PHP callback to run whenever there is some
+     *                                output available on STDOUT or STDERR
+     *
      * @return mixed The output of the shell command or FALSE if the command returned a non-zero exit code and $ignoreErrors was enabled.
      */
-    public function run()
+    public function run($callback = NULL)
     {
         $command = $this->getCommandLine();
 
@@ -145,7 +148,10 @@ class Process extends \Symfony\Component\Process\Process
         }
 
         parent::run(
-            function ($type, $buffer) {
+            function ($type, $buffer) use ($callback) {
+                if ($callback) {
+                    call_user_func($callback, $type, $buffer);
+                }
                 if (!$this->shy) {
                     $this->console->output($buffer, $this->pt ? $this->console->getVerbosity() : OutputInterface::VERBOSITY_DEBUG, false, !$this->pt);
                 }
