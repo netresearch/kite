@@ -21,9 +21,6 @@ use Symfony\Component\Console\Helper;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Process\Process;
 
-require_once __DIR__ . '/../bootstrap.php';
-require_once __DIR__ . '/Package.php';
-
 /**
  * Base TestCase
  *

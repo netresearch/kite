@@ -23,6 +23,11 @@
             "Netresearch\\Kite\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Netresearch\\Kite\\Test\\": "tests/"
+        }
+    },
     "extra": {
         "branch-alias": {
             "dev-TASK_REWRITE": "1.0.x-dev"
