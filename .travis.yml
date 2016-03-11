@@ -8,3 +8,5 @@ php:
 
 before_script:
   - composer install
+  - git config --global user.email "netresearch-kite@example.com"
+  - git config --global user.name "Travis CI"
