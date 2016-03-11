@@ -63,11 +63,12 @@ Per project installation
     composer require "kite=^1.2.0"
     vendor/bin/kite -V
 
+=============
 Configuration
 =============
 
 Task organization
------------------
+=================
 - Tasks
     - Smallest, predefined steps (currently: answer, break, callback, choose, composer, confirm, evaluate, exit, fs, git, include, iterate, output, phar, remoteShell, sub, tar, tryCatch)
 - Workflows
@@ -83,7 +84,7 @@ Task organization
     - Defines the jobs; can load and override presets
 
 Kite configuration file
------------------------
+=======================
 You need a file called "Kite.php" to set up config (where to deploy).
 For TYPO3 projects it should be placed here: `typo3conf/Kite.php`,
 for Magento `app/etc/kite.php` and for all other applications just `kite.php`.
@@ -111,7 +112,7 @@ A basic example could be
     ?>
 
 Jobs
-----
+====
 Jobs are to be configured in the key `jobs` in the configuration. They can contain
 a single `task`, an array of `tasks` or a `workflow` (always only one of them).
 
@@ -143,7 +144,7 @@ a single `task`, an array of `tasks` or a `workflow` (always only one of them).
     ];
 
 Nodes
------
+=====
 Whenever you set a key named `node` or `nodes` on a job, workflow or task
 it's value will be mapped to an aggregate of node models. Those models have the
 following default configuration:
@@ -166,6 +167,7 @@ following default configuration:
         // 'deployPath' => '/var/www'
     );
 
+=====
 Usage
 =====
 
@@ -186,7 +188,7 @@ By running
 you can show help for a specific job/command.
 
 Common jobs
------------
+===========
 - `kite [help command]`
     - Gives a list of all available commands (jobs) or shows help for the given one
 - `kite checkout [--merge] branch`
@@ -201,7 +203,7 @@ Common jobs
     - Clears caches locally (cc) or on all nodes of a specific stage
 
 Deployment jobs
----------------
+===============
 - `kite deploy [stage]`
     - Runs the deployment for all nodes on the given or selected stage
 - `kite rollout [stage]`
