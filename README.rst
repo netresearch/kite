@@ -10,7 +10,7 @@ Kite: Yet another build automation tool inspired by TYPO3.Surf
 
 .. image:: https://api.travis-ci.org/netresearch/kite.png
     :target: https://travis-ci.org/netresearch/kite
-   :align: right
+    :align: right
 
 .. contents::
     :backlinks: top

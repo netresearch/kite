@@ -107,11 +107,11 @@ class CheckoutTest extends TestCase
             }
             $this->assertContains(
                 '* ' . $branch,
-                explode("\n", $this->cmd('git br -a', $package->path))
+                explode("\n", $this->cmd('git branch -a', $package->path))
             );
             $this->assertContains(
                 '  ' . $branch,
-                explode("\n", $this->cmd('git br -a', $package->remote))
+                explode("\n", $this->cmd('git branch -a', $package->remote))
             );
         }
     }
