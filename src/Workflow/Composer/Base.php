@@ -273,7 +273,8 @@ abstract class Base extends Workflow
             $branches = array_unique(
                 array_map(
                     function ($el) {
-                        return array_pop(explode('/', $el));
+                        $parts = explode('/', $el);
+                        return array_pop($parts);
                     },
                     $package->branches
                 )
