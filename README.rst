@@ -214,7 +214,7 @@ a single `task`, an array of `tasks` or a `workflow` (always only one of them).
         ],
         'task' => [
             'type' => 'output',
-            'message' => '{message}'
+            'message' => '{job.message}'
         ]
     ];
 
