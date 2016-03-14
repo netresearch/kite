@@ -14,6 +14,7 @@
 
 namespace Netresearch\Kite\Workflow\Composer;
 use Netresearch\Kite\Exception;
+use Netresearch\Kite\Service\Composer\Package;
 
 /**
  * Checkout a branch and eventually merge it with the previously checked out branch
@@ -47,6 +48,12 @@ class Checkout extends Base
                 'option' => true,
                 'shortcut' => 'm'
             ),
+            'create' => array(
+                'type' => 'bool',
+                'label' => 'Create branch if not exists',
+                'option' => true,
+                'shortcut' => 'c'
+            ),
             '--'
         ) + parent::configureVariables();
     }
@@ -62,7 +69,8 @@ class Checkout extends Base
             function () {
                 $this->checkoutPackages(
                     (array) $this->get('branch'),
-                    $this->get('merge')
+                    $this->get('merge'),
+                    $this->get('create')
                 );
             }
         );
@@ -74,18 +82,20 @@ class Checkout extends Base
      * @param array $branches The branches to try
      * @param bool  $merge    Whether to merge the new branch with the previously
      *                        checked out branch
+     * @param bool  $create   Create branch if not exists
+     *
+     * @throws Exception\MissingVariableException
      *
      * @return void
      */
-    protected function checkoutPackages(array $branches, $merge = false)
+    protected function checkoutPackages(array $branches, $merge = false, $create = false)
     {
         /* @var $packages \Netresearch\Kite\Service\Composer\Package[] */
-        /* @var $package \Netresearch\Kite\Service\Composer\Package */
         $packages = array();
-        foreach ($this->get('composer.packages') as $package) {
+        foreach ($this->getPackages() as $package) {
             foreach ($branches as $branch) {
                 $oldBranch = $package->branch;
-                if ($this->checkoutPackage($package, $branch) !== false) {
+                if ($package->git && $this->checkoutPackage($package, $branch, $create) !== false) {
                     $packages[$package->name] = $package;
                     if ($merge && $oldBranch !== $branch) {
                         $this->mergePackage($package, $oldBranch);

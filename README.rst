@@ -87,6 +87,85 @@ Task organization
 - Configuration file (typo3conf/Kite.php, app/etc/kite.php, kite.php)
     - Defines the jobs; can load and override presets
 
+Variables
+=========
+The fact that all of the configured tasks are to be ran automated, introduces the
+need for a variable system that allows you to read from dynamic configurations or
+change it. Kite provides a basic syntax to access those variables from within
+strings (all options of tasks, nodes etc.):
+
+Each string *inside curly braces* inside an option string are evaluated as
+`Symfony Expression Language <http://symfony.com/doc/current/components/expression_language/index.html>`_
+expressions - f.i.
+
+.. code:: php
+
+    <?php
+    $this['messages'] = (object) ['default' => 'Hello world'];
+    $this['jobs']['echo'] = [
+        'description' => 'Output the default message from (\{config["messages"].default\})',
+        'task' => [
+            'type' => 'output',
+            'message' => '{config["messages"].default}'
+        ]
+    ];
+
+As you saw above, by quoting the braces, you can avoid that the expression is evaluated.
+Please see the `Symfony Expression Language Syntax <http://symfony.com/doc/current/components/expression_language/syntax.html>`_
+for help on how to use the expressions.
+
+Variable scopes
+---------------
+The variable scopes are very similar to those in JavaScript. This means that you can
+access all variables from the parent scope within the current scope unless you have
+a variable in the current scope that's name is the same. To disambiguate you can use
+the special variables `this` and `parent`.
+
+*Tasks options (to be documented - for now have a look in the configureVariables methods inside the task and workflow classes)
+are always bound to the current scope (that of the task)*
+
+Global variables
+----------------
+Additionally to the options from the current and parent tasks there are some global variables available:
+
+- `job`
+    - The current job object (instance of `\Netresearch\Kite\Job`)
+- `kite`
+    - Object with some information about the kite package (`path` and relative `dir`)
+- `config`
+    - The config array object (as in configuration file)
+- `composer`
+    - Composer service object providing keys `packages` and `rootPackage`
+
+Special variables
+-----------------
+- `this`
+    - By using `this` you can force the variable to be not looked up in the parent scopes
+    - but only within the current.
+- `parent`
+    - Points to the parent object
+
+Available functions
+-------------------
+Kite ships with the following functions:
+
+- `isset(variable)` and `empty(variable)`
+    - Behave just like their PHP equivalents. Only available for variable objects, such as
+    - `tasks`, `nodes`, `workflows` or `jobs` and their objects (f.i. not for configuration
+    - arrays)
+- `get(variableName, variableValue)` and `set(variableName, variableValue)`
+    - Get or set the variables (f.i. `set('job.owner', node.user)`
+- `answer(question)`
+    - Let the (command line) user answer a question and return the result
+- `answer(question)`
+    - Let the (command line) user answer a confirmation question and return the result
+- `select(question, options)`
+    - Let the (command line) select from an array of options
+- `replace(search, replace, subject, regex)`
+    - Replace the string `search` with `replace` in `subject`. Behaves like preg_replace
+      when `regex` is true - like string_replace otherwise.
+
+
 Kite configuration file
 =======================
 You need a file called "Kite.php" to set up config (where to deploy).
@@ -170,6 +249,152 @@ following default configuration:
         // 'host' => 'example.com',
         // 'deployPath' => '/var/www'
     );
+
+Deployment configuration
+========================
+
+Stages
+------
+As you saw in the example in `Kite configuration file`_, there is a top level configuration
+element named `stages`. They are set by the `common` preset and hold configuration
+only used for each of it's keys (such as `staging` and `production` by default). They
+are evaluated by workflows based on the `stage-select` workflow, which takes the
+stage(s) to use from either command line or a select question. After a stage was
+selected ALL of it's values are set to the corresponding task (such as `deploy`).
+
+The stages have no special meaning and are not handled in a special way - they only
+play together with the stage based tasks (`deploy` and `rollout` from the `common`
+preset and `ccr` from the `typo3` preset) because those are configured so.
+
+Deployment
+----------
+The `deployment` workflow deploys your application to exactly one stage (whereas the
+`rollout` just runs the `deployment` workflow for each until the selected stage).
+Thereby it does the following steps:
+
+#. Run `kite composer diagnose` to assert that your application is at a defined state (nothing uncommited, unpushed, unpulled, lock file up to date etc.)
+#. Run `composer checkout` with the parameters you provided for the stage:
+    #. `branch` - The branch to checkout. In `common` preset they are configured as follows:
+
+        .. code:: php
+
+            <?php
+            $this['stages'] = [
+                'staging' => [
+                    'branch' => '{replace("/", "-", composer.rootPackage.name)}-staging',
+                    'merge' => true,
+                    'createBranch' => '{config["composer"]["whitelistNames"] || config["composer"]["whitelistRemotes"] || config["composer"]["whitelistPaths"]}'
+                    // add nodes or node in your config
+                ],
+                'production' => [
+                    'branch' => 'master',
+                    // add nodes or node in your config
+                ]
+            ];
+
+    #. `merge` - Whether to merge the currently checked out branch into the branch to checkout
+    #. `createBranch` - Whether to create the branch if it doesn't exist. This is by
+       default set to true for the staging stage, when no whitelists for composer tasks
+       are configured. You can configure whitelists for composer like that
+
+        .. code:: php
+
+            <?php
+            // The following whitelist types are available (evaluated by OR)
+            // ... for the package names
+            $this['composer']['whitelistNames'] = 'netresearch/.*';
+            // ... for the git remote urls
+            $this['composer']['whitelistRemotes'] = 'git@github.com:netresearch/.*';
+            // ... for the package paths
+            $this['composer']['whitelistPaths'] = 'vendor/netresearch/.*';
+
+    #. `rsync` - configuration for rsync task invoked (f.i. with `excludes` option)
+#. Creates a new release from the current release on each `node` `{deployPath}/releases`
+#. Rsync the current local state to the new release dir on each `node`
+#. Symlink shared directories and files (shared means shared between the releases) -
+   the shared directories and files are expected to be at `{deployPath}/shared`. They
+   can be configured as seen in the typo3 preset:
+
+    .. code:: php
+
+        <?php
+        $this->merge(
+            $this['jobs']['deploy']['task'],
+            [
+                'shared' => [
+                    'dirs' => ['fileadmin', 'uploads', 'typo3temp']
+                ]
+            ]
+        );
+
+    To illustrate the behaviour of the stage configuration here's an example setting
+    the shared directories differently for each `stage`:
+
+    .. code:: php
+
+        <?php
+        $this->merge(
+            $this['stages'],
+            [
+                'staging' => [
+                    'shared' => [
+                        'dirs' => ['shared_dir_1', 'shared_dir_2'],
+                        'files' => ['file1', 'file2']
+                    ]
+                ],
+                'production' => [
+                    'shared' => [
+                        'dirs' => '{config["stages"]["staging"]["shared"]["dirs"]}',
+                        'file' => 'file'
+                    ]
+                ]
+            ]
+        );
+
+#. Switch the previous release pointer (`{deploypath}/previous`) to the current release.
+#. Switch the current release pointer (`{deploypath}/current`) to the new release.
+#. Invoke the `onReady` task if any. F.i.:
+
+    .. code:: php
+
+        <?php
+        $this->merge(
+            $this['jobs']['deploy']['task'],
+            [
+                'onReady' => [
+                    'type' => 'shell',
+                    'command' => 'mail',
+                    'optArg' => ['s' => 'Deployed to {stage}', 'user@example.com']
+                ],
+            ]
+        );
+
+    And to once again demonstrate that each of the `stages` can override any option on
+    the deployment workflow:
+
+    .. code:: php
+
+        <?php
+        $this->merge(
+            $this['stages']['production'],
+            [
+                'onReady' => [
+                    'type' => 'shell',
+                    'command' => 'mail',
+                    'optArg' => ['s' => '[IMPORTANT] Deployed to {stage}', 'user@example.com']
+                ],
+            ]
+        );
+
+When you invoke the `deployment` or `rollout` jobs with the rollback (`--rollback` or `-r`)
+option, it
+
+#. switches the next release pointer (`{deploypath}/next`) to the current release
+#. switches the current release pointer (`{deploypath}/current`) to the previous release
+#. invokes the `onReady` task if any.
+
+When you invoke the `deployment` or `rollout` jobs with the rollback (`--activate` or `-a`)
+option, it invokes the last three steps of the deployment (switch symlinks, and invoke `onReady`).
 
 =====
 Usage

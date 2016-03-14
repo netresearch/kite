@@ -13,6 +13,7 @@
  */
 
 namespace Netresearch\Kite\Workflow\Composer;
+use Netresearch\Kite\Service\Composer\Package;
 use Netresearch\Kite\Task;
 use Netresearch\Kite\Workflow;
 
@@ -120,12 +121,12 @@ class Merge extends Base
      * @param string $mergeBranch mergeBranch
      * @param bool   $pull        Whether to pull when branch exists
      *
-     * @return array
+     * @return Package[]
      */
     protected function getMergePackages($mergeBranch, $pull)
     {
         $mergePackages = array();
-        foreach ($this->get('composer.packages') as $package) {
+        foreach ($this->getPackages() as $package) {
             if ($mergeBranch === $package->branch) {
                 $checkout = $this->confirm("{$package->name} is checked out at {$mergeBranch} - do you want to checkout another branch from master and merge into that?");
                 if ($checkout) {

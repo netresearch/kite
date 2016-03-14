@@ -25,7 +25,7 @@ namespace Netresearch\Kite\Test;
 class Package
 {
     /**
-     * @var string package name without vendor prefix
+     * @var string package name
      */
     public $name;
 

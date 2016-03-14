@@ -56,6 +56,7 @@ class PackageTest extends TestCase
         $this->assertEquals(['master', 'origin/master'], $package->branches);
         $this->assertEquals(['master' => 'origin/master'], $package->upstreams);
         $this->assertEquals($project->name, $package->name);
+        $this->assertEquals($project->remote, $package->remote);
         $this->assertTrue($package->isRoot);
         $this->assertTrue($package->git);
         $this->assertEquals([], $package->requires);

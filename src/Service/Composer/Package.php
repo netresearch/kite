@@ -36,6 +36,7 @@ use Netresearch\Kite\Service\Composer;
  * @property string|null $branch    The currently checked out branch, if any
  *                                  If package is on a tag this will always be null
  * @property string|null $tag       The currently checked out tag, if any
+ * @property string|null $remote    The remote url (no multiple urls supported)
  *
  *
  * @category Netresearch
@@ -99,7 +100,50 @@ class Package
             $this->loadGitInformation();
             return $this->$name;
         }
+        if ($name === 'remote') {
+            $this->loadRemote();
+            return $this->$name;
+        }
         throw new Exception('Invalid property ' . $name);
+    }
+
+    /**
+     * Mark lazy properties as present
+     *
+     * @param string $name The name
+     *
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return in_array($name, ['branches', 'upstreams', 'branch', 'tag', 'git', 'remote'], true);
+    }
+
+    /**
+     * Get the remote
+     *
+     * @return void
+     */
+    protected function loadRemote()
+    {
+        $this->remote = null;
+        if ($this->git) {
+            $remote = null;
+            $remotesString = $this->composer->git('remote', $this->path, ['verbose' => true]);
+            $lines = explode("\n", trim($remotesString));
+            foreach ($lines as $line) {
+                preg_match('/^([^\s]+)\s+(.+) \((fetch|push)\)$/', $line, $match);
+                array_shift($match);
+                list($name, $url) = $match;
+                if ($remote && $remote !== $url) {
+                    $this->composer->output("<warning>Can not handle multiple remote urls - using $remote</warning>");
+                    break;
+                } else {
+                    $remote = $url;
+                }
+            }
+            $this->remote = $remote;
+        }
     }
 
     /**

@@ -35,6 +35,51 @@ abstract class Base extends Workflow
     protected $pushPackages = array();
 
     /**
+     * @var array
+     */
+    protected $whitelists;
+
+    /**
+     * Configure the variables
+     *
+     * @return array
+     */
+    protected function configureVariables()
+    {
+        $config = $this->getParent()->get('config');
+        if (!array_key_exists('composer', $config)) {
+            $config['composer'] = [];
+        }
+        foreach (['whitelistNames', 'whitelistPaths', 'whitelistRemotes'] as $key) {
+            if (!array_key_exists($key, $config['composer'])) {
+                $config['composer'][$key] = null;
+            }
+        }
+        return [
+            'whitelistNames' => array(
+                'default' => '{config["composer"]["whitelistNames"]}',
+                'type' => 'string',
+                'label' => 'Regular expression for package names, to limit this operation to',
+                'option' => true
+            ),
+            'whitelistPaths' => array(
+                'default' => '{config["composer"]["whitelistPaths"]}',
+                'type' => 'string',
+                'label' => 'Regular expression for package paths, to limit this operation to',
+                'option' => true
+            ),
+            'whitelistRemotes' => array(
+                'default' => '{config["composer"]["whitelistRemotes"]}',
+                'type' => 'string',
+                'label' => 'Regular expression for package remote urls, to limit this operation to',
+                'option' => true
+            ),
+            '--'
+        ] + parent::configureVariables();
+    }
+
+
+    /**
      * Push all packages marked to be pushed
      *
      * @return void
@@ -42,6 +87,7 @@ abstract class Base extends Workflow
     protected function pushPackages()
     {
         foreach ($this->pushPackages as $i => $package) {
+            $this->assertPackageAllowed($package);
             $this->console->output("Pushing <comment>$package->name</comment>", false);
             $this->git('push', $package->path, array('u' => 'origin', $package->branch));
             $this->console->output(
@@ -91,7 +137,7 @@ abstract class Base extends Workflow
         while ($packageName = array_shift($checkedOutPackages)) {
             $branch = $packages[$packageName]->branch;
             $version = 'dev-' . $branch;
-            foreach ($this->get('composer.packages') as $package) {
+            foreach ($this->getPackages(false, false) as $package) {
                 if (array_key_exists($packageName, $package->requires)) {
                     // TODO: Set required version to branch alias, if any
                     $requiredVersion = $package->requires[$packageName];
@@ -99,6 +145,10 @@ abstract class Base extends Workflow
                         $requiredVersion = 'dev-master';
                     }
                     if ($requiredVersion !== $version) {
+                        $this->assertPackageAllowed($package);
+                        if (!$package->git) {
+                            throw new Exception("Package {$package->name} required to be installed from source");
+                        }
                         if ($autoFix) {
                             $fix = true;
                             $this->output("Changing required version of {$packageName} in {$package->name} from {$requiredVersion} to {$version}");
@@ -141,6 +191,8 @@ abstract class Base extends Workflow
      */
     protected function rewriteRequirement($package, $requiredPackage, $newVersion)
     {
+        $this->assertPackageAllowed($package);
+
         $currentVersion = $package->requires[$requiredPackage];
         $composerFile = $package->path . '/composer.json';
         $composerFileContents = file_get_contents($composerFile);
@@ -203,8 +255,13 @@ abstract class Base extends Workflow
      */
     protected function checkoutPackage($package, $branch, $create = false)
     {
+        $this->assertPackageAllowed($package);
+
         if ($package->branch === $branch) {
             return null;
+        }
+        if (!$package->git) {
+            throw new Exception('Non git package can not be checked out');
         }
         $remoteBranch = 'origin/' . $branch;
         $isRemote = in_array($remoteBranch, $package->branches, true);
@@ -213,6 +270,22 @@ abstract class Base extends Workflow
         } elseif ($isRemote) {
             $this->git('checkout', $package->path, array('b' => $branch, $remoteBranch));
         } elseif ($create) {
+            $branches = array_unique(
+                array_map(
+                    function ($el) {
+                        return array_pop(explode('/', $el));
+                    },
+                    $package->branches
+                )
+            );
+            sort($branches);
+            $inferFromBranch = $this->choose(
+                "Select branch to create new branch '$branch' from in {$package->name}",
+                $branches, in_array('master', $branches, true) ? 'master' : $branch
+            );
+            if ($inferFromBranch !== $package->branch) {
+                $this->checkoutPackage($package, $inferFromBranch);
+            }
             $this->git('checkout', $package->path, array('b' => $branch));
             $package->branches[] = $branch;
         } else {
@@ -248,6 +321,12 @@ abstract class Base extends Workflow
      */
     protected function mergePackage($package, $branch, $message = null, $squash = false)
     {
+        $this->assertPackageAllowed($package);
+
+        if (!$package->git) {
+            throw new Exception('Non git package can not be merged');
+        }
+
         $this->git('fetch', $package->path, array('force' => true, 'origin', $branch . ':' . $branch));
 
         $ff = $branch == 'master' ? 'ff' : 'no-ff';
@@ -360,6 +439,88 @@ abstract class Base extends Workflow
             }
         }
         return $mergedRequires;
+    }
+
+    /**
+     * Get the allowed packages
+     *
+     * @param bool $gitOnly     If git packages should be returned only
+     * @param bool $allowedOnly If allowed packages should be returned only
+     *
+     * @return \Netresearch\Kite\Service\Composer\Package[]
+     */
+    protected function getPackages($gitOnly = true, $allowedOnly = true)
+    {
+        /* @var $packages \Netresearch\Kite\Service\Composer\Package[] */
+        /* @var $package \Netresearch\Kite\Service\Composer\Package */
+        $packages = array();
+        foreach ($this->get('composer.packages') as $package) {
+            if ((!$gitOnly || $package->git) && (!$allowedOnly || $this->isPackageAllowed($package))) {
+                $packages[$package->name] = $package;
+            }
+        }
+        return $packages;
+    }
+
+    /**
+     * Assert that package is allowed
+     *
+     * @param Package $package The package
+     *
+     * @throws Exception
+     *
+     * @return void
+     */
+    protected function assertPackageAllowed($package)
+    {
+        if (!$this->isPackageAllowed($package)) {
+            throw new Exception("Package {$package->name} is not in white list");
+        }
+    }
+
+    /**
+     * Determine if a package is whitelisted
+     *
+     * @param Package $package The package
+     *
+     * @return bool
+     */
+    protected function isPackageAllowed(Package $package)
+    {
+        $whitelistTypes = ['path', 'remote', 'name'];
+        if (!is_array($this->whitelists)) {
+            $this->whitelists = [];
+            foreach ($whitelistTypes as $whitelistType) {
+                $option = $this->get('whitelist' . ucfirst($whitelistType) . 's');
+                if ($option) {
+                    $this->whitelists[$whitelistType] = '#^' . $option . '$#';
+                }
+            }
+        }
+
+        if (!$this->whitelists) {
+            // Without whitelists, all packages are allowed
+            return true;
+        }
+
+        foreach ($this->whitelists as $type => $pattern) {
+            $subject = $package->$type;
+            if ($type === 'path') {
+                $subject = rtrim(
+                    $this->console->getFilesystem()->findShortestPath(
+                        $this->get('composer.rootPackage.path'),
+                        $subject,
+                        true
+                    ),
+                    '/'
+                );
+            }
+            if (preg_match($pattern, $subject)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 ?>

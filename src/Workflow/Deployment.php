@@ -131,7 +131,8 @@ class Deployment extends Workflow
             'Netresearch\\Kite\\Workflow\\Composer\\Checkout',
             array(
                 'branch' => $this->get('branch', null),
-                'merge' => $this->get('merge', false)
+                'merge' => $this->get('merge', false),
+                'create' => $this->get('createBranch', false)
             )
         );
     }

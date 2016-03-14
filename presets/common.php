@@ -13,10 +13,15 @@
 
 /* @var $this \Netresearch\Kite\Service\Config */
 
+// Default values for composer workflows
+$this['composer'] = array_fill_keys(['whitelistNames', 'whitelistRemotes', 'whitelistPaths'], null);
+
+// Stages to be selectable by stageSelect workflow
 $this['stages'] = [
     'staging' => [
         'branch' => '{replace("/", "-", composer.rootPackage.name)}-staging',
         'merge' => true,
+        'createBranch' => '{config["composer"]["whitelistNames"] || config["composer"]["whitelistRemotes"] || config["composer"]["whitelistPaths"]}'
         // add nodes or node in your config
     ],
     'production' => [
@@ -25,6 +30,7 @@ $this['stages'] = [
     ]
 ];
 
+// Common jobs
 $this['jobs'] = [
     'foreach-package' => [
         'description' => 'Execute a command for each package',
