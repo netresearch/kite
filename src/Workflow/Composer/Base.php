@@ -386,9 +386,9 @@ abstract class Base extends Workflow
         if (!is_object($ours) || !is_object($theirs)) {
             throw new Exception('Could not regenerate json file from solved conflicts');
         }
-        $diff = array_diff_key(get_object_vars($theirs), get_object_vars($ours));
-        foreach (get_object_vars($ours) as $key => $value) {
-            if ($key !== 'require' && (!property_exists($theirs, $key) || serialize($value) !== serialize($theirs->$key))) {
+        $diff = array_diff_key($theirs = get_object_vars($theirs), $ours = get_object_vars($ours));
+        foreach ($ours as $key => $value) {
+            if ($key !== 'require' && (!array_key_exists($key, $theirs) || serialize($value) !== serialize($theirs[$key]))) {
                 $diff[$key] = $value;
             }
         }
@@ -420,12 +420,12 @@ abstract class Base extends Workflow
      *
      * @return array
      */
-    private function mergeRequirements($package, $ours, $theirs)
+    private function mergeRequirements($package, array $ours, array $theirs)
     {
-        $oursRequire = get_object_vars($ours['require']);
-        $theirsRequire = get_object_vars($theirs['require']);
+        $oursRequire = isset($ours['require']) && is_object($ours['require']) ? get_object_vars($ours['require']) : [];
+        $theirsRequire = isset($theirs['require']) && is_object($theirs['require']) ? get_object_vars($theirs['require']) : [];
         $mergedRequires = array_merge($oursRequire, $theirsRequire);
-        $packages = $this->get('composer.packages');
+        $packages = $this->getPackages(false, false);
         $preferredVersion = 'dev-' . $package->branch;
         foreach ($mergedRequires as $packageName => $version) {
             $actualVersion = ($version === '@dev') ? 'dev-master' : $version;
