@@ -27,7 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @license  http://www.netresearch.de Netresearch Copyright
  * @link     http://www.netresearch.de
  */
-class Tasks extends Task
+abstract class Tasks extends Task
 {
     /**
      * @var \Netresearch\Kite\Service\Factory
