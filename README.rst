@@ -15,6 +15,10 @@ Kite: Yet another build automation tool inspired by TYPO3.Surf
 .. contents::
     :backlinks: top
 
+.. topic:: Appendix
+
+    - `Task and workflow reference <docs/reference.rst>`_
+
 Kite is build and automation tool, written in PHP and utilizing it for configuration.
 
 - ECMA like variable access:
@@ -74,11 +78,14 @@ Configuration
 Task organization
 =================
 - Tasks
-    - Smallest, predefined steps (currently: answer, break, callback, choose, composer, confirm, evaluate, exit, fs, git, include, iterate, output, phar, remoteShell, sub, tar, tryCatch)
+    - Smallest, predefined steps
+    - See the `task reference <docs/reference.rst#tasks>`_ for tasks shipped with kite
 - Workflows
-    -  Sets of tasks predefined in classes
+    - Special kind of task that allows to composer it's subtasks in a class
     - Top level workflows can expose command line arguments and options
+    - See the `workflow reference <docs/reference.rst#workflows>`_ for workflows shipped with kite
 - Jobs
+    - Outermost kind of task
     - Available as commands on command line
     - Set of tasks and/or workflows defined in arrays (in arbitrary depth)
     - Configurable command line arguments and options
@@ -121,8 +128,12 @@ access all variables from the parent scope within the current scope unless you h
 a variable in the current scope that's name is the same. To disambiguate you can use
 the special variables `this` and `parent`.
 
-*Tasks options (to be documented - for now have a look in the configureVariables methods inside the task and workflow classes)
-are always bound to the current scope (that of the task)*
+.. topic:: `Task or workflow options <docs/reference.rst>`_ are always bound to the scope of the task
+
+    This means, that they have to explicitly be set for the task or workflow and can not be read
+    from parent tasks (like jobs or workflows). However sub tasks of those tasks can
+    access those options without prefix when they don't have an option with the same
+    name or with `parent` prefix otherwise.
 
 Global variables
 ----------------
