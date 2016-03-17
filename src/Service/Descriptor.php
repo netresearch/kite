@@ -50,7 +50,7 @@ class Descriptor
                 if (!$description) {
                     $description = 'Generic ' . $reflection->getName();
                 }
-            } elseif (preg_match_all('/^\s+\*?(?:[ \t]+([^@][^\n]+))?$/mU', $reflection->getDocComment(), $matches, PREG_PATTERN_ORDER)) {
+            } elseif (preg_match_all('/^ \* ([^@ \n].+|)$/mU', $reflection->getDocComment(), $matches, PREG_PATTERN_ORDER)) {
                 $description = trim(implode("\n", $matches[1]));
             }
         }
