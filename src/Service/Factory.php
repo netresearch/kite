@@ -40,13 +40,14 @@ class Factory
     /**
      * @var array
      */
-    protected $taskNamespaces = array(
-        'Netresearch\Kite\Task'
-    );
-
-    protected $workflowNamespaces = array(
-        'Netresearch\Kite\Workflow'
-    );
+    protected $namespaces = [
+        'task' => [
+            'Netresearch\Kite\Task'
+        ],
+        'workflow' => [
+            'Netresearch\Kite\Workflow'
+        ]
+    ];
 
     /**
      * Construct factory
@@ -171,7 +172,7 @@ class Factory
         if (!strpos($definition, '\\')) {
             $taskClass = str_replace(' ', '\\', ucwords(str_replace('-', ' ', $definition)));
             $taskClass = $taskClass . ($postfixType ? $ucType : '');
-            foreach ($this->{$type . 'Namespaces'} as $namespace) {
+            foreach ($this->namespaces[$type] as $namespace) {
                 $potentialClass = '\\' . $namespace . '\\' . $taskClass;
                 if (class_exists($potentialClass)) {
                     return $potentialClass;
@@ -181,6 +182,18 @@ class Factory
             throw new Exception($definition .' must extend Netresearch\\Kite\\' . $ucType);
         }
         return $definition;
+    }
+
+    /**
+     * Get the namespaces - either for a specific type or all
+     *
+     * @param string|null $type workflow or tasks
+     *
+     * @return array
+     */
+    public function getNamespaces($type = null)
+    {
+        return $type ? $this->namespaces[$type] : $this->namespaces;
     }
 }
 ?>
