@@ -233,6 +233,11 @@ class Application extends \Symfony\Component\Console\Application
     public function doRun(InputInterface $input, OutputInterface $output)
     {
         if ($input->hasParameterOption('--workflow')) {
+            $strInput = (string) $input;
+            if ($this->getCommandName($input) === 'help') {
+                $strInput = str_replace('help ', '', $strInput);
+                $strInput .= ' --help';
+            }
             $workflow = $input->getParameterOption('--workflow');
             $jobName = 'generic:workflow:' . $workflow;
             $this->config->configureJob($jobName, array('workflow' => $workflow));
@@ -248,7 +253,7 @@ class Application extends \Symfony\Component\Console\Application
                             $parameterOption . ' ',
                             ' ' . $parameterOption,
                             $parameterOption
-                        ), '', $input
+                        ), '', $strInput
                     )
                 )
             );
