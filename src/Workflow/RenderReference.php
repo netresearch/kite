@@ -103,6 +103,8 @@ class RenderReference extends Workflow
         $commonVars = $this->getCommonVariables();
         $lines[] = 'Common options';
         $lines[] = '==============';
+        $lines[] = 'The following options are available on the most tasks and workflows (unless they deactivated them):';
+        $lines[] = '';
         $this->renderVariables($lines, $commonVars, 'common');
 
         foreach (['task', 'workflow'] as $type) {
@@ -119,7 +121,7 @@ class RenderReference extends Workflow
                 $lines[] = $name;
                 $lines[] = str_repeat('-', strlen($name));
                 $lines[] = '';
-                $lines[] = $descriptor->describeTask($taskObject);
+                $lines[] = str_replace("\n", "\n\n", $descriptor->describeTask($taskObject));
                 $lines[] = '';
                 $variableConfig = $taskObject->get('_variableConfiguration');
                 $taskVariables = [];

@@ -16,7 +16,9 @@ use Netresearch\Kite\Workflow;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class ClearCodeCaches
+ * Clears code caches not available from shell and calls (statcache, opcache and apc).
+ *
+ * Creates a PHP script on the nodes or locally and calls it via the webUrl or node.webUrl
  *
  * @category Netresearch
  * @package  Netresearch\Kite\Workflow

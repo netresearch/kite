@@ -21,6 +21,8 @@ Task and Workflow reference
 
 Common options
 ==============
+The following options are available on the most tasks and workflows (unless they deactivated them):
+
 .. list-table::
    :header-rows: 1
    :widths: 5 5 5 5 80
@@ -1981,7 +1983,9 @@ Workflows
 clearCodeCaches
 ---------------
 
-Class ClearCodeCaches
+Clears code caches not available from shell and calls (statcache, opcache and apc).
+
+Creates a PHP script on the nodes or locally and calls it via the webUrl or node.webUrl
 
 Options
 ```````
