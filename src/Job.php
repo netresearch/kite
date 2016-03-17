@@ -151,7 +151,9 @@ class Job extends Tasks
     {
         $this->started = true;
 
-        $this->console->getFilesystem()->ensureDirectoryExists($this->expand('{config["workspace"]}'));
+        if (isset($this->console->getConfig()['workspace'])) {
+            $this->console->getFilesystem()->ensureDirectoryExists($this->expand('{config["workspace"]}'));
+        }
 
         $input = $this->console->getInput();
         $this->dryRun = $input->getOption('dry-run');
