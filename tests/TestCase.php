@@ -91,7 +91,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $console->setDebugOutput(new ConsoleOutput(ConsoleOutput::VERBOSITY_QUIET));
         $console->setApplication($application);
 
-        return new \Netresearch\Kite\Job($console);
+        $job = new \Netresearch\Kite\Job($console);
+        $job->get('composer')->invalidatePackages();
+        return $job;
     }
 
     /**
@@ -175,7 +177,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
             $composerJson = "{\n" . '    "name": "' . $package->name . '"';
             if ($isProject) {
                 file_put_contents($package->remote . '/kite.php', '<?php $this->loadPreset("common"); $this["workspace"] = "kite-workspace"; ?>');
-                file_put_contents($package->remote . '/.gitignore', '/kite-workspace');
+                file_put_contents($package->remote . '/.gitignore', "/kite-workspace\n/composer.lock\n/vendor");
                 $composerJson .= ",\n    \"type\": \"project\"";
                 $composerJson .= ",\n    \"config\": {\"cache-files-ttl\": 0}";
                 $composerJson .= ",\n    \"minimum-stability\": \"dev\"";
@@ -229,7 +231,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
             }
         }
         if ($cwd && !is_dir($cwd)) {
-            $this->fail("Dir $cwd doesn't exist");
+            throw new \RuntimeException("Dir $cwd doesn't exist");
         }
         $process = new Process($cmd, $cwd);
         //$process->setTty(true);

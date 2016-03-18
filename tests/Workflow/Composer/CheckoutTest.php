@@ -30,6 +30,12 @@ use Symfony\Component\Console\Question\Question;
  */
 class CheckoutTest extends TestCase
 {
+    const QUESTION_FIX_REQUIREMENTS = 'Fix that\?.+';
+
+    const QUESTION_CREATE_BRANCH_FROM = 'Select branch to create new branch \'{branch}\'.+';
+
+    const QUESTION_MERGE_COMMIT_MESSAGE = 'Enter commit message:.+merg(ed?|ing).+';
+
     /**
      * Provide scenarios for the checkout stuff
      *
@@ -63,25 +69,58 @@ class CheckoutTest extends TestCase
         ];
     }
 
-    protected function runWorkflow(array $options = [])
+    /**
+     * Run a workflow
+     *
+     * @param array $options
+     * @param array $answers
+     *
+     * @return void
+     */
+    protected function runWorkflow(array $options = [], array $answers = [])
     {
         $job = $this->getJobMock(
-            function (InputInterface $input, OutputInterface $output, Question $question) {
-                $question = strip_tags($question->getQuestion());
-                if (substr($question, 0, 4) === 'Fix ') {
-                    return true;
-                } elseif (strpos($question, 'Select branch to create new branch') === 0) {
-                    return 'master';
-                } else {
-                    $this->fail('Unknown question');
+            function (InputInterface $input, OutputInterface $output, Question $question) use ($options, $answers) {
+
+                $question = rtrim(strip_tags($question->getQuestion()));
+                foreach ($answers as $pattern => $answer) {
+                    foreach ($options as $option => $value) {
+                        $placeHolder = '{' . $option . '}';
+                        if (strpos($pattern, $placeHolder) !== false) {
+                            if (!is_string($value) && !is_numeric($value)) {
+                                $this->fail('Can only replace string and number options');
+                            }
+                            $pattern = str_replace($placeHolder, preg_quote($value, '#'), $pattern);
+                        }
+                    }
+                    if (preg_match('#^' . $pattern . '$#i', $question)) {
+                        return $answer;
+                    }
                 }
-                return null;
+                $this->fail('Unexpected question: "' . $question . '"');
             }
         );
         $workflow = new Checkout($job);
         $workflow->setFromArray($options);
         $workflow->assemble();
         $workflow->run();
+    }
+
+    protected function getCurrentRevision($project)
+    {
+        return trim($this->cmd('git rev-parse HEAD', $project->path));
+    }
+
+    protected function assertBranch(Package $package, $branch, $checkedOut = true)
+    {
+        $this->assertContains(
+            ($checkedOut ? '*' : ' ') . ' ' . $branch,
+            explode("\n", $this->cmd('git branch -a', $package->path))
+        );
+        $this->assertContains(
+            '  ' . $branch,
+            explode("\n", $this->cmd('git branch -a', $package->remote))
+        );
     }
 
     /**
@@ -105,21 +144,17 @@ class CheckoutTest extends TestCase
 
         call_user_func($scenario, $lastPackage);
 
-        $this->runWorkflow(['branch' => $branch]);
+        $this->runWorkflow(
+            ['branch' => $branch],
+            [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM . '(project|package-[1-2]).+' => 'master']
+        );
 
         foreach ($allPackages as $package) {
             if ($package->dependencies) {
                 $composerJson = json_decode(file_get_contents($package->path . '/composer.json'), true);
                 $this->assertEquals('dev-' . $branch, current($composerJson['require']));
+                $this->assertBranch($package, $branch);
             }
-            $this->assertContains(
-                '* ' . $branch,
-                explode("\n", $this->cmd('git branch -a', $package->path))
-            );
-            $this->assertContains(
-                '  ' . $branch,
-                explode("\n", $this->cmd('git branch -a', $package->remote))
-            );
         }
     }
 
@@ -131,7 +166,100 @@ class CheckoutTest extends TestCase
      */
     public function testCheckoutWithMerge()
     {
-        $this->markTestIncomplete('Test of the merge option is still missing');
+        $project = $this->getProject();
+
+        $heads = new \stdClass();
+        $heads->master = $this->getCurrentRevision($project);
+
+        foreach (['topicbranch', 'featurebranch'] as $branch) {
+            $this->runWorkflow(
+                ['branch' => $branch, 'create' => true, 'whitelistNames' => 'netresearch/(project|package-1)'],
+                [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM => 'master']
+            );
+            $heads->$branch = $this->getCurrentRevision($project);
+        }
+
+        // featurebranch is checked out
+        // going to checkout topicbranch and merge in featurebranch
+        $this->runWorkflow(
+            ['branch' => 'topicbranch', 'merge' => true],
+            [self::QUESTION_MERGE_COMMIT_MESSAGE => 'merged featurebranch']
+        );
+        $heads->current = $this->getCurrentRevision($project);
+
+        $n = "\n";
+        $this->assertEquals(
+            '*   ' . $heads->current . $n
+            . '|\\  ' . $n
+            . '| * ' . $heads->featurebranch . $n
+            . '* | ' . $heads->topicbranch . $n
+            . '|/  ' . $n
+            . '* ' . trim($heads->master),
+            $this->cmd('git log --graph --pretty=format:\'%H\' --no-color', $project->path)
+        );
+    }
+
+    /**
+     * Test that conflicts in composer.json outside the require object are detected
+     * and an exception is thrown
+     *
+     * @expectedException \Netresearch\Kite\Exception
+     * @expectedExceptionCode 1458307516
+     *
+     * @return void
+     */
+    public function testCheckoutWithUnsolvableMergeConflictInComposerJson()
+    {
+
+        $project = $this->getProject();
+
+        foreach (['topicbranch', 'featurebranch'] as $i => $branch) {
+            $this->runWorkflow(
+                ['branch' => $branch, 'create' => true, 'whitelistNames' => 'netresearch/(project|package-1)'],
+                [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM => 'master']
+            );
+            file_put_contents(
+                $project->path . '/composer.json',
+                str_replace(
+                    '"minimum-stability": "dev"',
+                    '"minimum-stability": "' . ($i ? 'stable' : 'beta'). '"',
+                    file_get_contents($project->path . '/composer.json')
+                )
+            );
+            $this->cmd('git commit -anm "Introducing conflict in ' . $branch . '"; git push', $project->path);
+        }
+
+        // featurebranch is checked out
+        // going to checkout topicbranch and merge in featurebranch
+        $this->runWorkflow(['branch' => 'topicbranch', 'merge' => true]);
+    }
+
+    /**
+     * Test that conflicts in composer.json outside the require object are detected
+     * and an exception is thrown
+     *
+     * @expectedException \Netresearch\Kite\Exception
+     * @expectedExceptionCode 1458307785
+     *
+     * @return void
+     */
+    public function testCheckoutWithConflictsBesidesComposerJson()
+    {
+
+        $project = $this->getProject();
+
+        foreach (['topicbranch', 'featurebranch'] as $branch) {
+            $this->runWorkflow(
+                ['branch' => $branch, 'create' => true, 'whitelistNames' => 'netresearch/(project|package-1)'],
+                [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM => 'master']
+            );
+            file_put_contents($project->path . '/conflictingFile.txt', $branch);
+            $this->cmd('git add -A; git commit -nm "Introducing conflict in ' . $branch . '"; git push', $project->path);
+        }
+
+        // featurebranch is checked out
+        // going to checkout topicbranch and merge in featurebranch
+        $this->runWorkflow(['branch' => 'topicbranch', 'merge' => true]);
     }
 
     /**
@@ -170,7 +298,10 @@ class CheckoutTest extends TestCase
         }
 
         $branch = 'testbranch';
-        $this->runWorkflow(['branch' => $branch, 'create' => true, 'whitelist' . ucfirst($type) . 's' => $pattern]);
+        $this->runWorkflow(
+            ['branch' => $branch, 'create' => true, 'whitelist' . ucfirst($type) . 's' => $pattern],
+            [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM => 'master']
+        );
 
         foreach ($allPackages as $package) {
             $expectedBranch = in_array($package->name, $packageNames, true) ? $branch : 'master';
@@ -192,8 +323,10 @@ class CheckoutTest extends TestCase
     public function testDependenciesNotInWhitelist()
     {
         $project = $this->getProject();
-        $this->runWorkflow(['branch' => 'testbranch', 'create' => true, 'whitelistNames' => 'netresearch/package-3']);
+        $this->runWorkflow(
+            ['branch' => 'testbranch', 'create' => true, 'whitelistNames' => 'netresearch/package-3'],
+            [self::QUESTION_CREATE_BRANCH_FROM => 'master']
+        );
     }
 }
-
 ?>

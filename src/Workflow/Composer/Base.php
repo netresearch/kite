@@ -343,19 +343,26 @@ abstract class Base extends Workflow
             $diff = $this->git('diff', $package->path, array('name-only' => true, 'diff-filter' => 'U'));
             $conflictedFiles = array_flip(explode("\n", $diff));
             if (array_key_exists('composer.json', $conflictedFiles)) {
-                $this->resolveRequirementsConflict($package);
-                $this->git('add', $package->path, 'composer.json');
-                unset($conflictedFiles['composer.json']);
+                try {
+                    $this->resolveRequirementsConflict($package);
+                    $this->git('add', $package->path, 'composer.json');
+                } catch (Exception $conflictSolvingException) {
+                }
             }
-            if ($conflictedFiles) {
-                throw new Exception('There are unresolved conflicts - please resolve them and then commit the result');
+            if (array_diff(array_keys($conflictedFiles), ['composer.json'])) {
+                throw new Exception(
+                    'There are unresolved conflicts - please resolve them and then commit the result',
+                    1458307785, isset($conflictSolvingException) ? $conflictSolvingException : null
+                );
+            } elseif (isset($conflictSolvingException)) {
+                throw $conflictSolvingException;
             }
         }
-        if ($this->git('status', $package->path, array('porcelain' => true))) {
+        if (isset($conflictedFiles) || $this->git('status', $package->path, array('porcelain' => true))) {
             if (!$message) {
                 $message = $this->answer(
                     'Enter commit message:',
-                    'Merging ' . $branch . ' into ' . $package->branch
+                    'Merged ' . $branch . ' into ' . $package->branch
                 );
             }
             $this->git('commit', $package->path, array('n' => true, 'm' => $message));
@@ -393,7 +400,7 @@ abstract class Base extends Workflow
             }
         }
         if ($diff !== array()) {
-            throw new Exception('Can not automerge composer.json due to conflicts outside require object');
+            throw new Exception('Can not automerge composer.json due to conflicts outside require object', 1458307516);
         }
 
         preg_match('/\{[^\{]*<{7}.+?>{7}[^\{]*([\t ]*)\}/smU', $contents, $matches, PREG_OFFSET_CAPTURE);
