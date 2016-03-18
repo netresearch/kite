@@ -119,7 +119,7 @@ The following options are available on the most tasks and workflows (unless they
        executeInPreview
 
      - bool
-     - `false`
+     - :code:`false`
      - \-
      - Whether to execute this task even when job is run with --dry-run
    * - 
@@ -131,7 +131,7 @@ The following options are available on the most tasks and workflows (unless they
        force
 
      - bool
-     - `false`
+     - :code:`false`
      - \-
      - Whether this task should be run even when prior tasks (inside the current workflow) failed, exited or broke execution.
    * - 
@@ -864,7 +864,7 @@ Options
        as
 
      - string|array
-     - `null`
+     - :code:`null`
      - \-
      - String with variable name to set the VALUEs to or array which's key to set the KEYs  and which's value to set the VALUEs to
    * - 
@@ -876,7 +876,7 @@ Options
        key
 
      - string
-     - `null`
+     - :code:`null`
      - \-
      - Variable name to set the KEYs to (ignored when "as" doesn't provide both
    * - 
@@ -971,7 +971,7 @@ Options
        newLine
 
      - bool
-     - `true`
+     - :code:`true`
      - \-
      - Whether to print a new line after message
 
@@ -2020,7 +2020,7 @@ Options
        baseDir
 
      - string
-     - `{config["workspace"]}`
+     - :code:`{config["workspace"]}`
      - \-
      - Path relative to current application root and webUrl, where the temp script will be stored
 
@@ -2091,7 +2091,7 @@ Options
        whitelistNames
 
      - string
-     - `{config["composer"]["whitelistNames"]}`
+     - :code:`{config["composer"]["whitelistNames"]}`
      - \-
      - Regular expression for package names, to limit this operation to
    * - 
@@ -2103,7 +2103,7 @@ Options
        whitelistPaths
 
      - string
-     - `{config["composer"]["whitelistPaths"]}`
+     - :code:`{config["composer"]["whitelistPaths"]}`
      - \-
      - Regular expression for package paths, to limit this operation to
    * - 
@@ -2115,7 +2115,7 @@ Options
        whitelistRemotes
 
      - string
-     - `{config["composer"]["whitelistRemotes"]}`
+     - :code:`{config["composer"]["whitelistRemotes"]}`
      - \-
      - Regular expression for package remote urls, to limit this operation to
 
@@ -2174,7 +2174,7 @@ Options
        whitelistNames
 
      - string
-     - `{config["composer"]["whitelistNames"]}`
+     - :code:`{config["composer"]["whitelistNames"]}`
      - \-
      - Regular expression for package names, to limit this operation to
    * - 
@@ -2186,7 +2186,7 @@ Options
        whitelistPaths
 
      - string
-     - `{config["composer"]["whitelistPaths"]}`
+     - :code:`{config["composer"]["whitelistPaths"]}`
      - \-
      - Regular expression for package paths, to limit this operation to
    * - 
@@ -2198,7 +2198,7 @@ Options
        whitelistRemotes
 
      - string
-     - `{config["composer"]["whitelistRemotes"]}`
+     - :code:`{config["composer"]["whitelistRemotes"]}`
      - \-
      - Regular expression for package remote urls, to limit this operation to
 
@@ -2293,7 +2293,7 @@ Options
        whitelistNames
 
      - string
-     - `{config["composer"]["whitelistNames"]}`
+     - :code:`{config["composer"]["whitelistNames"]}`
      - \-
      - Regular expression for package names, to limit this operation to
    * - 
@@ -2305,7 +2305,7 @@ Options
        whitelistPaths
 
      - string
-     - `{config["composer"]["whitelistPaths"]}`
+     - :code:`{config["composer"]["whitelistPaths"]}`
      - \-
      - Regular expression for package paths, to limit this operation to
    * - 
@@ -2317,7 +2317,7 @@ Options
        whitelistRemotes
 
      - string
-     - `{config["composer"]["whitelistRemotes"]}`
+     - :code:`{config["composer"]["whitelistRemotes"]}`
      - \-
      - Regular expression for package remote urls, to limit this operation to
 
@@ -2542,7 +2542,7 @@ Options
        question
 
      - string
-     - `Select stage`
+     - :code:`Select stage`
      - \-
      - Question to ask before stage select
 

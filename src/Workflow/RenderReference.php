@@ -197,7 +197,7 @@ class RenderReference extends Workflow
                     $v = $config[$key];
                     $value = $v === null ? 'null' : ($v === true ? 'true' : ($v === false ? 'false' : $v));
                     if (is_string($value)) {
-                        $value = '`' . $value . '`';
+                        $value = ':code:`' . $value . '`';
                     }
                 } elseif ($key === 'required') {
                     $value = $config[$key] === true ? 'X' : $config[$key];

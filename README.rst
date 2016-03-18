@@ -15,19 +15,15 @@ Kite: Make your projects fly
 .. image:: https://img.shields.io/scrutinizer/g/netresearch/kite.svg?style=flat-square
     :target: https://scrutinizer-ci.com/g/netresearch/kite/?branch=master
 
-.. contents::
-    :backlinks: top
-
-.. topic:: Appendix
-
-    - `Task and workflow reference <docs/reference.rst>`_
+.. role:: php(code)
+    :language: php
 
 Kite is a build and automation tool inspired by TYPO3.Surf, written in PHP and utilizing PHP for configuration.
 It's...
 
 - easy to use
     - Kite ships with several preconfigured tasks, workflows and presets - just use a preset and be done.
-    - Jobs and workflows are available on the command line and there's also `--help` available for each of them.
+    - Jobs and workflows are available on the command line and there's also :code:`--help` available for each of them.
 - flexible
     - The configuration can be completely done by arrays, fiddling your tasks together or by workflow classes that have all the tasks available as methods or both.
     - Jobs, workflows and tasks can easily be reused at any point - new jobs can be composed of any of them.
@@ -39,9 +35,15 @@ It's...
     - Nodes can be set globally or only for specific (sub) tasks
     - Remote tasks operate on all current nodes
 - safe
-    - Everything can be `--dry-run` to preview what happens (yet the tasks to include need to be configured)
-    - The complete debug output of previous tasks can be viewed with `kite log`
+    - Everything can be :code:`--dry-run` to preview what happens (yet the tasks to include need to be configured)
+    - The complete debug output of previous tasks can be viewed with :code:`kite log`
 
+.. contents::
+    :backlinks: top
+
+.. topic:: Appendix
+
+    - `Task and workflow reference <docs/reference.rst>`_
     
 ============
 Installation
@@ -137,62 +139,62 @@ Variable scopes
 The variable scopes are very similar to those in JavaScript. This means that you can
 access all variables from the parent scope within the current scope unless you have
 a variable in the current scope that's name is the same. To disambiguate you can use
-the special variables `this` and `parent`.
+the special variables :code:`this` and :code:`parent`.
 
 .. topic:: `Task or workflow options <docs/reference.rst>`_ are always bound to the scope of the task
 
     This means, that they have to explicitly be set for the task or workflow and can not be read
     from parent tasks (like jobs or workflows). However sub tasks of those tasks can
     access those options without prefix when they don't have an option with the same
-    name or with `parent` prefix otherwise.
+    name or with :code:`parent` prefix otherwise.
 
 Global variables
 ----------------
 Additionally to the options from the current and parent tasks there are some global variables available:
 
-- `job`
-    - The current job object (instance of `\Netresearch\Kite\Job`)
-- `kite`
-    - Object with some information about the kite package (`path` and relative `dir`)
-- `config`
+- :code:`job`
+    - The current job object (instance of :code:`\Netresearch\Kite\Job`)
+- :code:`kite`
+    - Object with some information about the kite package (:code:`path` and relative :code:`dir`)
+- :code:`config`
     - The config array object (as in configuration file)
-- `composer`
-    - Composer service object providing keys `packages` and `rootPackage`
+- :code:`composer`
+    - Composer service object providing keys :code:`packages` and :code:`rootPackage`
 
 Special variables
 -----------------
-- `this`
-    - By using `this` you can force the variable to be not looked up in the parent scopes
+- :code:`this`
+    - By using :code:`this` you can force the variable to be not looked up in the parent scopes
     - but only within the current.
-- `parent`
+- :code:`parent`
     - Points to the parent object
 
 Available functions
 -------------------
 Kite ships with the following `expression language functions <http://symfony.com/doc/current/components/expression_language/syntax.html#component-expression-functions>`_:
 
-- `isset(variable)` and `empty(variable)`
+- :code:`isset(variable)` and :code:`empty(variable)`
     - Behave just like their PHP equivalents. Only available for variable objects, such as
-    - `tasks`, `nodes`, `workflows` or `jobs` and their objects (f.i. not for configuration
+    - :code:`tasks`, :code:`nodes`, :code:`workflows` or :code:`jobs` and their objects (f.i. not for configuration
     - arrays)
-- `get(variableName, variableValue)` and `set(variableName, variableValue)`
-    - Get or set the variables (f.i. `set('job.owner', node.user)`
-- `answer(question)`
+- :code:`get(variableName, variableValue)` and :code:`set(variableName, variableValue)`
+    - Get or set the variables (f.i. :code:`set('job.owner', node.user)`
+- :code:`answer(question)`
     - Let the (command line) user answer a question and return the result
-- `answer(question)`
+- :code:`answer(question)`
     - Let the (command line) user answer a confirmation question and return the result
-- `select(question, options)`
+- :code:`select(question, options)`
     - Let the (command line) select from an array of options
-- `replace(search, replace, subject, regex)`
-    - Replace the string `search` with `replace` in `subject`. Behaves like preg_replace
-      when `regex` is true - like string_replace otherwise.
+- :code:`replace(search, replace, subject, regex)`
+    - Replace the string :code:`search` with :code:`replace` in :code:`subject`. Behaves like preg_replace
+      when :code:`regex` is true - like string_replace otherwise.
 
 
 Kite configuration file
 =======================
 You need a file called "Kite.php" to set up config (where to deploy).
-For TYPO3 projects it should be placed here: `typo3conf/Kite.php`,
-for Magento `app/etc/kite.php` and for all other applications just `kite.php`.
+For TYPO3 projects it should be placed here: :code:`typo3conf/Kite.php`,
+for Magento :code:`app/etc/kite.php` and for all other applications just :code:`kite.php`.
 A basic example could be
 
 .. code:: php
@@ -218,8 +220,8 @@ A basic example could be
 
 Jobs
 ====
-Jobs are to be configured in the key `jobs` in the configuration. They can contain
-a single `task`, an array of `tasks` or a `workflow` (always only one of them).
+Jobs are to be configured in the key :code:`jobs` in the configuration. They can contain
+a single :code:`task`, an array of :code:`tasks` or a :code:`workflow` (always only one of them).
 
 .. code:: php
 
@@ -250,7 +252,7 @@ a single `task`, an array of `tasks` or a `workflow` (always only one of them).
 
 Nodes
 =====
-Whenever you set a key named `node` or `nodes` on a job, workflow or task
+Whenever you set a key named :code:`node` or :code:`nodes` on a job, workflow or task
 it's value will be mapped to an aggregate of node models. Those models have the
 following default configuration:
 
@@ -278,25 +280,25 @@ Deployment configuration
 Stages
 ------
 As you saw in the example in `Kite configuration file`_, there is a top level configuration
-element named `stages`. They are set by the `common` preset and hold configuration
-only used for each of it's keys (such as `staging` and `production` by default). They
-are evaluated by workflows based on the `stage-select` workflow, which takes the
+element named :code:`stages`. They are set by the :code:`common` preset and hold configuration
+only used for each of it's keys (such as :code:`staging` and :code:`production` by default). They
+are evaluated by workflows based on the :code:`stage-select` workflow, which takes the
 stage(s) to use from either command line or a select question. After a stage was
-selected ALL of it's values are set to the corresponding task (such as `deploy`).
+selected ALL of it's values are set to the corresponding task (such as :code:`deploy`).
 
 The stages have no special meaning and are not handled in a special way - they only
-play together with the stage based tasks (`deploy` and `rollout` from the `common`
-preset and `ccr` from the `typo3` preset) because those are configured so.
+play together with the stage based tasks (:code:`deploy` and :code:`rollout` from the :code:`common`
+preset and :code:`ccr` from the :code:`typo3` preset) because those are configured so.
 
 Deployment
 ----------
-The `deployment` workflow deploys your application to exactly one stage (whereas the
-`rollout` just runs the `deployment` workflow for each until the selected stage).
+The :code:`deployment` workflow deploys your application to exactly one stage (whereas the
+:code:`rollout` just runs the :code:`deployment` workflow for each until the selected stage).
 Thereby it does the following steps:
 
-#. Run `kite composer diagnose` to assert that your application is at a defined state (nothing uncommited, unpushed, unpulled, lock file up to date etc.)
-#. Run `composer checkout` with the parameters you provided for the stage:
-    #. `branch` - The branch to checkout. In `common` preset they are configured as follows:
+#. Run :code:`kite composer diagnose` to assert that your application is at a defined state (nothing uncommited, unpushed, unpulled, lock file up to date etc.)
+#. Run :code:`composer checkout` with the parameters you provided for the stage:
+    #. :code:`branch` - The branch to checkout. In :code:`common` preset they are configured as follows:
 
         .. code:: php
 
@@ -314,8 +316,8 @@ Thereby it does the following steps:
                 ]
             ];
 
-    #. `merge` - Whether to merge the currently checked out branch into the branch to checkout
-    #. `createBranch` - Whether to create the branch if it doesn't exist. This is by
+    #. :code:`merge` - Whether to merge the currently checked out branch into the branch to checkout
+    #. :code:`createBranch` - Whether to create the branch if it doesn't exist. This is by
        default set to true for the staging stage, when no whitelists for composer tasks
        are configured. You can configure whitelists for composer like that
 
@@ -330,11 +332,11 @@ Thereby it does the following steps:
             // ... for the package paths
             $this['composer']['whitelistPaths'] = 'vendor/netresearch/.*';
 
-    #. `rsync` - configuration for rsync task invoked (f.i. with `excludes` option)
-#. Creates a new release from the current release on each `node` `{deployPath}/releases`
-#. Rsync the current local state to the new release dir on each `node`
+    #. :code:`rsync` - configuration for rsync task invoked (f.i. with :code:`excludes` option)
+#. Creates a new release from the current release on each :code:`node` :code:`{deployPath}/releases`
+#. Rsync the current local state to the new release dir on each :code:`node`
 #. Symlink shared directories and files (shared means shared between the releases) -
-   the shared directories and files are expected to be at `{deployPath}/shared`. They
+   the shared directories and files are expected to be at :code:`{deployPath}/shared`. They
    can be configured as seen in the typo3 preset:
 
     .. code:: php
@@ -350,7 +352,7 @@ Thereby it does the following steps:
         );
 
     To illustrate the behaviour of the stage configuration here's an example setting
-    the shared directories differently for each `stage`:
+    the shared directories differently for each :code:`stage`:
 
     .. code:: php
 
@@ -373,9 +375,9 @@ Thereby it does the following steps:
             ]
         );
 
-#. Switch the previous release pointer (`{deploypath}/previous`) to the current release.
-#. Switch the current release pointer (`{deploypath}/current`) to the new release.
-#. Invoke the `onReady` task if any. F.i.:
+#. Switch the previous release pointer (:code:`{deploypath}/previous`) to the current release.
+#. Switch the current release pointer (:code:`{deploypath}/current`) to the new release.
+#. Invoke the :code:`onReady` task if any. F.i.:
 
     .. code:: php
 
@@ -391,7 +393,7 @@ Thereby it does the following steps:
             ]
         );
 
-    And to once again demonstrate that each of the `stages` can override any option on
+    And to once again demonstrate that each of the :code:`stages` can override any option on
     the deployment workflow:
 
     .. code:: php
@@ -408,21 +410,21 @@ Thereby it does the following steps:
             ]
         );
 
-When you invoke the `deployment` or `rollout` jobs with the rollback (`--rollback` or `-r`)
+When you invoke the :code:`deployment` or :code:`rollout` jobs with the rollback (:code:`--rollback` or :code:`-r`)
 option, it
 
-#. switches the next release pointer (`{deploypath}/next`) to the current release
-#. switches the current release pointer (`{deploypath}/current`) to the previous release
-#. invokes the `onReady` task if any.
+#. switches the next release pointer (:code:`{deploypath}/next`) to the current release
+#. switches the current release pointer (:code:`{deploypath}/current`) to the previous release
+#. invokes the :code:`onReady` task if any.
 
-When you invoke the `deployment` or `rollout` jobs with the rollback (`--activate` or `-a`)
-option, it invokes the last three steps of the deployment (switch symlinks, and invoke `onReady`).
+When you invoke the :code:`deployment` or :code:`rollout` jobs with the rollback (:code:`--activate` or :code:`-a`)
+option, it invokes the last three steps of the deployment (switch symlinks, and invoke :code:`onReady`).
 
 =====
 Usage
 =====
 
-As stated above, all jobs are available as kite sub commands (`kite job-name`). You can list the available commands by running
+As stated above, all jobs are available as kite sub commands (:code:`kite job-name`). You can list the available commands by running
 
 .. code:: bash
 
@@ -440,35 +442,35 @@ you can show help for a specific job/command.
 
 Common commands
 ===============
-- `kite [help [command]]`
+- :code:`kite [help [command]]`
     - Gives a list of all available commands (jobs) or shows help for the given one
-- `kite --workflow=<workflow-name-or-class>`
+- :code:`kite --workflow=<workflow-name-or-class>`
     - Runs a workflow class without requiring it to be inside a job
-- `kite --workflow=<workflow-name-or-class> --help`
+- :code:`kite --workflow=<workflow-name-or-class> --help`
     - Shows the docs (php class doc), arguments and options for a workflow
-- _`kite log [-l]`
+- :code:`kite log [-l]`
     - Shows the last (default), specific (use with caret like ^2 shows the 2nd least
-      log or with a timestamp from `kite log -l`) or a list of the available log
+      log or with a timestamp from :code:`kite log -l`) or a list of the available log
       records
 
 Common jobs
 ===========
-- `kite checkout [--merge] branch`
+- :code:`kite checkout [--merge] branch`
     - Goes through all composer packages and checks out the branch there if it’s available
     - After checking out the branch on a package it goes through all packages requiring it and updates the version constraint to that branch
-    - When `--merge` is passed, the currently checked out branch is merged into the branch to checkout
-- `kite merge [--squash] [--message=”Message”] branch`
+    - When :code:`--merge` is passed, the currently checked out branch is merged into the branch to checkout
+- :code:`kite merge [--squash] [--message=”Message”] branch`
     - Goes through all composer packages and merges the branch into the currently checked out
-- `kite package-foreach [--git] command`
-    - Runs a command for each composer package (optionally only `--git` packages)
-- `kite cc, kite ccr [stage]`
+- :code:`kite package-foreach [--git] command`
+    - Runs a command for each composer package (optionally only :code:`--git` packages)
+- :code:`kite cc, kite ccr [stage]`
     - Clears caches locally (cc) or on all nodes of a specific stage
 
 Deployment jobs
 ===============
-- `kite deploy [stage]`
+- :code:`kite deploy [stage]`
     - Runs the deployment for all nodes on the given or selected stage
-- `kite rollout [stage]`
+- :code:`kite rollout [stage]`
     - Runs the deployment for all nodes for each stage until (including) the given stage
 
 .. topic:: Use public key authentication
@@ -481,6 +483,6 @@ Trouble shooting
 Every task that's executed including it's output will be logged to a log file inside
 your home directory. This includes f.i. each command ran on the local and remote shells,
 their output, debug messages and a lot more. Basically it holds the output, you would
-get by adding `-vvv` to your kite command.
+get by adding :code:`-vvv` to your kite command.
 
-Just run `kite log [-l]` when a job failed and you want to know exactly what went wrong.
+Just run :code:`kite log` when a job failed and you want to know exactly what went wrong.
