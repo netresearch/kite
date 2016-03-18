@@ -4,9 +4,9 @@
        :width: 200 px
        :alt: Kite
 
-**************************************************************
-Kite: Yet another build automation tool inspired by TYPO3.Surf
-**************************************************************
+****************************
+Kite: Make your projects fly
+****************************
 
 .. image:: http://img.shields.io/travis/netresearch/kite.svg?style=flat-square
     :target: https://travis-ci.org/netresearch/kite
@@ -22,17 +22,25 @@ Kite: Yet another build automation tool inspired by TYPO3.Surf
 
     - `Task and workflow reference <docs/reference.rst>`_
 
-Kite is build and automation tool, written in PHP and utilizing it for configuration.
+Kite is a build and automation tool inspired by TYPO3.Surf, written in PHP and utilizing PHP for configuration.
+It's...
 
-- ECMA like variable access:
-    - Sub tasks can access variables from parent but can set them on their own as well
-    - Advanced logic during execution possible by using expressions (utilizing `Symfony Expression Language <http://symfony.com/doc/current/components/expression_language/index.html>`_)
-- Node based:
+- easy to use
+    - Kite ships with several preconfigured tasks, workflows and presets - just use a preset and be done.
+    - Jobs and workflows are available on the command line and there's also `--help` available for each of them.
+- flexible
+    - The configuration can be completely done by arrays, fiddling your tasks together or by workflow classes that have all the tasks available as methods or both.
+    - Jobs, workflows and tasks can easily be reused at any point - new jobs can be composed of any of them.
+    - The variable system provides a JavaScript like variable inheritance: Sub tasks can access variables from parent but can set them on their own as well
+    - Jobs and workflows can expose variables as command line options and arguments.
+    - Advanced logic during execution possible by using `Symfony Expression Language <http://symfony.com/doc/current/components/expression_language/index.html>`_
+- node based
     - Unlimited number of remote targets possible
     - Nodes can be set globally or only for specific (sub) tasks
     - Remote tasks operate on all current nodes
-- Dry-Run available by design (yet the tasks to include need to be configured)
-- Originally planned and built as TYPO3 extension but later on ported to generic composer package - installable globally or per project
+- safe
+    - Everything can be `--dry-run` to preview what happens (yet the tasks to include need to be configured)
+    - The complete debug output of previous tasks can be viewed with `kite log`
 
     
 ============
@@ -78,8 +86,8 @@ Per project installation
 Configuration
 =============
 
-Task organization
-=================
+Concepts
+========
 - Tasks
     - Smallest, predefined steps
     - See the `task reference <docs/reference.rst#tasks>`_ for tasks shipped with kite
@@ -120,7 +128,7 @@ expressions - f.i.
         ]
     ];
 
-As you saw above, by quoting the braces, you can avoid that the expression is evaluated.
+As you see above, by quoting the braces, you can avoid that the expression is evaluated.
 Please see the `Symfony Expression Language Syntax <http://symfony.com/doc/current/components/expression_language/syntax.html>`_
 for help on how to use the expressions.
 
@@ -161,7 +169,7 @@ Special variables
 
 Available functions
 -------------------
-Kite ships with the following functions:
+Kite ships with the following `expression language functions <http://symfony.com/doc/current/components/expression_language/syntax.html#component-expression-functions>`_:
 
 - `isset(variable)` and `empty(variable)`
     - Behave just like their PHP equivalents. Only available for variable objects, such as
@@ -430,10 +438,21 @@ By running
 
 you can show help for a specific job/command.
 
+Common commands
+===============
+- `kite [help [command]]`
+    - Gives a list of all available commands (jobs) or shows help for the given one
+- `kite --workflow=<workflow-name-or-class>`
+    - Runs a workflow class without requiring it to be inside a job
+- `kite --workflow=<workflow-name-or-class> --help`
+    - Shows the docs (php class doc), arguments and options for a workflow
+- _`kite log [-l]`
+    - Shows the last (default), specific (use with caret like ^2 shows the 2nd least
+      log or with a timestamp from `kite log -l`) or a list of the available log
+      records
+
 Common jobs
 ===========
-- `kite [help command]`
-    - Gives a list of all available commands (jobs) or shows help for the given one
 - `kite checkout [--merge] branch`
     - Goes through all composer packages and checks out the branch there if it’s available
     - After checking out the branch on a package it goes through all packages requiring it and updates the version constraint to that branch
@@ -455,3 +474,13 @@ Deployment jobs
 .. topic:: Use public key authentication
 
     To prevent you to have to type your password several times during deployment you should set your public key on your server. Usually this is located here: "~/.ssh/authorized_keys".
+
+Trouble shooting
+================
+
+Every task that's executed including it's output will be logged to a log file inside
+your home directory. This includes f.i. each command ran on the local and remote shells,
+their output, debug messages and a lot more. Basically it holds the output, you would
+get by adding `-vvv` to your kite command.
+
+Just run `kite log [-l]` when a job failed and you want to know exactly what went wrong.

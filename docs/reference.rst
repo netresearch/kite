@@ -4,9 +4,9 @@
       :width: 200 px
       :alt: Kite
 
-**************************************************************
-Kite: Yet another build automation tool inspired by TYPO3.Surf
-**************************************************************
+****************************
+Kite: Make your projects fly
+****************************
 
 ===========================
 Task and Workflow reference
