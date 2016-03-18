@@ -8,9 +8,12 @@
 Kite: Yet another build automation tool inspired by TYPO3.Surf
 **************************************************************
 
-.. image:: https://api.travis-ci.org/netresearch/kite.png
+.. image:: http://img.shields.io/travis/netresearch/kite.svg?style=flat-square
     :target: https://travis-ci.org/netresearch/kite
-    :align: right
+.. image:: https://img.shields.io/packagist/v/netresearch/kite.svg?style=flat-square
+    :target: https://packagist.org/packages/netresearch/kite
+.. image:: https://img.shields.io/scrutinizer/g/netresearch/kite.svg?style=flat-square
+    :target: https://scrutinizer-ci.com/g/netresearch/kite/?branch=master
 
 .. contents::
     :backlinks: top
