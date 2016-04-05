@@ -43,6 +43,11 @@ class Diagnose extends Base
     protected $composerUpdateRequired = false;
 
     /**
+     * @var bool
+     */
+    protected $dontCheckCurrentPackageAgain = false;
+
+    /**
      * Configure the options
      *
      * @return array
@@ -126,10 +131,13 @@ class Diagnose extends Base
                 $this->console->output(ucfirst($message));
                 $errors++;
                 if ($fix) {
+                    $this->dontCheckCurrentPackageAgain = false;
                     $this->console->indent();
                     $this->{'fix' . $check}($package);
                     $this->console->outdent();
-                    $rerunForPackages[] = $package->name;
+                    if (!$this->dontCheckCurrentPackageAgain) {
+                        $rerunForPackages[] = $package->name;
+                    }
                 }
             }
             $this->pushPackages();
@@ -499,11 +507,13 @@ class Diagnose extends Base
     protected function selectFixes($fixes)
     {
         $this->console->outdent();
-        $fixes['n'] = 'Nothing, ask again later';
+        $fixes['n'] = 'Nothing for now, ask again later';
+        $fixes['i'] = 'Ignore';
         $fixes['x'] = 'Exit';
         $result = $this->choose('What do you want to do?', $fixes);
         $this->console->indent();
-        if ($result == 'n') {
+        if ($result == 'i' || $result == 'n') {
+            $this->dontCheckCurrentPackageAgain = ($result === 'i');
             return null;
         }
         if ($result == 'x') {
