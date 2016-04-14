@@ -36,14 +36,9 @@ if ($typo3VersionIsMinimum7) {
     $classLoader = include getcwd() . '/typo3_src/vendor/autoload.php';
     \TYPO3\CMS\Core\Core\Bootstrap::getInstance()
         ->initializeClassLoader($classLoader)
-        ->baseSetup('')
-        ->startOutputBuffering()
-        ->loadConfigurationAndInitialize()
-        ->loadTypo3LoadedExtAndExtLocalconf(true)
-        ->setFinalCachingFrameworkCacheConfiguration()
-        ->defineLoggingAndExceptionConstants()
-        ->unsetReservedGlobalVariables()
-        ->initializeTypo3DbGlobal();
+        ->baseSetup(PATH_site)
+        ->configure()
+        ->loadExtensionTables(true);
 } else {
     include 'typo3/sysext/core/Classes/Core/Bootstrap.php';
     \TYPO3\CMS\Core\Core\Bootstrap::getInstance()
