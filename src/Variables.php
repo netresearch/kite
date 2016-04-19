@@ -483,10 +483,7 @@ class Variables implements \ArrayAccess
         if (!$expressionEngine) {
             $expressionEngine = new ExpressionLanguage();
         }
-        if (is_string($value) && strpos($value, '{') !== false) {
-            return $expressionEngine->evaluate($value, array(ExpressionLanguage::VARIABLES_KEY => $this));
-        }
-        return $value;
+        return $expressionEngine->evaluate($value, [ExpressionLanguage::VARIABLES_KEY => $this]);
     }
 
     /**

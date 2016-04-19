@@ -34,6 +34,11 @@ use Symfony\Component\ExpressionLanguage\ParserCache\ParserCacheInterface;
 class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\ExpressionLanguage
 {
     /**
+     * @var array
+     */
+    protected $expressionResults = [];
+
+    /**
      * @var string
      */
     const VARIABLES_KEY = 'variables';
@@ -52,6 +57,43 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($this, new Lexer());
     }
+
+    /**
+     * Reevaluate parents evaluation results as expressions could be nested
+     *
+     * Don't parse expression strings which were the final result of an evaluation
+     * ( As for example, given a variable "char" that is "\{",
+     *   the result of "{char}" would be "{". Reevaluating this is 1. not intended
+     *   and would 2. lead to an error )
+     *
+     * @param string|\Symfony\Component\ExpressionLanguage\Expression $expression The expression
+     * @param array                                                   $values     The values
+     *
+     * @return string|mixed
+     */
+    public function evaluate($expression, $values = [])
+    {
+        if (is_string($expression)
+            && !in_array($expression, $this->expressionResults, true)
+            && preg_match($couldBeExpressionPattern = '/(^|[^\\\\])\{/', $expression)
+        ) {
+            do {
+                $expression = parent::evaluate($expression, $values);
+                if (!is_string($expression)) {
+                    break;
+                }
+                if (!preg_match($couldBeExpressionPattern, $expression)) {
+                    $expression = str_replace(['\\{', '\\}'], ['{', '}'], $expression);
+                    if (strpos($expression, '{') !== false) {
+                        $this->expressionResults[] = $expression;
+                    }
+                    break;
+                }
+            } while (true);
+        }
+        return $expression;
+    }
+
 
     /**
      * Ask a question

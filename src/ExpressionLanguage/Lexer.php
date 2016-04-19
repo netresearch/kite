@@ -60,11 +60,11 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
         // Split the expression into it's string and actual expression parts
         while (++$cursor < $end) {
             if ($expression[$cursor] === '{' || $expression[$cursor] === '}') {
-                $type = $expression[$cursor] === '{' ? 1 : -1;
                 if ($cursor && $expression[$cursor - 1] === '\\') {
                     // Escaped parenthesis
-                    $expressions[$current][0] = substr($expressions[$current][0], 0, -1);
+                    // Let parser unescape them after parsing
                 } else {
+                    $type = $expression[$cursor] === '{' ? 1 : -1;
                     $group += $type;
                     if ($group === 1 && $type === 1) {
                         $expressions[++$current] = array(null, 1, $cursor);
