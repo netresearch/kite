@@ -25,6 +25,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 /**
  * Kite application
@@ -178,7 +179,18 @@ class Application extends \Symfony\Component\Console\Application
                 }
             }
             if (!$package) {
-                throw new Exception('Could not determine self version');
+                $kitePath = dirname(dirname(__DIR__));
+                $process = new Process('git symbolic-ref -q --short HEAD || git describe --tags --exact-match; git rev-parse HEAD; git show -s --format=%ct HEAD', $kitePath);
+                $process->run();
+                if ($output = $process->getOutput()) {
+                    $package = json_decode(file_get_contents($kitePath . '/composer.json'));
+                    list($name, $revision, $tstamp) = explode("\n", trim($output), 3);
+                    $package->version = preg_match('/^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+)?$/i', $name) ? $name : 'dev-' . $name;
+                    $package->source = (object) ['reference' => $revision];
+                    $package->time = date('Y-m-d H:i:s', $tstamp);
+                } else {
+                    throw new Exception('Could not determine self version');
+                }
             }
         }
         return $package;
