@@ -132,11 +132,16 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
         $stream = parent::tokenize($expression);
         $tokens = array();
         $previousWasDot = false;
+        $ignorePrimaryExpressions = array_flip(['null', 'NULL', 'false', 'FALSE', 'true', 'TRUE']);
         while (!$stream->isEOF()) {
             /* @var \Symfony\Component\ExpressionLanguage\Token $token */
             $token = $stream->current;
             $stream->next();
             if ($token->type === Token::NAME_TYPE && !$previousWasDot) {
+                if (array_key_exists($token->value, $ignorePrimaryExpressions)) {
+                    $tokens[] = $token;
+                    continue;
+                }
                 $isTest = false;
                 if ($stream->current->test(Token::PUNCTUATION_TYPE, '(')) {
                     $tokens[] = $token;
@@ -159,6 +164,7 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
                     $stream->next();
                     $nameToken = $stream->current;
                     $stream->next();
+                    // Operators like "not" and "matches" are valid method or property names - others not
                     if ($nameToken->type !== Token::NAME_TYPE
                         && ($nameToken->type !== Token::OPERATOR_TYPE || !preg_match('/[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/A', $nameToken->value))
                     ) {
