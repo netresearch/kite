@@ -15,7 +15,7 @@
 
 // Default values for composer workflows
 $this['composer'] = array_fill_keys(['whitelistNames', 'whitelistRemotes', 'whitelistPaths'], null);
-$this['composer']['whitelistRemotes'] = '{replace("#/.+$#", "/.*", composer.rootPackage.remote, true)}';
+$this['composer']['whitelistRemotes'] = '{preg_quote(preg_replace("#/[^/]+$#s", "", composer.rootPackage.remote), "#")}/.+';
 
 // Stages to be selectable by stageSelect workflow
 $this['stages'] = [
