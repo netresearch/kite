@@ -121,75 +121,58 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
     protected function registerFunctions()
     {
         parent::registerFunctions();
-        $this->register(
-            'confirm',
-            function ($question) {
+        $functions = [
+            'call' => function (array $values, $function) {
+                $args = array_slice(func_get_args(), 2);
+                if (array_key_exists($function, $this->functions)) {
+                    array_unshift($args, $values);
+                    $function = $this->functions[$function]['evaluator'];
+                }
+                return call_user_func_array($function, $args);
             },
-            function (array $values, $question) {
-                return $this->ask($values[self::VARIABLES_KEY], new ConfirmationQuestion("<question>$question</question> [y] "));
-            }
-        );
-        $this->register(
-            'answer',
-            function ($question) {
-            },
-            function (array $values, $question) {
-                return $this->ask($values[self::VARIABLES_KEY], new Question("<question>$question</question> "));
-            }
-        );
-        $this->register(
-            'choose',
-            function ($question) {
-            },
-            function (array $values, $question, array $choices) {
-                return $this->ask($values[self::VARIABLES_KEY], new ChoiceQuestion("<question>$question</question> ", $choices));
-            }
-        );
-        $this->register(
-            'isset',
-            function ($var) {
-            },
-            function (array $values, $var) {
+            'isset' => function (array $values, $var) {
                 return $values[self::VARIABLES_KEY]->has($var);
-            }
-        );
-        $this->register(
-            'empty',
-            function ($var) {
             },
-            function (array $values, $var) {
-                return $values[self::VARIABLES_KEY]->has($var) && $values[self::VARIABLES_KEY]->get($var);
-            }
-        );
-        $this->register(
-            'get',
-            function () {
+            'empty' => function (array $values, $var) {
+                return !$values[self::VARIABLES_KEY]->has($var) || !$values[self::VARIABLES_KEY]->get($var);
             },
-            function (array $values, $var) {
+            'get' => function (array $values, $var) {
                 return $values[self::VARIABLES_KEY]->get($var);
-            }
-        );
-        $this->register(
-            'set',
-            function () {
             },
-            function (array $values, $var, $value) {
+            'set' => function (array $values, $var, $value) {
                 $values[self::VARIABLES_KEY]->set($var, $value);
                 return $value;
-            }
-        );
-        $this->register(
-            'replace',
-            function () {
             },
-            function (array $values, $search, $replace, $subject, $regex = false) {
+            'confirm' => function (array $values, $question) {
+                return $this->ask($values[self::VARIABLES_KEY], new ConfirmationQuestion("<question>$question</question> [y] "));
+            },
+            'answer' => function (array $values, $question) {
+                return $this->ask($values[self::VARIABLES_KEY], new Question("<question>$question</question> "));
+            },
+            'choose' => function (array $values, $question) {
+                return $this->ask($values[self::VARIABLES_KEY], new Question("<question>$question</question> "));
+            },
+            'replace' => function (array $values, $search, $replace, $subject, $regex = false) {
+                $values[self::VARIABLES_KEY]->console->output(
+                    '<warning>Expression language function "replace" is deprecated '
+                    . 'and will be removed in 1.6.0 - use preg_replace or str_replace</warning>'
+                );
                 if ($regex) {
                     return preg_replace($search, $replace, $subject);
                 } else {
                     return str_replace($search, $replace, $subject);
                 }
-            }
-        );
+            },
+        ];
+        foreach ($functions as $name => $function) {
+            $this->register(
+                $name,
+                function () {
+
+                },
+                $function
+            );
+        }
     }
 }
 ?>

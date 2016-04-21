@@ -185,9 +185,8 @@ Kite ships with the following `expression language functions <http://symfony.com
     - Let the (command line) user answer a confirmation question and return the result
 - :code:`select(question, options)`
     - Let the (command line) select from an array of options
-- :code:`replace(search, replace, subject, regex)`
-    - Replace the string :code:`search` with :code:`replace` in :code:`subject`. Behaves like preg_replace
-      when :code:`regex` is true - like string_replace otherwise.
+- **any PHP function**
+    - Lets you call PHP functions as you are used to in PHP - e.g. :code:`str_replace('\\\\', '/', config['somePath'])` (Note the four back slashes which are required to pass a single escaped backslash to Expression Language)
 
 
 Kite configuration file

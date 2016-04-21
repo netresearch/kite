@@ -52,13 +52,58 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
      */
     public function tokenize($expression)
     {
+        $length = strlen($expression);
+        $stringsAndExpressions = $this->splitIntoStringsAndActualExpressions($expression, $length);
+
+        // Actually tokenize all remaining expressions
+        $tokens = array();
+        $isMultipleExpressions = isset($stringsAndExpressions[1]);
+        foreach ($stringsAndExpressions as $i => $item) {
+            if ($isMultipleExpressions && $i > 0) {
+                $tokens[] = new Token(Token::OPERATOR_TYPE, '~', $item[2]);
+            }
+            if ($item[1]) {
+                if ($isMultipleExpressions) {
+                    $tokens[] = new Token(Token::PUNCTUATION_TYPE, '(', $item[2]);
+                }
+                foreach ($this->tokenizeExpression($item[0]) as $token) {
+                    $token->cursor += $item[2];
+                    $tokens[] = $token;
+                }
+                if ($isMultipleExpressions) {
+                    $tokens[] = new Token(Token::PUNCTUATION_TYPE, ')', $item[2]);
+                }
+            } else {
+                $tokens[] = new Token(Token::STRING_TYPE, $item[0], $item[2]);
+            }
+        }
+
+        $tokens[] = new Token(Token::EOF_TYPE, null, $length);
+
+        return new TokenStream($tokens);
+    }
+
+    /**
+     * Split a "string with {expression} and string parts" into
+     * [
+     *   [ "string with an ",   false, 0  ],
+     *   [ "expression",        true,  12 ],
+     *   [ " and string parts", false, 23 ]
+     * ]
+     *
+     * @param string $expression The mixed expression string
+     * @param int    $length     Length beginning from 0 to analyze
+     *
+     * @return array
+     */
+    protected function splitIntoStringsAndActualExpressions($expression, $length)
+    {
         $cursor = -1;
-        $end = strlen($expression);
-        $expressions = array(array(null, 0, 0));
+        $expressions = [[null, false, 0]];
         $current = 0;
         $group = 0;
         // Split the expression into it's string and actual expression parts
-        while (++$cursor < $end) {
+        while (++$cursor < $length) {
             if ($expression[$cursor] === '{' || $expression[$cursor] === '}') {
                 if ($cursor && $expression[$cursor - 1] === '\\') {
                     // Escaped parenthesis
@@ -67,10 +112,10 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
                     $type = $expression[$cursor] === '{' ? 1 : -1;
                     $group += $type;
                     if ($group === 1 && $type === 1) {
-                        $expressions[++$current] = array(null, 1, $cursor);
+                        $expressions[++$current] = [null, true, $cursor];
                         continue;
                     } elseif ($group === 0 && $type === -1) {
-                        $expressions[++$current] = array(null, 0, $cursor);
+                        $expressions[++$current] = [null, false, $cursor];
                         continue;
                     } elseif ($group < 0) {
                         throw new \Exception('Unopened and unescaped closing parenthesis');
@@ -89,39 +134,15 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
                 unset($expressions[$i]);
             }
         }
-
-        // Actually tokenize all remaining expressions
-        $tokens = array();
-        $isMultipleExpressions = count($expressions) > 1;
-        foreach (array_values($expressions) as $i => $properties) {
-            list($value, $type, $cursor) = $properties;
-            if ($isMultipleExpressions && $i > 0) {
-                $tokens[] = new Token(Token::OPERATOR_TYPE, '~', $cursor);
-            }
-            if ($type === 0) {
-                $tokens[] = new Token(Token::STRING_TYPE, $value, $cursor);
-            } else {
-                if ($isMultipleExpressions) {
-                    $tokens[] = new Token(Token::PUNCTUATION_TYPE, '(', $cursor);
-                }
-                foreach ($this->tokenizeExpression($value) as $token) {
-                    $token->cursor += $cursor;
-                    $tokens[] = $token;
-                }
-                if ($isMultipleExpressions) {
-                    $tokens[] = new Token(Token::PUNCTUATION_TYPE, ')', $cursor);
-                }
-            }
-        }
-
-        $tokens[] = new Token(Token::EOF_TYPE, null, $end);
-
-        return new TokenStream($tokens);
+        return array_values($expressions);
     }
 
     /**
      * Actually tokenize an expression - at this point object and property access is
      * transformed, so that "this.property" will be "get('this.propery')"
+     *
+     * Also all function calls (but isset and empty) will be rewritten from
+     * function(abc) to call("function", abc) to make dynamic functions possible
      *
      * @param string $expression The expression
      *
@@ -145,16 +166,21 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
                 $isTest = false;
                 if ($stream->current->test(Token::PUNCTUATION_TYPE, '(')) {
                     $tokens[] = $token;
+                    $tokens[] = $stream->current;
+                    $stream->next();
                     if ($token->value === 'isset' || $token->value === 'empty') {
                         $isTest = true;
-                        $tokens[] = $stream->current;
-                        $stream->next();
                         $token = $stream->current;
                         if ($token->type !== Token::NAME_TYPE) {
                             throw new SyntaxError('Expected name', $token->cursor);
                         }
                         $stream->next();
                     } else {
+                        $tokens[] = new Token(Token::STRING_TYPE, $token->value, $token->cursor);
+                        $token->value = 'call';
+                        if (!$stream->current->test(Token::PUNCTUATION_TYPE, ')')) {
+                            $tokens[] = new Token(Token::PUNCTUATION_TYPE, ',', $token->cursor);
+                        }
                         continue;
                     }
                 }
@@ -202,7 +228,6 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
 
         return $tokens;
     }
-
 }
 
 ?>
