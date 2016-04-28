@@ -110,7 +110,7 @@ class Deployment extends Workflow
     protected function checkout()
     {
         if (!$this->get('job.initialBranch', null)) {
-            $this->set('job.initialBranch', '{composer.rootPackage.branch}');
+            $this->set('job.initialBranch', $this->get('composer.rootPackage.branch'));
 
             // Assert a clean state and a valid lock...
             $this->sub('Netresearch\Kite\Workflow\Composer\Diagnose')
