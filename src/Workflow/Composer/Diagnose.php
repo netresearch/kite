@@ -319,6 +319,13 @@ class Diagnose extends Base
                 if (array_key_exists($package->name, $dependentPackage->requires)) {
                     if (substr($dependentPackage->requires[$package->name], 0, 4) === 'dev-') {
                         $requiredBranch = substr($dependentPackage->requires[$package->name], 4);
+                        if (strpos($requiredBranch, '#')) {
+                            $otherHash = isset($hash) ? $hash : null;
+                            list($requiredBranch, $hash) = explode('#', $requiredBranch);
+                            if ($otherHash && $otherHash !== $hash) {
+                                return '<error>Two or more packages require %s in different commits</error>';
+                            }
+                        }
                         if ($package->requiredBranch && $package->requiredBranch !== $requiredBranch) {
                             $package->invalidRequirements = true;
                             return '<error>Two or more packages require %s in different branches</error>';
@@ -335,6 +342,9 @@ class Diagnose extends Base
             $constraint = $package->tag ?: 'dev-' . $package->branch;
             if ($package->requiredBranch && $package->requiredBranch !== $package->branch) {
                 return "%s is at <comment>$constraint</comment> but is required at <comment>dev-{$package->requiredBranch}</comment>";
+            }
+            if (isset($hash) && substr($package->source->reference, 0, strlen($hash)) !== $hash) {
+                return "%s is at <comment>{$constraint}#{$package->source->reference}</comment> but is required at <comment>dev-{$package->requiredBranch}#{$hash}</comment>";
             }
         }
         return null;
