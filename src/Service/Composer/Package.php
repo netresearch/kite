@@ -83,7 +83,6 @@ class Package
             $this->$key = $value;
         }
 
-        $this->requires = isset($composerJson->require) ? get_object_vars($composerJson->require) : array();
         $this->isRoot = $isRoot;
     }
 
@@ -104,6 +103,10 @@ class Package
             $this->loadRemote();
             return $this->$name;
         }
+        if ($name === 'requires') {
+            $this->loadRequires();
+            return $this->$name;
+        }
         throw new Exception('Invalid property ' . $name);
     }
 
@@ -116,7 +119,45 @@ class Package
      */
     public function __isset($name)
     {
-        return in_array($name, ['branches', 'upstreams', 'branch', 'tag', 'git', 'remote'], true);
+        return in_array($name, ['branches', 'upstreams', 'branch', 'tag', 'git', 'remote', 'requires'], true);
+    }
+
+    /**
+     * Load the requires - removes inline aliases
+     *
+     * @return void
+     */
+    protected function loadRequires()
+    {
+        $this->requires = isset($this->require) ? get_object_vars($this->require) : array();
+        foreach ($this->requires as $package => $constraint) {
+            if ($pos = strpos($constraint, ' as ')) {
+                if ($hashPos = strpos($constraint, '#')) {
+                    // dev-master#old-hash isn't treated by composer, so we don't as well
+                    $pos = $hashPos;
+                }
+                $this->requires[$package] = substr($constraint, 0, $pos);
+            }
+        }
+    }
+
+    /**
+     * Reload requires from composer.json
+     *
+     * @return $this
+     */
+    public function reloadRequires()
+    {
+        $file = $this->path . '/composer.json';
+        if (file_exists($file)) {
+            $composerJson = json_decode(file_get_contents($file));
+            unset($this->require);
+            if (isset($composerJson->require)) {
+                $this->require = $composerJson->require;
+            }
+            $this->loadRequires();
+        }
+        return $this;
     }
 
     /**

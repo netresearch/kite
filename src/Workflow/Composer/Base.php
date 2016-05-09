@@ -233,15 +233,13 @@ abstract class Base extends Workflow
      *
      * @param Package $package The package
      *
+     * @deprecated Use $package->reloadRequires()
+     *
      * @return void
      */
     protected function reloadRequires($package)
     {
-        $file = $package->path . '/composer.json';
-        if (file_exists($file)) {
-            $composerJson = json_decode(file_get_contents($file));
-            $package->requires = isset($composerJson->require) ? get_object_vars($composerJson->require) : array();
-        }
+        $package->reloadRequires();
     }
 
     /**
