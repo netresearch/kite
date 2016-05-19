@@ -95,19 +95,28 @@ class Package
      */
     public function __get($name)
     {
-        if (in_array($name, ['branches', 'upstreams', 'branch', 'tag', 'git'], true)) {
+        switch ($name) {
+        case 'git':
+            $gitDir = $this->path . '/.git';
+            $this->git = file_exists($gitDir) && is_dir($gitDir);
+            break;
+        case 'branches':
+        case 'upstreams':
+        case 'branch':
+        case 'tag':
             $this->loadGitInformation();
-            return $this->$name;
-        }
-        if ($name === 'remote') {
+            break;
+        case 'remote':
             $this->loadRemote();
-            return $this->$name;
-        }
-        if ($name === 'requires') {
+            break;
+        case 'requires':
             $this->loadRequires();
-            return $this->$name;
+            break;
+        default:
+            throw new Exception('Invalid property ' . $name);
+
         }
-        throw new Exception('Invalid property ' . $name);
+        return $this->$name;
     }
 
     /**
@@ -200,8 +209,6 @@ class Package
         $this->upstreams = array();
         $this->branch = null;
         $this->tag = null;
-        $gitDir = $this->path . '/.git';
-        $this->git = file_exists($gitDir) && is_dir($gitDir);
         if ($this->git) {
             $this->composer->git('fetch', $this->path, array('p' => true, 'origin'));
             try {
