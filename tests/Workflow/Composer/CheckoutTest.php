@@ -162,11 +162,11 @@ class CheckoutTest extends TestCase
      * Test the checkout with merging the previous checked out branch into the branch
      * to check out
      *
-     * @return void
+     * @param Package $project
      */
-    public function testCheckoutWithMerge()
+    public function testCheckoutWithMerge(Package $project = null)
     {
-        $project = $this->getProject();
+        $project = $project ?: $this->getProject();
 
         $heads = new \stdClass();
         $heads->master = $this->getCurrentRevision($project);
@@ -176,7 +176,7 @@ class CheckoutTest extends TestCase
                 ['branch' => $branch, 'create' => true, 'whitelistNames' => 'netresearch/(project|package-1)'],
                 [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM => 'master']
             );
-            $heads->$branch = $this->getCurrentRevision($project);
+            $heads->$branch = $this->cmd('git log --pretty=%H master..', $project->path);
         }
 
         // featurebranch is checked out
@@ -190,13 +190,36 @@ class CheckoutTest extends TestCase
         $n = "\n";
         $this->assertEquals(
             '*   ' . $heads->current . $n
-            . '|\\  ' . $n
-            . '| * ' . $heads->featurebranch . $n
-            . '* | ' . $heads->topicbranch . $n
+            . '|\\  '
+            . str_replace($n, $n . '| * ', $n . trim($heads->featurebranch))
+            . str_replace($n, $n . '* | ', $n . trim($heads->topicbranch)) . $n
             . '|/  ' . $n
             . '* ' . trim($heads->master),
             $this->cmd('git log --graph --pretty=format:\'%H\' --no-color', $project->path)
         );
+    }
+
+    /**
+     * Check that merging still works even when CRLFs were introduced in the feature
+     * branch
+     *
+     * @return void
+     */
+    public function testCheckoutWithMergeAndCrlf()
+    {
+        $project = $this->getProject();
+
+        $this->cmd('git checkout -b featurebranch', $project->path);
+        file_put_contents(
+            $composer = $project->path . '/composer.json',
+            str_replace("\n", "\r\n", file_get_contents($composer))
+        );
+        $this->cmd('git config core.autocrlf false', $project->path);
+        $this->cmd('git commit -anm \'Changing EOL style to CRLF\'', $project->path);
+        $this->cmd('git push origin featurebranch', $project->path);
+        $this->cmd('git checkout master', $project->path);
+
+        $this->testCheckoutWithMerge($project);
     }
 
     /**

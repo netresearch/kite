@@ -401,20 +401,22 @@ abstract class Base extends Workflow
             throw new Exception('Can not automerge composer.json due to conflicts outside require object', 1458307516);
         }
 
-        if (preg_match('/\{[^\{]*<{7}.+?>{7}[^\{]*([\t ]*)\}/smU', $contents, $matches, PREG_OFFSET_CAPTURE)) {
-            $prefix = "\n" . str_repeat($matches[1][0], 2);
-            $requireBlock = '';
-            foreach ($this->mergeRequirements($package, $ours, $theirs) as $packageName => $version) {
-                $requireBlock .= $prefix . '"' . $packageName . '": "' . $version . '",';
-            }
-            file_put_contents(
-                $package->path . '/composer.json',
-                substr($contents, 0, $matches[0][1]) . '{'
-                . rtrim($requireBlock, ',') . "\n"
-                . $matches[1][0] . '}'
-                . substr($contents, $matches[0][1] + strlen($matches[0][0]))
-            );
-        }
+        $theirs['require'] = $this->mergeRequirements($package, $ours, $theirs);
+        file_put_contents($package->path . '/composer.json', $this->jsonEncode($theirs));
+    }
+
+    /**
+     * Encode a variable for JSON file
+     *
+     * @param mixed $var The var
+     *
+     * @return string
+     */
+    protected function jsonEncode($var)
+    {
+        return json_encode(
+            $var, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+        ) . "\n";
     }
 
     /**
