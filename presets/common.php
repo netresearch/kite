@@ -62,6 +62,21 @@ $this['jobs'] = [
             }
         ]
     ],
+    'update' => [
+        'description' => 'Update the application (git pull and composer update)',
+        'arguments' => [
+            'branch' => [
+                'type' => 'string',
+                'required' => true,
+                'label' => 'Branch to checkout before updating'
+            ]
+        ],
+        'tasks' => [
+            ['type' => 'git', 'command' => 'checkout', 'argv' => '{branch}', 'if' => '!empty(branch) && composer.rootPackage.branch != branch'],
+            ['type' => 'git', 'command' => 'pull'],
+            ['type' => 'composer', 'command' => 'update'],
+        ],
+    ],
     'merge' => [
         'description' => 'Merge all current git packages into current project branch',
         'workflow' => 'Netresearch\Kite\Workflow\Composer\Merge'
