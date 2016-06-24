@@ -273,6 +273,33 @@ following default configuration:
         // 'deployPath' => '/var/www'
     );
 
+Development packages
+====================
+The default kite jobs :code:`checkout` and :code:`merge` work only on packages which are white listed as development packages. As :code:`deploy` and :code:`rollout` utilize those jobs they stick to this behaviour as well.
+
+You can white list packages in three ways: by package name, by git remote url or by package path. When none of them is given all git packages will be used as development packages. You can change the white lists in your `Kite configuration file`_:
+
+    .. code:: php
+
+        <?php
+        // The following whitelist types are available (evaluated by OR)
+        // ... for the package names
+        $this['composer']['whitelistNames'] = 'netresearch/.*';
+        // ... for the git remote urls
+        $this['composer']['whitelistRemotes'] = 'git@github.com:netresearch/.*';
+        // ... for the package paths
+        $this['composer']['whitelistPaths'] = 'vendor/netresearch/.*';
+
+The default configuration is as follows:
+
+    .. code:: php
+
+        <?php
+        $this['composer']['whitelistNames'] = $this['composer']['whitelistPaths'] = null;
+        $this['composer']['whitelistRemotes'] = '{preg_quote(preg_replace("#/[^/]+$#s", "", composer.rootPackage.remote), "#")}/.+';
+
+This means that only packages which share the part before the last occurrence of / with the application remote will be considered as development packages (f.i. if your application git remote is :code:`https://github.com/netresearch/kite.git` then only packages with a remote like :code:`https://github.com/netresearch/*` will match).
+
 Deployment configuration
 ========================
 
@@ -316,21 +343,7 @@ Thereby it does the following steps:
             ];
 
     #. :code:`merge` - Whether to merge the currently checked out branch into the branch to checkout
-    #. :code:`createBranch` - Whether to create the branch if it doesn't exist. This is by
-       default set to true for the staging stage, when no whitelists for composer tasks
-       are configured. You can configure whitelists for composer like that
-
-        .. code:: php
-
-            <?php
-            // The following whitelist types are available (evaluated by OR)
-            // ... for the package names
-            $this['composer']['whitelistNames'] = 'netresearch/.*';
-            // ... for the git remote urls
-            $this['composer']['whitelistRemotes'] = 'git@github.com:netresearch/.*';
-            // ... for the package paths
-            $this['composer']['whitelistPaths'] = 'vendor/netresearch/.*';
-
+    #. :code:`createBranch` - Whether to create the branch if it doesn't exist. This is by default set to true for the staging stage, when `Development packages` are white listed (which are by default).
     #. :code:`rsync` - configuration for rsync task invoked (f.i. with :code:`excludes` option)
 #. Creates a new release from the current release on each :code:`node` :code:`{deployPath}/releases`
 #. Rsync the current local state to the new release dir on each :code:`node`
@@ -455,15 +468,80 @@ Common commands
 Common jobs
 ===========
 - :code:`kite checkout [--merge] branch`
-    - Goes through all composer packages and checks out the branch there if it’s available
-    - After checking out the branch on a package it goes through all packages requiring it and updates the version constraint to that branch
+    - Goes through all `Development packages`_ and checks out the branch there if it’s available
+    - After checking out the branch on a package it goes through all `Development packages`_ requiring it and updates the version constraint to that branch
     - When :code:`--merge` is passed, the currently checked out branch is merged into the branch to checkout
+    - When :code:`-c` is passed, the branch will be created in all `Development packages`_ when it doesn't exist there (you can use :code:`-p` option to limit the operation to certain packages)
 - :code:`kite merge [--squash] [--message=”Message”] branch`
     - Goes through all composer packages and merges the branch into the currently checked out
 - :code:`kite package-foreach [--git] command`
     - Runs a command for each composer package (optionally only :code:`--git` packages)
 - :code:`kite cc, kite ccr [stage]`
     - Clears caches locally (cc) or on all nodes of a specific stage
+
+Development workflow
+====================
+The default kite jobs are designed to ease the development of composer based applications which tends to be pretty complicated when it comes to working with development branches across several packages. What kite can do for you, is to manage the branches in the `Development packages`_ along with dependencies on them.
+
+In the following you'll find the kite commands for the common workflow that you do your development within feature (eventually derived from topic branches) or bug fix branches, which you will merge into the master as soon as their changes were reviewed and tested.
+
+1. **Ensure application is on master and up to date**
+
+    .. code:: bash
+
+        kite update master
+
+2. **Create the feature branch in the package(s) you want**
+
+    This will create the FEATURE branch in package vendor/branch and all installed dependent packages and make them require it in :code:`dev-FEATURE` (as your application directly or indirectly requires the package it will be checked out in FEATURE branch as well).
+
+    .. code:: bash
+
+        kite checkout -c -p vendor/package FEATURE
+
+3. Develop
+
+    .. code:: bash
+
+        cd vendor/package
+        echo '<?php phpinfo(); ?>' > i.php
+        git add i.php
+        git commit -m 'Added php info'
+        git push
+        cd ../..
+
+4. (Work on another existing branch)
+
+    .. code:: bash
+
+        kite checkout ANOTHER_FEATURE
+
+5. **Deploy FEATURE branch to staging**
+
+    .. code:: bash
+
+        kite checkout FEATURE
+        kite deploy staging
+
+5. (Work on another existing branch)
+
+    .. code:: bash
+
+        kite checkout ANOTHER_FEATURE
+
+6. **FEATURE was reviewed, merge it into master and delete it**
+
+    .. code:: bash
+
+        kite checkout master
+        kite merge --delete FEATURE
+
+7. **Roll out master (now including FEATURE) over staging to production**
+
+    .. code:: bash
+
+        kite rollout production
+
 
 Deployment jobs
 ===============

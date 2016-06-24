@@ -68,7 +68,7 @@ class Checkout extends Base
         $this->callback(
             function () {
                 $this->checkoutPackages(
-                    (array) $this->get('branch'),
+                    array_unique((array) $this->get('branch') + ['master']),
                     $this->get('merge'),
                     $this->get('create')
                 );
