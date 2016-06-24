@@ -40,6 +40,11 @@ abstract class Base extends Workflow
     protected $whitelists;
 
     /**
+     * @var array
+     */
+    protected $packageNames;
+
+    /**
      * Configure the variables
      *
      * @return array
@@ -56,6 +61,12 @@ abstract class Base extends Workflow
             }
         }
         return [
+            'packages' => array(
+                'type' => 'array',
+                'label' => 'Package name(s) to limit this operation to',
+                'shortcut' => 'p',
+                'option' => true
+            ),
             'whitelistNames' => array(
                 'default' => '{config["composer"]["whitelistNames"]}',
                 'type' => 'string',
@@ -87,7 +98,7 @@ abstract class Base extends Workflow
     protected function pushPackages()
     {
         foreach ($this->pushPackages as $i => $package) {
-            $this->assertPackageAllowed($package);
+            $this->assertPackageIsWhiteListed($package);
             $this->console->output("Pushing <comment>$package->name</comment>", false);
             $this->git('push', $package->path, array('u' => 'origin', $package->branch));
             $this->console->output(
@@ -145,7 +156,7 @@ abstract class Base extends Workflow
                         $requiredVersion = 'dev-master';
                     }
                     if ($requiredVersion !== $version) {
-                        $this->assertPackageAllowed($package);
+                        $this->assertPackageIsWhiteListed($package);
                         if (!$package->git) {
                             throw new Exception("Package {$package->name} required to be installed from source");
                         }
@@ -191,7 +202,7 @@ abstract class Base extends Workflow
      */
     protected function rewriteRequirement($package, $requiredPackage, $newVersion)
     {
-        $this->assertPackageAllowed($package);
+        $this->assertPackageIsWhiteListed($package);
 
         $currentVersion = $package->requires[$requiredPackage];
         $composerFile = $package->path . '/composer.json';
@@ -253,7 +264,7 @@ abstract class Base extends Workflow
      */
     protected function checkoutPackage($package, $branch, $create = false)
     {
-        $this->assertPackageAllowed($package);
+        $this->assertPackageIsWhiteListed($package);
 
         if ($package->branch === $branch) {
             return null;
@@ -320,7 +331,7 @@ abstract class Base extends Workflow
      */
     protected function mergePackage($package, $branch, $message = null, $squash = false)
     {
-        $this->assertPackageAllowed($package);
+        $this->assertPackageIsWhiteListed($package);
 
         if (!$package->git) {
             throw new Exception('Non git package can not be merged');
@@ -472,7 +483,7 @@ abstract class Base extends Workflow
     }
 
     /**
-     * Assert that package is allowed
+     * Assert that package is in white lists
      *
      * @param Package $package The package
      *
@@ -480,15 +491,15 @@ abstract class Base extends Workflow
      *
      * @return void
      */
-    protected function assertPackageAllowed($package)
+    protected function assertPackageIsWhiteListed($package)
     {
-        if (!$this->isPackageAllowed($package)) {
+        if ($this->isPackageWhiteListed($package) === false) {
             throw new Exception("Package {$package->name} is not in white list");
         }
     }
 
     /**
-     * Determine if a package is whitelisted
+     * Determine if a package is not excluded by the packages option or white lists
      *
      * @param Package $package The package
      *
@@ -496,20 +507,41 @@ abstract class Base extends Workflow
      */
     protected function isPackageAllowed(Package $package)
     {
-        $whitelistTypes = ['path', 'remote', 'name'];
-        if (!is_array($this->whitelists)) {
-            $this->whitelists = [];
-            foreach ($whitelistTypes as $whitelistType) {
-                $option = $this->get('whitelist' . ucfirst($whitelistType) . 's');
-                if ($option) {
-                    $this->whitelists[$whitelistType] = '#^' . $option . '$#';
-                }
-            }
+
+        if (!is_array($this->packageNames)) {
+            $this->packageNames = $this->get('packages', []);
         }
 
-        if (!$this->whitelists) {
-            // Without whitelists, all packages are allowed
+        if ($this->packageNames) {
+            if (!in_array($package->name, $this->packageNames, true)
+                || $this->isPackageWhiteListed($package) === false
+                && !$this->confirm("The package $package->name is excluded by your whitelist configuration - are you sure you want to include it anyway?")
+            ) {
+                return false;
+            }
             return true;
+        }
+
+        return (boolean) $this->isPackageWhiteListed($package);
+    }
+
+    /**
+     * Determine if package is white listed
+     *
+     * @param Package $package The package
+     *
+     * @return bool|null
+     */
+    protected function isPackageWhiteListed(Package $package)
+    {
+        if (!is_array($this->whitelists)) {
+            $this->whitelists = [];
+            foreach (['path', 'remote', 'name'] as $whiteListType) {
+                $option = $this->get('whitelist' . ucfirst($whiteListType) . 's');
+                if ($option) {
+                    $this->whitelists[$whiteListType] = '#^' . $option . '$#';
+                }
+            }
         }
 
         foreach ($this->whitelists as $type => $pattern) {
@@ -529,7 +561,7 @@ abstract class Base extends Workflow
             }
         }
 
-        return false;
+        return $this->whitelists ? false : null;
     }
 }
 ?>
