@@ -38,7 +38,7 @@ class Checkout extends Base
         return array(
             'branch' => array(
                 'type' => 'string|array',
-                'label' => 'The branch',
+                'label' => 'The branch(es) to check out (fallback is always master)',
                 'argument' => true,
                 'required' => true
             ),
@@ -68,7 +68,7 @@ class Checkout extends Base
         $this->callback(
             function () {
                 $this->checkoutPackages(
-                    array_unique((array) $this->get('branch') + ['master']),
+                    array_unique(array_merge((array) $this->get('branch'), ['master'])),
                     $this->get('merge'),
                     $this->get('create')
                 );
@@ -95,12 +95,12 @@ class Checkout extends Base
         foreach ($this->getPackages() as $package) {
             foreach ($branches as $branch) {
                 $oldBranch = $package->branch;
-                if ($package->git && $this->checkoutPackage($package, $branch, $create) !== false) {
+                if ($this->checkoutPackage($package, $branch, $create) !== false) {
                     $packages[$package->name] = $package;
                     if ($merge && $oldBranch !== $branch) {
                         $this->mergePackage($package, $oldBranch);
                     }
-                    break;
+                    continue 2;
                 }
             }
         }
