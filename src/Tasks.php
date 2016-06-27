@@ -73,9 +73,6 @@ abstract class Tasks extends Task
     {
         parent::__construct($parent);
         $this->factory = $this->console->getFactory();
-        if (!$this->offsetExists('name')) {
-            $this->offsetSet('name', spl_object_hash($this));
-        }
     }
 
     /**
