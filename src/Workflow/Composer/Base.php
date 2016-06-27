@@ -169,12 +169,12 @@ abstract class Base extends Workflow
                             $fix = $this->confirm('Fix that?');
                         }
                         if ($fix) {
-                            if (!array_key_exists($package->name, $packages)) {
-                                $this->checkoutPackage($package, $branch, true);
+                            if ($this->checkoutPackage($package, $branch, true)) {
                                 $checkedOutPackages[] = $package->name;
+                            }
+                            if (!array_key_exists($package->name, $packages)) {
                                 $packages[$package->name] = $package;
                             }
-
                             $this->pushPackages[$packageName] = $packages[$packageName];
                             $this->rewriteRequirement($package, $packageName, $version);
                         } else {
@@ -522,7 +522,7 @@ abstract class Base extends Workflow
             return true;
         }
 
-        return (boolean) $this->isPackageWhiteListed($package);
+        return $this->isPackageWhiteListed($package) !== false;
     }
 
     /**
