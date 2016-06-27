@@ -68,9 +68,6 @@ class Deployment extends Workflow
                 'label' => 'Array of files (in key "files") and directories (in key "dirs") to share between releases - share directory is in node.deployDir/shared',
                 'default' => array()
             ),
-            'onReady' => array(
-                'type' => 'array',
-            ),
             '--'
         ) + parent::configureVariables();
     }
@@ -96,9 +93,6 @@ class Deployment extends Workflow
             $this->rollback();
         } else {
             $this->activate();
-        }
-        if ($onReady = $this->get('onReady')) {
-            $this->sub($onReady);
         }
     }
 
