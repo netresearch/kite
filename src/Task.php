@@ -69,6 +69,14 @@ abstract class Task extends Variables
                 'type' => 'string',
                 'label' => 'Name of the task to execute this task before'
             ),
+            'onBefore' => array(
+                'type' => 'array',
+                'label' => 'Array of sub tasks to execute prior to this task'
+            ),
+            'onAfter' => array(
+                'type' => 'array',
+                'label' => 'Array of sub tasks to execute after this task'
+            ),
             'message' => array(
                 'type' => 'string',
                 'label' => 'Message to output when job is run with --dry-run or prior to execution'
@@ -92,6 +100,47 @@ abstract class Task extends Variables
                 'label' => 'The variable to save the return value of the execute method of the task to.'
             ),
         );
+    }
+
+    /**
+     * Handle onBefore, onAfter and name
+     *
+     * @param mixed $offset The name of the variable
+     * @param mixed $value  The value
+     *
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        if ($offset === 'onBefore' || $offset == 'onAfter') {
+            $type = lcfirst(substr($offset, 2));
+            $name = $this->offsetGet('name');
+            $factory = $this->console->getFactory();
+            foreach ((array) $this->expand($value) as $subTask) {
+                $subTask = $factory->createTask($this->expand($subTask), $this, [$type => $name]);
+                $this->job->addTask($subTask);
+            }
+            return;
+        }
+        if ($offset === 'name' && $this->offsetExists('name')) {
+            throw new Exception('name may not be set doubly (try putting it at top of the task/job/workflow configuration');
+        }
+        parent::offsetSet($offset, $value);
+    }
+
+    /**
+     * Generate name if it doesn't exist
+     *
+     * @param mixed $offset The name of the variable
+     *
+     * @return mixed
+     */
+    public function &offsetGet($offset)
+    {
+        if ($offset === 'name' && !$this->offsetExists('name')) {
+            $this->offsetSet('name', spl_object_hash($this));
+        }
+        return parent::offsetGet($offset);
     }
 
     /**
