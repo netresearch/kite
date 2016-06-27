@@ -49,7 +49,7 @@ class CheckoutTest extends TestCase
                 $branch,
                 function (Package $package) use ($branch) {
                     // Branch is available on remote
-                    self::cmd('git checkout -b ?; git checkout master', $package->remote, $branch);
+                    self::cmd('git push origin master:?', $package->path, $branch);
                 }
             ],
             [
@@ -133,7 +133,7 @@ class CheckoutTest extends TestCase
      * @dataProvider provideCheckoutScenarios
      *
      */
-    public function testCheckout($branch, $scenario)
+    public function testCheckoutSimple($branch, $scenario)
     {
         $project = $lastPackage = $this->getProject();
         $allPackages = [];
