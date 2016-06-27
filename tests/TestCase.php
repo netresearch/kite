@@ -171,13 +171,15 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
             $package->name = 'netresearch/' . ($isProject ? 'project' : 'package-' . $i);
             $package->path = $projectPath . ($isProject ? '' : '/vendor/' . $package->name);
             $package->remote = $remotesPath . '/' . basename($package->name);
-            mkdir($package->remote);
 
-            $this->cmd('git init', $package->remote);
+            $tmpRemote = $package->remote . '-tmp';
+            mkdir($tmpRemote);
+
+            $this->cmd('git init', $tmpRemote);
             $composerJson = "{\n" . '    "name": "' . $package->name . '"';
             if ($isProject) {
-                file_put_contents($package->remote . '/kite.php', '<?php $this->loadPreset("common"); $this["workspace"] = "kite-workspace"; ?>');
-                file_put_contents($package->remote . '/.gitignore', "/kite-workspace\n/composer.lock\n/vendor");
+                file_put_contents($tmpRemote . '/kite.php', '<?php $this->loadPreset("common"); $this["workspace"] = "kite-workspace"; ?>');
+                file_put_contents($tmpRemote . '/.gitignore', "/kite-workspace\n/composer.lock\n/vendor");
                 $composerJson .= ",\n    \"type\": \"project\"";
                 $composerJson .= ",\n    \"config\": {\"cache-files-ttl\": 0}";
                 $composerJson .= ",\n    \"minimum-stability\": \"dev\"";
@@ -197,8 +199,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
                 $package->dependencies[] = $lastPackage;
             }
             $composerJson .= "\n}";
-            file_put_contents($package->remote . '/composer.json', $composerJson);
-            $this->cmd('git add -A; git commit -nm \'Initial import\'', $package->remote);
+            file_put_contents($tmpRemote . '/composer.json', $composerJson);
+            $this->cmd('git add -A; git commit -nm \'Initial import\'', $tmpRemote);
+            $this->cmd('git clone --bare ? ?', null, $tmpRemote, $package->remote);
 
             $lastPackage = $package;
             $i--;
