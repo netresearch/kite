@@ -31,17 +31,27 @@ $this['jobs']['cc'] = [
             'if' => '!config["webUrl"]'
         ],
         [
-            'type' => 'shell',
-            'command' => '{config["php"]} ' . __DIR__ . '/typo3/clear-cache.php',
-            'processSettings' => ['pt' => true]
-        ],
-        [
             'workflow' => 'clearCodeCaches',
             'webUrl' => '{config["webUrl"]}',
             'if' => 'config["webUrl"]'
+        ],
+        [
+            'type' => 'shell',
+            'command' => [
+                'rm -rf typo3temp/Cache/*',
+                '{config["php"]} ' . __DIR__ . '/typo3/clear-cache.php',
+                '{config["php"]} ' . __DIR__ . '/typo3/schema-migration.php',
+            ],
+            'processSettings' => ['pt' => true]
         ]
     ]
 ];
+foreach (['update', 'checkout', 'merge'] as $job) {
+    $this->merge(
+        $this['jobs'][$job],
+        ['onAfter' => ['{config["jobs"]["cc"]}']]
+    );
+}
 
 $this['jobs']['ccr'] = [
     'description' => 'Clear remote caches and migrate DB',
@@ -59,6 +69,7 @@ $this['jobs']['ccr'] = [
             [
                 'type' => 'remoteShell',
                 'command' => [
+                    'rm -rf typo3temp/Cache/*',
                     '{node.php} {config["workspace"]}/typo3/clear-cache.php',
                     '{node.php} {config["workspace"]}/typo3/schema-migration.php',
                     'rm -rf {config["workspace"]}'
@@ -73,7 +84,7 @@ $this['jobs']['ccr'] = [
 $this->merge(
     $this['jobs']['deploy']['task'],
     [
-        'onReady' => '{config["jobs"]["ccr"]["task"]}',
+        'onAfter' => ['{config["jobs"]["ccr"]["task"]}'],
         'rsync' => [
             'exclude' => [
                 '/typo3temp',
