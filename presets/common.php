@@ -67,7 +67,6 @@ $this['jobs'] = [
         'arguments' => [
             'branch' => [
                 'type' => 'string',
-                'required' => true,
                 'label' => 'Branch to checkout before updating'
             ]
         ],
