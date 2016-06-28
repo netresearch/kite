@@ -71,7 +71,7 @@ class PackageTest extends TestCase
     {
         $project = $this->getProject(0);
 
-        $this->cmd('git checkout -b remote', $project->remote);
+        $this->cmd('git push origin master:remote', $project->path);
         $this->cmd('git checkout -b remoteAndLocal; git push -u origin remoteAndLocal; git checkout master', $project->path);
         $this->cmd('git checkout -b local', $project->path);
 
