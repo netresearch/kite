@@ -120,12 +120,39 @@ abstract class Task extends Variables
                 $subTask = $factory->createTask($this->expand($subTask), $this, [$type => $name]);
                 $this->job->addTask($subTask);
             }
-            return;
         }
-        if ($offset === 'name' && $this->offsetExists('name')) {
+        if ($offset === 'name' && parent::offsetGet('name')) {
             throw new Exception('name may not be set doubly (try putting it at top of the task/job/workflow configuration');
         }
         parent::offsetSet($offset, $value);
+    }
+
+    /**
+     * Re-add the onBefore and onAfter tasks and regenerate name
+     *
+     * @return void
+     */
+    public function __clone()
+    {
+        parent::offsetSet('name', null);
+        parent::__clone();
+        foreach (['onBefore', 'onAfter'] as $type) {
+            if ($val = $this->offsetGet($type)) {
+                $this->offsetSet($type, $val);
+            }
+        }
+    }
+
+    /**
+     * Handle name
+     *
+     * @param mixed $offset The variable name
+     *
+     * @return bool
+     */
+    public function offsetExists($offset)
+    {
+        return $offset === 'name' || parent::offsetExists($offset);
     }
 
     /**
@@ -137,8 +164,8 @@ abstract class Task extends Variables
      */
     public function &offsetGet($offset)
     {
-        if ($offset === 'name' && !$this->offsetExists('name')) {
-            $this->offsetSet('name', spl_object_hash($this));
+        if ($offset === 'name' && !parent::offsetGet('name')) {
+            parent::offsetSet('name', spl_object_hash($this));
         }
         return parent::offsetGet($offset);
     }
