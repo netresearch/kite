@@ -311,6 +311,7 @@ class Diagnose extends Base
             $package->requiredBranch = null;
             $package->unsatisfiedDependentPackages = array();
             $package->invalidRequirements = false;
+            $dependentPackages = [];
             foreach ($this->get('composer.packages') as $dependentPackage) {
                 if (!isset($dependentPackage->requiresUpToDate)) {
                     $this->reloadRequires($dependentPackage);
@@ -318,6 +319,7 @@ class Diagnose extends Base
                 }
                 if (array_key_exists($package->name, $dependentPackage->requires)) {
                     if (substr($dependentPackage->requires[$package->name], 0, 4) === 'dev-') {
+                        $dependentPackages[] = $dependentPackage->name;
                         $requiredBranch = substr($dependentPackage->requires[$package->name], 4);
                         if (strpos($requiredBranch, '#')) {
                             $otherHash = isset($hash) ? $hash : null;
@@ -328,7 +330,9 @@ class Diagnose extends Base
                         }
                         if ($package->requiredBranch && $package->requiredBranch !== $requiredBranch) {
                             $package->invalidRequirements = true;
-                            return '<error>Two or more packages require %s in different branches</error>';
+                            return '<error>' . array_pop($dependentPackages)
+                                . ' and ' . array_pop($dependentPackages)
+                                . ' require %s in different branches</error>';
                         }
                         $package->requiredBranch = $requiredBranch;
                         if ($requiredBranch !== $package->branch) {
