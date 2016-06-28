@@ -419,14 +419,6 @@ class Diagnose extends Base
     protected function checkDivergeFromLock($package)
     {
         if ($package->git && !$package->isRoot) {
-            $constraint = $package->tag ? ltrim($package->tag, 'v') : 'dev-' . $package->branch;
-            if (($package->tag || $package->branch) && $package->version !== $constraint) {
-                if ($this->git('rev-parse', $package->path, 'HEAD') === $package->source->reference) {
-                    // HEAD is tip of branch and tag - so only branch was detected
-                    return;
-                }
-                return "%s is at <comment>$constraint</comment> but is locked at <comment>{$package->version}</comment>";
-            }
             $rawCounts = $this->git('rev-list', $package->path, "--count --left-right --cherry-pick {$package->source->reference}...");
             $counts = explode("\t", $rawCounts);
             if ($counts[0] || $counts[1]) {
