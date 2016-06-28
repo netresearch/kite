@@ -34,7 +34,6 @@ use Netresearch\Kite\Service\Composer;
  * @property array       $branches  Git branches (including remote branches)
  * @property array       $upstreams Upstream branches (values) for local branches (keys)
  * @property string|null $branch    The currently checked out branch, if any
- *                                  If package is on a tag this will always be null
  * @property string|null $tag       The currently checked out tag, if any
  * @property string|null $remote    The remote url (no multiple urls supported)
  *
@@ -103,8 +102,10 @@ class Package
         case 'branches':
         case 'upstreams':
         case 'branch':
-        case 'tag':
             $this->loadGitInformation();
+            break;
+        case 'tag':
+            $this->loadTag();
             break;
         case 'remote':
             $this->loadRemote();
@@ -208,7 +209,6 @@ class Package
         $this->branches = array();
         $this->upstreams = array();
         $this->branch = null;
-        $this->tag = null;
         if ($this->git) {
             $this->composer->git('fetch', $this->path, array('p' => true, 'origin'));
             try {
@@ -223,7 +223,7 @@ class Package
                     throw $e;
                 }
             }
-            if (!self::$forEachRefHeadSupported && !($this->tag = $this->getTag())) {
+            if (!self::$forEachRefHeadSupported) {
                 $this->branch = $this->composer->git('rev-parse', $this->path, ['abbrev-ref' => true, 'HEAD']) ?: null;
             }
             foreach (explode("\n", trim($gitBr)) as $line) {
@@ -239,25 +239,21 @@ class Package
                     $this->upstreams[$branch] = $upstream;
                 }
             }
-            if (self::$forEachRefHeadSupported && !$this->branch) {
-                $this->tag = $this->getTag();
-            }
         }
     }
 
     /**
-     * Get  the currently checked out tag
+     * Load the currently checked out tag
      *
-     * @return string|null
+     * @return void
      */
-    protected function getTag()
+    protected function loadTag()
     {
         try {
-            return trim($this->composer->git('describe', $this->path, array('exact-match' => true, 'tags' => true)));
+            $this->tag = trim($this->composer->git('describe', $this->path, array('exact-match' => true, 'tags' => true)));
         } catch (Exception\ProcessFailedException $e) {
-            return null;
+            $this->tag =  null;
         }
-
     }
 }
 
