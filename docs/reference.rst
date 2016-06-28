@@ -70,6 +70,30 @@ The following options are available on the most tasks and workflows (unless they
      - Name of the task to execute this task before
    * - 
 
+       .. |common-onBefore| replace:: onBefore
+
+       .. _common-onBefore:
+
+       onBefore
+
+     - array
+     - \-
+     - \-
+     - Array of sub tasks to execute prior to this task
+   * - 
+
+       .. |common-onAfter| replace:: onAfter
+
+       .. _common-onAfter:
+
+       onAfter
+
+     - array
+     - \-
+     - \-
+     - Array of sub tasks to execute after this task
+   * - 
+
        .. |common-message| replace:: message
 
        .. _common-message:
@@ -196,7 +220,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 break
@@ -206,7 +230,7 @@ Break the current iteration (of Tasks chain f.i.)
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 callback
@@ -241,7 +265,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 choose
@@ -300,7 +324,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 composer
@@ -457,7 +481,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 confirm
@@ -504,7 +528,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 evaluate
@@ -539,7 +563,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 exit
@@ -574,7 +598,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 fs
@@ -633,7 +657,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 git
@@ -788,7 +812,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 include
@@ -823,7 +847,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 iterate
@@ -930,7 +954,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 output
@@ -1080,7 +1104,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 remoteShell
@@ -1235,7 +1259,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 rsync
@@ -1426,7 +1450,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 scp
@@ -1545,7 +1569,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 shell
@@ -1700,7 +1724,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 sub
@@ -1771,7 +1795,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 tar
@@ -1878,7 +1902,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 tryCatch
@@ -1973,7 +1997,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 Workflows
@@ -2026,7 +2050,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 composer-checkout
@@ -2057,7 +2081,7 @@ Options
      - string|array
      - \-
      - X
-     - The branch
+     - The branch(es) to check out (fallback is always master)
    * - 
 
        .. |workflow-composer-checkout-merge| replace:: merge
@@ -2082,6 +2106,18 @@ Options
      - \-
      - \-
      - Create branch if not exists
+   * - 
+
+       .. |workflow-composer-checkout-packages| replace:: packages
+
+       .. _workflow-composer-checkout-packages:
+
+       packages
+
+     - array
+     - \-
+     - \-
+     - Package name(s) to limit this operation to
    * - 
 
        .. |workflow-composer-checkout-whitelistNames| replace:: whitelistNames
@@ -2121,7 +2157,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 composer-diagnose
@@ -2167,6 +2203,18 @@ Options
      - Enable fixes and optionally reduce to certain fixes - available fixes are UnstagedChanges, RemoteSynchronicity, RequirementsMatch, DivergeFromLock, ComposerLockActuality
    * - 
 
+       .. |workflow-composer-diagnose-packages| replace:: packages
+
+       .. _workflow-composer-diagnose-packages:
+
+       packages
+
+     - array
+     - \-
+     - \-
+     - Package name(s) to limit this operation to
+   * - 
+
        .. |workflow-composer-diagnose-whitelistNames| replace:: whitelistNames
 
        .. _workflow-composer-diagnose-whitelistNames:
@@ -2204,7 +2252,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 composer-merge
@@ -2286,6 +2334,18 @@ Options
      - Don't do a diagnose upfront
    * - 
 
+       .. |workflow-composer-merge-packages| replace:: packages
+
+       .. _workflow-composer-merge-packages:
+
+       packages
+
+     - array
+     - \-
+     - \-
+     - Package name(s) to limit this operation to
+   * - 
+
        .. |workflow-composer-merge-whitelistNames| replace:: whitelistNames
 
        .. _workflow-composer-merge-whitelistNames:
@@ -2323,7 +2383,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 deployment
@@ -2403,22 +2463,10 @@ Options
 
      - \-
      - Array of files (in key "files") and directories (in key "dirs") to share between releases - share directory is in node.deployDir/shared
-   * - 
-
-       .. |workflow-deployment-onReady| replace:: onReady
-
-       .. _workflow-deployment-onReady:
-
-       onReady
-
-     - array
-     - \-
-     - \-
-     - \-
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 git-assertUnchanged
@@ -2453,7 +2501,7 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-message|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
 
 
 stageSelect
@@ -2548,4 +2596,4 @@ Options
 
 Common options
 ``````````````
-|common-name|_, |common-after|_, |common-before|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_
+|common-name|_, |common-after|_, |common-before|_, |common-onBefore|_, |common-onAfter|_, |common-if|_, |common-executeInPreview|_, |common-force|_, |common-toVar|_

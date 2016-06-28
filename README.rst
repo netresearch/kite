@@ -176,7 +176,7 @@ Kite ships with the following `expression language functions <http://symfony.com
 - :code:`isset(variable)` and :code:`empty(variable)`
     - Behave just like their PHP equivalents. Only available for variable objects, such as
     - :code:`tasks`, :code:`nodes`, :code:`workflows` or :code:`jobs` and their objects (f.i. not for configuration
-    - arrays)
+      arrays)
 - :code:`get(variableName, variableValue)` and :code:`set(variableName, variableValue)`
     - Get or set the variables (f.i. :code:`set('job.owner', node.user)`
 - :code:`answer(question)`
@@ -467,6 +467,9 @@ Common commands
 
 Common jobs
 ===========
+- :code:`update [branch]`
+    - Checks out :code:`branch` when given
+    - Runs git pull followed by composer update
 - :code:`kite checkout [--merge] branch`
     - Goes through all `Development packages`_ and checks out the branch there if it’s available
     - After checking out the branch on a package it goes through all `Development packages`_ requiring it and updates the version constraint to that branch
@@ -477,7 +480,7 @@ Common jobs
 - :code:`kite package-foreach [--git] command`
     - Runs a command for each composer package (optionally only :code:`--git` packages)
 - :code:`kite cc, kite ccr [stage]`
-    - Clears caches locally (cc) or on all nodes of a specific stage
+    - Clears caches locally (cc) or on all nodes of a specific stage (contained in TYPO3 preset only for now)
 
 Development workflow
 ====================
