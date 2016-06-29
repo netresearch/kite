@@ -137,7 +137,7 @@ class Process extends \Symfony\Component\Process\Process
      *
      * @return mixed The output of the shell command or FALSE if the command returned a non-zero exit code and $ignoreErrors was enabled.
      */
-    public function run($callback = NULL)
+    public function run($callback = null)
     {
         $command = $this->getCommandLine();
 
@@ -152,16 +152,13 @@ class Process extends \Symfony\Component\Process\Process
                 if ($callback) {
                     call_user_func($callback, $type, $buffer);
                 }
-                if (!$this->shy) {
+                if (!$this->shy || $type !== self::OUT) {
                     $this->console->output($buffer, $this->pt ? $this->console->getVerbosity() : OutputInterface::VERBOSITY_DEBUG, false, !$this->pt);
                 }
             }
         );
 
         if ($this->getExitCode() !== 0) {
-            if ($this->console->getVerbosity() <= OutputInterface::VERBOSITY_DEBUG && !$this->pt) {
-                $this->console->getOutput()->write($this->getErrorOutput(), false, OutputInterface::OUTPUT_RAW);
-            }
             throw new ProcessFailedException($this);
         }
 
