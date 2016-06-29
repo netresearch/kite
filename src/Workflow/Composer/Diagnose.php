@@ -109,7 +109,7 @@ class Diagnose extends Base
      */
     public function doCheck($check, $fix, array $packageNames = array())
     {
-        $packages = $this->get('composer.packages');
+        $packages = $this->getPackages(false);
         $errors = 0;
         if (!$packageNames) {
             $this->console->output($check, false);
@@ -419,7 +419,19 @@ class Diagnose extends Base
     protected function checkDivergeFromLock($package)
     {
         if ($package->git && !$package->isRoot) {
-            $rawCounts = $this->git('rev-list', $package->path, "--count --left-right --cherry-pick {$package->source->reference}...");
+            $remote = false;
+            do {
+                $reference = ($remote ? 'origin/' : '') . $package->source->reference;
+                try {
+                    $rawCounts = $this->git('rev-list', $package->path, "--count --left-right --cherry-pick {$reference}...");
+                    break;
+                } catch (Exception\ProcessFailedException $e) {
+                    if ($remote) {
+                        return "The locked reference {$package->source->reference} in %s is not available";
+                    }
+                    $remote = true;
+                }
+            } while ($remote);
             $counts = explode("\t", $rawCounts);
             if ($counts[0] || $counts[1]) {
                 $num = $counts[0] ?: $counts[1];
