@@ -507,17 +507,19 @@ abstract class Base extends Workflow
      */
     protected function isPackageAllowed(Package $package)
     {
-
         if (!is_array($this->packageNames)) {
-            $this->packageNames = $this->get('packages', []);
+            $this->packageNames = array_fill_keys($this->get('packages') ?: [], null);
         }
 
         if ($this->packageNames) {
-            if (!in_array($package->name, $this->packageNames, true)
-                || $this->isPackageWhiteListed($package) === false
-                && !$this->confirm("The package $package->name is excluded by your whitelist configuration - are you sure you want to include it anyway?")
-            ) {
+            if (!array_key_exists($package->name, $this->packageNames)) {
                 return false;
+            }
+            if ($this->isPackageWhiteListed($package) === false) {
+                if ($this->packageNames[$package->name] === null) {
+                    $this->packageNames[$package->name] = $this->confirm("The package $package->name is excluded by your whitelist configuration - are you sure you want to include it anyway?");
+                }
+                return $this->packageNames[$package->name];
             }
             return true;
         }
