@@ -72,7 +72,7 @@ Global installation
 
 .. code:: bash
 
-    composer global require "kite=^1.2.0"
+    composer global require "netresearch/kite"
     ~/.composer/vendor/bin/kite -V
 
 Per project installation
@@ -81,7 +81,7 @@ Per project installation
 .. code:: bash
 
     cd /var/www/project
-    composer require "kite=^1.2.0"
+    composer require "netresearch/kite"
     vendor/bin/kite -V
 
 =============
