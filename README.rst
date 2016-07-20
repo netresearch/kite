@@ -467,7 +467,7 @@ Common commands
 
 Common jobs
 ===========
-- :code:`update [branch]`
+- :code:`kite update [branch]`
     - Checks out :code:`branch` when given
     - Runs git pull followed by composer update
 - :code:`kite checkout [--merge] branch`
@@ -477,7 +477,7 @@ Common jobs
     - When :code:`-c` is passed, the branch will be created in all `Development packages`_ when it doesn't exist there (you can use :code:`-p` option to limit the operation to certain packages)
 - :code:`kite merge [--squash] [--message=”Message”] branch`
     - Goes through all composer packages and merges the branch into the currently checked out
-- :code:`kite package-foreach [--git] command`
+- :code:`kite foreach-package [--git] command`
     - Runs a command for each composer package (optionally only :code:`--git` packages)
 - :code:`kite cc, kite ccr [stage]`
     - Clears caches locally (cc) or on all nodes of a specific stage (contained in TYPO3 preset only for now)
