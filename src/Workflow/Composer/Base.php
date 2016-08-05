@@ -137,12 +137,13 @@ abstract class Base extends Workflow
      * If not and $autoFix or user agrees, the require-statements in the
      * dependent packages are changed accordingly.
      *
-     * @param Package[] $packages Packages
-     * @param bool      $autoFix  Whether to autofix wrong requirements
+     * @param Package[] $packages              Packages
+     * @param bool      $autoFix               Whether to autofix wrong requirements
+     * @param bool      $useNewAsCurrentBranch Whether to rewrite requirements in the root package only
      *
      * @return void
      */
-    protected function rewriteRequirements(array &$packages, $autoFix = false)
+    protected function rewriteRequirements(array &$packages, $autoFix = false, $useNewAsCurrentBranch = false)
     {
         $checkedOutPackages = array_keys($packages);
         $unfixedRequirements = 0;
@@ -183,6 +184,11 @@ abstract class Base extends Workflow
                         }
                     }
                 }
+
+                // if useAsCurrent-option is set, only the first package should be altered
+                if ($useNewAsCurrentBranch) {
+                    break;
+                }
             }
         }
         if ($unfixedRequirements) {
@@ -215,7 +221,7 @@ abstract class Base extends Workflow
                 preg_quote($requiredPackage, '/'),
                 preg_quote($currentVersion, '/')
             ),
-            '$1' . $newVersion,
+            '$1' . $newVersion . ' as ' . $currentVersion,
             $composerFileContents
         );
         file_put_contents($composerFile, $newComposerFileContents);

@@ -54,6 +54,12 @@ class Checkout extends Base
                 'option' => true,
                 'shortcut' => 'c'
             ),
+            'aliases' => array(
+                'type' => 'bool',
+                'label' => 'Only change composer.json of root branch',
+                'option' => true,
+                'shortcut' => 'a'
+            ),
             '--'
         ) + parent::configureVariables();
     }
@@ -70,7 +76,8 @@ class Checkout extends Base
                 $this->checkoutPackages(
                     array_unique(array_merge((array) $this->get('branch'), ['master'])),
                     $this->get('merge'),
-                    $this->get('create')
+                    $this->get('create'),
+                    $this->get('aliases')
                 );
             }
         );
@@ -79,16 +86,19 @@ class Checkout extends Base
     /**
      * Go through all packages and check it out in the first matching branch
      *
-     * @param array $branches The branches to try
-     * @param bool  $merge    Whether to merge the new branch with the previously
-     *                        checked out branch
-     * @param bool  $create   Create branch if not exists
+     * @param array $branches                   The branches to try
+     * @param bool  $merge                      Whether to merge the new branch with the previously
+     *                                          checked out branch
+     * @param bool  $create                     Create branch if not exists
+     * @param bool  $changeOnlyRootComposerJson Don't change every composer.json
+     *                                          that requires the package but only the composer.json
+     *                                          of the root repo
      *
      * @throws Exception\MissingVariableException
      *
      * @return void
      */
-    protected function checkoutPackages(array $branches, $merge = false, $create = false)
+    protected function checkoutPackages(array $branches, $merge = false, $create = false, $changeOnlyRootComposerJson = false)
     {
         /* @var $packages \Netresearch\Kite\Service\Composer\Package[] */
         $packages = array();
@@ -116,7 +126,7 @@ class Checkout extends Base
             return;
         }
 
-        $this->rewriteRequirements($packages, $merge);
+        $this->rewriteRequirements($packages, $merge, $changeOnlyRootComposerJson);
         $this->pushPackages();
 
         // Each package containing one of the branches should now be checked out in
