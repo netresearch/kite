@@ -178,7 +178,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
             $this->cmd('git init', $tmpRemote);
             $composerJson = "{\n" . '    "name": "' . $package->name . '"';
             if ($isProject) {
-                file_put_contents($tmpRemote . '/kite.php', '<?php $this->loadPreset("common"); $this["workspace"] = "kite-workspace"; ?>');
+                file_put_contents($tmpRemote . '/kite.php', '<?php $this->loadPreset("common"); $this["workspace"] = "kite-workspace"; $this["jobs"]["checkout"]["aliases"] = true; ?>');
                 file_put_contents($tmpRemote . '/.gitignore', "/kite-workspace\n/composer.lock\n/vendor");
                 $composerJson .= ",\n    \"type\": \"project\"";
                 $composerJson .= ",\n    \"config\": {\"cache-files-ttl\": 0}";
