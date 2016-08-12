@@ -56,7 +56,7 @@ class Checkout extends Base
             ),
             'aliases' => array(
                 'type' => 'bool',
-                'label' => 'Only change composer.json of root branch',
+                'label' => 'Use aliases instead of creating new branches in several extensions',
                 'option' => true,
                 'shortcut' => 'a'
             ),
@@ -86,20 +86,32 @@ class Checkout extends Base
     /**
      * Go through all packages and check it out in the first matching branch
      *
-     * @param array $branches                   The branches to try
-     * @param bool  $merge                      Whether to merge the new branch with the previously
-     *                                          checked out branch
-     * @param bool  $create                     Create branch if not exists
-     * @param bool  $changeOnlyRootComposerJson Don't change every composer.json
-     *                                          that requires the package but only the composer.json
-     *                                          of the root repo
+     * @param array $branches The branches to try
+     * @param bool  $merge    Whether to merge the new branch with the previously
+     *                        checked out branch
+     * @param bool  $create   Create branch if not exists
+     * @param bool  $aliases  Don't change every composer.json
+     *                        that requires the package but only the composer.json
+     *                        of the root repo
      *
      * @throws Exception\MissingVariableException
      *
      * @return void
      */
-    protected function checkoutPackages(array $branches, $merge = false, $create = false, $changeOnlyRootComposerJson = false)
+    protected function checkoutPackages(array $branches, $merge = false, $create = false, $aliases = false)
     {
+        $config = $this->getParent()->get('config');
+
+        if (!array_key_exists('checkout', $config['jobs'])) {
+            $config['jobs']['checkout'] = [];
+        }
+
+        if (!array_key_exists('aliases', $config['jobs']['checkout'])) {
+            $config['jobs']['checkout']['aliases'] = false;
+        }
+
+        $aliases = $aliases || $config['jobs']['checkout']['aliases'];
+        
         /* @var $packages \Netresearch\Kite\Service\Composer\Package[] */
         $packages = array();
         foreach ($this->getPackages() as $package) {
@@ -126,7 +138,7 @@ class Checkout extends Base
             return;
         }
 
-        $this->rewriteRequirements($packages, $merge, $changeOnlyRootComposerJson);
+        $this->rewriteRequirements($packages, $merge, $aliases);
         $this->pushPackages();
 
         // Each package containing one of the branches should now be checked out in

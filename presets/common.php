@@ -82,7 +82,8 @@ $this['jobs'] = [
     ],
     'checkout' => [
         'description' => 'Checkout all packages with the given branch at this branch and update the dependencies',
-        'workflow' => 'Netresearch\Kite\Workflow\Composer\Checkout'
+        'workflow' => 'Netresearch\Kite\Workflow\Composer\Checkout',
+        'aliases' => false
     ],
     'diagnose' => [
         'description' => 'Show status of packages',

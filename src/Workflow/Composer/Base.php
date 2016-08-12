@@ -57,7 +57,7 @@ abstract class Base extends Workflow
         }
         foreach (['whitelistNames', 'whitelistPaths', 'whitelistRemotes'] as $key) {
             if (!array_key_exists($key, $config['composer'])) {
-                $config['composer'][ $key ] = null;
+                $config['composer'][$key] = null;
             }
         }
 
@@ -148,12 +148,12 @@ abstract class Base extends Workflow
         $checkedOutPackages = array_keys($packages);
         $unfixedRequirements = 0;
         while ($packageName = array_shift($checkedOutPackages)) {
-            $branch = $packages[ $packageName ]->branch;
+            $branch = $packages[$packageName]->branch;
             $version = 'dev-' . $branch;
             foreach ($this->getPackages(false, false) as $package) {
                 if (array_key_exists($packageName, $package->requires)) {
                     // TODO: Set required version to branch alias, if any
-                    $requiredVersion = $package->requires[ $packageName ];
+                    $requiredVersion = $package->requires[$packageName];
                     if ($requiredVersion === '@dev') {
                         $requiredVersion = 'dev-master';
                     }
@@ -177,8 +177,8 @@ abstract class Base extends Workflow
                             if (!array_key_exists($package->name, $packages)) {
                                 $packages[ $package->name ] = $package;
                             }
-                            $this->pushPackages[ $packageName ] = $packages[ $packageName ];
-                            $this->rewriteRequirement($package, $packageName, $version);
+                            $this->pushPackages[$packageName] = $packages[$packageName];
+                            $this->rewriteRequirement($package, $packageName, $version, $aliases);
                         } else {
                             $unfixedRequirements++;
                         }
@@ -205,23 +205,25 @@ abstract class Base extends Workflow
      * @param Package $package         The package
      * @param string  $requiredPackage The required package
      * @param string  $newVersion      The new version
+     * @param bool    $aliases         Whether the aliases-option is set
      *
      * @return void
      */
-    protected function rewriteRequirement($package, $requiredPackage, $newVersion)
+    protected function rewriteRequirement($package, $requiredPackage, $newVersion, $aliases = false)
     {
         $this->assertPackageIsWhiteListed($package);
 
-        $currentVersion = $package->requires[ $requiredPackage ];
+        $currentVersion = $package->requires[$requiredPackage];
         $composerFile = $package->path . '/composer.json';
         $composerFileContents = file_get_contents($composerFile);
+        $alias = $aliases? ' as ' . $currentVersion : '';
         $newComposerFileContents = preg_replace(
             sprintf(
                 '/(^\s*"require"\s*:\s*\{[^\}]+"%s"\s*:\s*")%s/m',
                 preg_quote($requiredPackage, '/'),
                 preg_quote($currentVersion, '/')
             ),
-            '$1' . $newVersion . ' as ' . $currentVersion,
+            '$1' . $newVersion . $alias,
             $composerFileContents
         );
         file_put_contents($composerFile, $newComposerFileContents);
@@ -241,7 +243,7 @@ abstract class Base extends Workflow
 
         $this->console->output("Made <comment>$package->name</comment> require <comment>$requiredPackage $newVersion</comment>");
 
-        $this->pushPackages[ $package->name ] = $package;
+        $this->pushPackages[$package->name] = $package;
     }
 
     /**
