@@ -63,6 +63,52 @@ class PackageTest extends TestCase
     }
 
     /**
+     * @dataProvider versionNameProvider
+     */
+    public function testGetNewVersionAlias($new, $old, $result, $aliases)
+    {
+        $project = $this->getProject(0);
+        $package = $this->getPackage($project, true);
+
+        $package->requires['testPackage'] = $old;
+
+        $this->assertEquals(
+            $result,
+            $package->getNewVersionAlias('testPackage', $new, $aliases)
+        );
+    }
+
+    /**
+     * Gives combinations of branch names with ans without aliases and the respective
+     * result of getNewVersionName
+     *
+     * @return array
+     */
+    public function versionNameProvider()
+    {
+        return array(
+            array(
+                'newversion',
+                'oldversion',
+                'newversion as oldversion',
+                true
+            ),
+            array(
+                'dev-NEW-123',
+                'master',
+                'dev-NEW-123 as master',
+                true
+            ),
+            array(
+                'newestversion',
+                'newversion as oldversion',
+                'newestversion as oldversion',
+                true
+            )
+        );
+    }
+
+    /**
      * Test local only, remote only and remotely and locally available branches
      *
      * @return void

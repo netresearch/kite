@@ -120,6 +120,23 @@ class Package
         return $this->$name;
     }
 
+    public function getNewVersionAlias($requiredPackage, $newVersionName, $aliases = false)
+    {
+        $currentVersion = $this->requires[$requiredPackage];
+
+        if ($aliases) {
+            $pos = strpos($currentVersion, ' as ');
+
+            if ($pos) {
+                $currentVersion = substr($currentVersion, $pos + 4);
+            }
+
+            $newVersionName .= ' as ' . $currentVersion;
+        }
+
+        return $newVersionName;
+    }
+
     /**
      * Mark lazy properties as present
      *
@@ -139,7 +156,7 @@ class Package
      */
     protected function loadRequires()
     {
-        $this->requires = isset($this->require) ? get_object_vars($this->require) : array();
+        $this->requires = isset($this->requires) ? get_object_vars($this->requires) : array();
         foreach ($this->requires as $package => $constraint) {
             if ($pos = strpos($constraint, ' as ')) {
                 if ($hashPos = strpos($constraint, '#')) {
