@@ -130,7 +130,12 @@ class ClearCodeCaches extends Workflow
         if (array_pop($caches) !== 'SUCCESS') {
             $this->console->output("<error>Clearcache not run successfully</error>");
             $this->console->indent();
-            $this->console->output($response, OutputInterface::VERBOSITY_DEBUG);
+            if ($response === false) {
+                $msg = curl_error($ch);
+            } else {
+                $msg = $response;
+            }
+            $this->console->output($msg, OutputInterface::VERBOSITY_DEBUG);
             $this->console->outdent();
         } else {
             if ($caches) {
