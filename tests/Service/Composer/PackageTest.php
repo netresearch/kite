@@ -69,8 +69,7 @@ class PackageTest extends TestCase
     {
         $project = $this->getProject(0);
         $package = $this->getPackage($project, true);
-
-        $package->requires['testPackage'] = $old;
+        $package->setRequires(array('testPackage' => $old));
 
         $this->assertEquals(
             $result,

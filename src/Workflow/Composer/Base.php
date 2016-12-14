@@ -216,16 +216,15 @@ abstract class Base extends Workflow
         $currentVersion = $package->requires[$requiredPackage];
         $composerFile = $package->path . '/composer.json';
         $composerFileContents = file_get_contents($composerFile);
-        if ($aliases) {
-            $newVersion = $this->getNewVersionName($newVersion, $currentVersion);
-        }
+        $requirementConstraint = $package->getNewVersionAlias($requiredPackage, $newVersion, $aliases);
+
         $newComposerFileContents = preg_replace(
             sprintf(
                 '/(^\s*"require"\s*:\s*\{[^\}]+"%s"\s*:\s*")%s/m',
                 preg_quote($requiredPackage, '/'),
                 preg_quote($currentVersion, '/')
             ),
-            '$1' . $newVersion,
+            '$1' . $requirementConstraint,
             $composerFileContents
         );
         file_put_contents($composerFile, $newComposerFileContents);
@@ -237,36 +236,15 @@ abstract class Base extends Workflow
             throw new Exception('Replacing version failed');
         }
 
-        $this->git('commit', $package->path, array('n' => true, 'm' => "Change required version of $requiredPackage to $newVersion", 'composer.json'));
+        $this->git('commit', $package->path, array('n' => true, 'm' => "Change required version of $requiredPackage to $requirementConstraint", 'composer.json'));
         if (!isset($package->source)) {
             $package->source = new \stdClass();
         }
         $package->source->reference = $this->git('rev-parse', $package->path, array('HEAD'));
 
-        $this->console->output("Made <comment>$package->name</comment> require <comment>$requiredPackage $newVersion</comment>");
+        $this->console->output("Made <comment>$package->name</comment> require <comment>$requiredPackage $requirementConstraint</comment>");
 
         $this->pushPackages[$package->name] = $package;
-    }
-
-    /**
-     * Get the name of the new method with alias
-     *
-     * @param string $newversion     the new package version
-     * @param string $currentversion the old name of the version of the package
-     *
-     * @return string
-     */
-    public function getNewVersionName($newversion, $currentversion)
-    {
-        $pos = strpos($currentversion, ' as ');
-
-        if ($pos) {
-            $currentversion = substr($currentversion, $pos + 4);
-        }
-
-        $newversion .= ' as ' . $currentversion;
-
-        return $newversion;
     }
 
     /**

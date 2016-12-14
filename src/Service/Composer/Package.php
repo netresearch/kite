@@ -120,14 +120,47 @@ class Package
         return $this->$name;
     }
 
+    /**
+     * Get the requirements
+     *
+     * @return array
+     */
+    public function getRequires()
+    {
+        if (empty($this->requires)) {
+            $this->loadRequires();
+        }
+
+        return $this->requires;
+    }
+
+    /**
+     * Set the requirements
+     *
+     * @param array $requires the requirements
+     *
+     * @return void
+     */
+    public function setRequires($requires)
+    {
+        $this->requires = $requires;
+    }
+
+    /**
+     * Get the new version name
+     *
+     * @param string $requiredPackage The required package like 'tt-news'
+     * @param string $newVersionName  The new version constraint like 'dev-master'
+     * @param bool   $aliases         Whether composer alias should be used
+     *
+     * @return string
+     */
     public function getNewVersionAlias($requiredPackage, $newVersionName, $aliases = false)
     {
         $currentVersion = $this->requires[$requiredPackage];
 
         if ($aliases) {
-            $pos = strpos($currentVersion, ' as ');
-
-            if ($pos) {
+            if ($pos = strpos($currentVersion, ' as ')) {
                 $currentVersion = substr($currentVersion, $pos + 4);
             }
 
@@ -156,16 +189,34 @@ class Package
      */
     protected function loadRequires()
     {
-        $this->requires = isset($this->requires) ? get_object_vars($this->requires) : array();
-        foreach ($this->requires as $package => $constraint) {
-            if ($pos = strpos($constraint, ' as ')) {
-                if ($hashPos = strpos($constraint, '#')) {
-                    // dev-master#old-hash isn't treated by composer, so we don't as well
-                    $pos = $hashPos;
-                }
-                $this->requires[$package] = substr($constraint, 0, $pos);
+        $requirements = array();
+
+        if (isset($this->require)) {
+            $requirements = get_object_vars($this->require);
+            foreach ($requirements as $package => $constraint) {
+                $requirements[$package] = $this->removeHashAndAliasParts($constraint);
             }
         }
+
+        $this->setRequires($requirements);
+    }
+
+    /**
+     * Remove parts of requirement constraints we are not interested in
+     *
+     * @param string $constraint The constraint as given in composer.json
+     *
+     * @return string
+     */
+    protected function removeHashAndAliasParts($constraint)
+    {
+        if ($pos = strpos($constraint, ' as ')) {
+            if ($hashPos = strpos($constraint, '#')) {
+                $pos = $hashPos;
+            }
+            $constraint = substr($constraint, 0, $pos);
+        }
+        return $constraint;
     }
 
     /**
