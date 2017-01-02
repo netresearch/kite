@@ -488,11 +488,13 @@ class Diagnose extends Base
     protected function checkComposerLockActuality($package)
     {
         if ($package->isRoot) {
-            $lock = json_decode(file_get_contents('composer.lock'));
-            if (md5_file('composer.json') !== $lock->{'hash'}) {
+            try {
+                $this->composer('validate', '--no-check-all --no-check-publish');
+            } catch(Exception\ProcessFailedException $e) {
                 return 'The lock file is not up to date with the latest changes in root composer.json';
             }
         }
+
         return null;
     }
 
