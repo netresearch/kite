@@ -99,6 +99,10 @@ class ClearCodeCaches extends Workflow
                 echo 'apc|';
                 apc_clear_cache();
             }
+            if (function_exists('xcache_clear_cache')) {
+                echo 'xcache|';
+                xcache_clear_cache(XC_TYPE_PHP);
+            }
             unlink(__FILE__);
             echo 'SUCCESS';
             ?>\n"
@@ -123,6 +127,7 @@ class ClearCodeCaches extends Workflow
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         $response = curl_exec($ch);
         $content = substr($response, curl_getinfo($ch, CURLINFO_HEADER_SIZE));
 
