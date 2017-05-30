@@ -1,76 +1,74 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite\Workflow
- * @subpackage Composer
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Workflow\Composer;
-use Netresearch\Kite\Service\Composer\Package;
-use Netresearch\Kite\Task;
-use Netresearch\Kite\Workflow;
 
+use Netresearch\Kite\Service\Composer\Package;
 
 /**
- * Go through all packages and merge the given branch into the current, when it exists
+ * Go through all packages and merge the given branch into the current, when it exists.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite\Workflow
- * @subpackage Composer
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class Merge extends Base
 {
     /**
-     * Configures the arguments/options
+     * Configures the arguments/options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'branch' => array(
-                'type' => 'string',
-                'label' => 'The branch to merge in',
+        return [
+            'branch' => [
+                'type'     => 'string',
+                'label'    => 'The branch to merge in',
                 'argument' => true,
-                'required' => true
-            ),
-            'squash' => array(
-                'type' => 'bool',
-                'label' => 'Whether to merge with --squash',
+                'required' => true,
+            ],
+            'squash' => [
+                'type'   => 'bool',
+                'label'  => 'Whether to merge with --squash',
                 'option' => true,
-            ),
-            'delete' => array(
-                'type' => 'bool',
-                'label' => 'Whether to delete the branch after merge',
+            ],
+            'delete' => [
+                'type'   => 'bool',
+                'label'  => 'Whether to delete the branch after merge',
                 'option' => true,
-            ),
-            'message' => array(
-                'type' => 'bool',
-                'label' => 'Message for commits (if any)',
+            ],
+            'message' => [
+                'type'     => 'bool',
+                'label'    => 'Message for commits (if any)',
+                'option'   => true,
+                'shortcut' => 'm',
+            ],
+            'no-diagnose' => [
+                'type'   => 'bool',
+                'label'  => 'Don\'t do a diagnose upfront',
                 'option' => true,
-                'shortcut' => 'm'
-            ),
-            'no-diagnose' => array(
-                'type' => 'bool',
-                'label' => 'Don\'t do a diagnose upfront',
-                'option' => true,
-            ),
-            '--'
-        ) + parent::configureVariables();
+            ],
+            '--',
+        ] + parent::configureVariables();
     }
 
     /**
-     * Assemble the tasks
+     * Assemble the tasks.
      *
      * @return void
      */
@@ -86,12 +84,13 @@ class Merge extends Base
                 $message = $this->get('message', '');
 
                 if ($diagnose) {
-                    $this->sub('Netresearch\Kite\Workflow\Composer\Diagnose', array('fix' => true));
+                    $this->sub('Netresearch\Kite\Workflow\Composer\Diagnose', ['fix' => true]);
                 }
 
                 $mergePackages = $this->getMergePackages($mergeBranch, !$diagnose);
                 if (!$mergePackages) {
                     $this->console->output("<warning>Could not find branch $mergeBranch in any installed package</warning>");
+
                     return;
                 }
 
@@ -99,8 +98,8 @@ class Merge extends Base
                     $this->mergePackage($package, $mergeBranch, $message, $squash);
 
                     if ($delete) {
-                        $this->git('branch', $package->path, array('d' => $mergeBranch));
-                        $this->git('push', $package->path, array('origin', ':' . $mergeBranch));
+                        $this->git('branch', $package->path, ['d' => $mergeBranch]);
+                        $this->git('push', $package->path, ['origin', ':'.$mergeBranch]);
                     }
                 }
 
@@ -116,7 +115,7 @@ class Merge extends Base
     }
 
     /**
-     * Get the packages which have the branch to merge
+     * Get the packages which have the branch to merge.
      *
      * @param string $mergeBranch mergeBranch
      * @param bool   $pull        Whether to pull when branch exists
@@ -125,12 +124,12 @@ class Merge extends Base
      */
     protected function getMergePackages($mergeBranch, $pull)
     {
-        $mergePackages = array();
+        $mergePackages = [];
         foreach ($this->getPackages() as $package) {
             if ($mergeBranch === $package->branch) {
                 $checkout = $this->confirm("{$package->name} is checked out at {$mergeBranch} - do you want to checkout another branch from master and merge into that?");
                 if ($checkout) {
-                    $choices = array('Create new branch');
+                    $choices = ['Create new branch'];
                     foreach ($package->branches as $choiceBranch) {
                         if ($choiceBranch !== $mergeBranch) {
                             $choices[] = $choiceBranch;
@@ -142,10 +141,10 @@ class Merge extends Base
                         $package->branches[] = $checkoutBranch;
                         $inferFromBranch = 'master';
                     }
-                    $this->git('fetch', $package->path, array('force' => true, 'origin', $inferFromBranch . ':' . $checkoutBranch));
-                    $this->git('checkout', $package->path, array($checkoutBranch));
+                    $this->git('fetch', $package->path, ['force' => true, 'origin', $inferFromBranch.':'.$checkoutBranch]);
+                    $this->git('checkout', $package->path, [$checkoutBranch]);
                     $package->branch = $checkoutBranch;
-                    $package->version = 'dev-' . $checkoutBranch;
+                    $package->version = 'dev-'.$checkoutBranch;
                 } else {
                     continue;
                 }
@@ -159,7 +158,7 @@ class Merge extends Base
             }
             $mergePackages[$package->name] = $package;
         }
+
         return $mergePackages;
     }
 }
-?>

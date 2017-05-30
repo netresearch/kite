@@ -1,25 +1,27 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite;
 
 /**
- * Base class for Workflows
+ * Base class for Workflows.
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 abstract class Workflow extends Tasks
@@ -30,18 +32,18 @@ abstract class Workflow extends Tasks
     private $assembled = false;
 
     /**
-     * Variable configuration
+     * Variable configuration.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'tasks' => null,
-            'task' => null,
+        return [
+            'tasks'    => null,
+            'task'     => null,
             'workflow' => null,
-            'script' => null
-        ) + parent::configureVariables();
+            'script'   => null,
+        ] + parent::configureVariables();
     }
 
     /**
@@ -61,7 +63,7 @@ abstract class Workflow extends Tasks
     }
 
     /**
-     * Override to create the tasks from the according options
+     * Override to create the tasks from the according options.
      *
      * @param string $name  Variable name
      * @param mixed  $value Variable value
@@ -71,14 +73,13 @@ abstract class Workflow extends Tasks
     public function offsetSet($name, $value)
     {
         if (in_array($name, ['workflow', 'script', 'task', 'tasks'], true)) {
-            throw new Exception($name . ' not allowed on workflows');
+            throw new Exception($name.' not allowed on workflows');
         }
         parent::offsetSet($name, $value);
     }
 
-
     /**
-     * Run an array of tasks
+     * Run an array of tasks.
      *
      * @return $this
      */
@@ -88,10 +89,9 @@ abstract class Workflow extends Tasks
     }
 
     /**
-     * Override to assemble the tasks
+     * Override to assemble the tasks.
      *
      * @return void
      */
     abstract public function assemble();
 }
-?>

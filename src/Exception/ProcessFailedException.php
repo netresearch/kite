@@ -1,27 +1,30 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Exception
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Exception;
+
 use Netresearch\Kite\Exception;
 use Netresearch\Kite\Service\Process;
 
 /**
- * Class ProcessFailedException
+ * Class ProcessFailedException.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Exception
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class ProcessFailedException extends Exception
@@ -64,7 +67,7 @@ class ProcessFailedException extends Exception
     }
 
     /**
-     * Get the process
+     * Get the process.
      *
      * @return Process
      */
@@ -73,5 +76,3 @@ class ProcessFailedException extends Exception
         return $this->process;
     }
 }
-
-?>

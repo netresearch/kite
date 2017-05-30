@@ -1,26 +1,29 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Console\Output
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Console\Output;
+
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 
 /**
- * Class ConsoleOutput
+ * Class ConsoleOutput.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Console\Output
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class ConsoleOutput extends Output
@@ -29,7 +32,7 @@ class ConsoleOutput extends Output
      * ConsoleOutput constructor.
      *
      * @param int|mixed                     $verbosity The verbosity
-     * @param boolean                       $decorated If output should be decorated
+     * @param bool                          $decorated If output should be decorated
      * @param OutputFormatterInterface|null $formatter Formatter
      */
     public function __construct($verbosity = self::VERBOSITY_NORMAL, $decorated = null, OutputFormatterInterface $formatter = null)
@@ -54,7 +57,6 @@ class ConsoleOutput extends Output
      */
     protected function hasStdoutSupport()
     {
-        return ('OS400' != php_uname('s'));
+        return 'OS400' != php_uname('s');
     }
 }
-?>

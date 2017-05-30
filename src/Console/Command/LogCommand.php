@@ -1,17 +1,19 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Console\Command
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Console\Command;
+
 use Netresearch\Kite\Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -20,18 +22,19 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class LogCommand
+ * Class LogCommand.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Console\Command
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class LogCommand extends Command
 {
     /**
-     * Configure the command
+     * Configure the command.
      *
      * @return void
      */
@@ -41,12 +44,11 @@ class LogCommand extends Command
             ->setName('log')
             ->setDescription('Show the debug log of a previous kite job execution')
             ->setDefinition(
-                array(
+                [
                     new InputOption('list', 'l', null, 'List available log entries'),
-                    new InputArgument('entry', null, 'The log entry - either full name, as in <info>--list</info> or last nth in the form <comment>^n</comment>')
-                )
+                    new InputArgument('entry', null, 'The log entry - either full name, as in <info>--list</info> or last nth in the form <comment>^n</comment>'),
+                ]
             );
-        ;
     }
 
     /**
@@ -60,9 +62,9 @@ class LogCommand extends Command
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      *
-     * @return null|int null or 0 if everything went fine, or an error code
-     *
      * @throws \LogicException When this abstract method is not implemented
+     *
+     * @return null|int null or 0 if everything went fine, or an error code
      *
      * @see setCode()
      */
@@ -72,11 +74,12 @@ class LogCommand extends Command
         if (!is_dir($dir)) {
             throw new Exception("Debug dir $dir doesn't exist");
         }
-        $files = glob($dir . '/*');
+        $files = glob($dir.'/*');
         if ($input->getOption('list')) {
             foreach ($files as $file) {
                 $output->writeln(basename($file));
             }
+
             return;
         }
         if ($entry = $input->getArgument('entry')) {
@@ -102,5 +105,3 @@ class LogCommand extends Command
         $output->write(file_get_contents($show), false, OutputInterface::OUTPUT_RAW);
     }
 }
-
-?>

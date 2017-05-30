@@ -1,28 +1,29 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite;
 
-use Netresearch\Kite\Exception;
 use Netresearch\Kite\ExpressionLanguage\ExpressionLanguage;
 
 /**
- * Variable container class
+ * Variable container class.
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class Variables implements \ArrayAccess
@@ -30,7 +31,7 @@ class Variables implements \ArrayAccess
     /**
      * @var array
      */
-    private $variables = array();
+    private $variables = [];
 
     /**
      * @var Variables
@@ -40,7 +41,7 @@ class Variables implements \ArrayAccess
     /**
      * @var Variables[]
      */
-    private $children = array();
+    private $children = [];
 
     /**
      * Variables constructor.
@@ -48,7 +49,7 @@ class Variables implements \ArrayAccess
      * @param Variables|null $parent   Parent variables container
      * @param array          $defaults Array with default values
      */
-    public function __construct(Variables $parent = null, array $defaults = array())
+    public function __construct(Variables $parent = null, array $defaults = [])
     {
         $this->parent = $parent === $this ? null : $parent;
         if ($this->parent) {
@@ -72,13 +73,13 @@ class Variables implements \ArrayAccess
 
     /**
      * Clone the children with this step as well, cause otherwise they'll lose
-     * connection to parent
+     * connection to parent.
      *
      * @return void
      */
-    function __clone()
+    public function __clone()
     {
-        $children = array();
+        $children = [];
         foreach ($this->children as $child) {
             $children[] = $clone = clone $child;
             $clone->parent = $this;
@@ -87,7 +88,7 @@ class Variables implements \ArrayAccess
     }
 
     /**
-     * Bind to another parent
+     * Bind to another parent.
      *
      * @param Variables $newParent The new parent
      *
@@ -108,7 +109,7 @@ class Variables implements \ArrayAccess
     }
 
     /**
-     * Get the parent variables object, if any
+     * Get the parent variables object, if any.
      *
      * @return Variables
      */
@@ -125,7 +126,7 @@ class Variables implements \ArrayAccess
      * --- required (defaults to false)
      * --- default (defaults to null, ignored when required)
      * -- null: The default value will be set to null
-     * -- false: No default value will be set
+     * -- false: No default value will be set.
      *
      * Also you can add a "--" with numeric key, to state the boundaries of
      * current and parent variables configuration
@@ -137,11 +138,11 @@ class Variables implements \ArrayAccess
      */
     protected function configureVariables()
     {
-        return array();
+        return [];
     }
 
     /**
-     * Get a variable from this very object (unexpanded)
+     * Get a variable from this very object (unexpanded).
      *
      * @param mixed $offset Variable name
      *
@@ -158,13 +159,13 @@ class Variables implements \ArrayAccess
     }
 
     /**
-     * Determine if a variable is available on this very object
+     * Determine if a variable is available on this very object.
      *
      * @param mixed $offset Variable name
      *
      * @internal See {@see Variables::offsetGet()}
      *
-     * @return boolean
+     * @return bool
      */
     public function offsetExists($offset)
     {
@@ -172,7 +173,7 @@ class Variables implements \ArrayAccess
     }
 
     /**
-     * Set a variable on this very object
+     * Set a variable on this very object.
      *
      * @param mixed $offset Variable name
      * @param mixed $value  The value
@@ -187,7 +188,7 @@ class Variables implements \ArrayAccess
     }
 
     /**
-     * Unset a variable from this very object
+     * Unset a variable from this very object.
      *
      * @param mixed $offset Variable name
      *
@@ -200,10 +201,9 @@ class Variables implements \ArrayAccess
         unset($this->variables[$offset]);
     }
 
-
     /**
      * Find the first context that contains the first part of the variable
-     * (this will always return current context - configured variables as well)
+     * (this will always return current context - configured variables as well).
      *
      * @param array $variableParts The path split by dot
      *
@@ -225,6 +225,7 @@ class Variables implements \ArrayAccess
                 throw new Exception('No parent object available');
             }
             array_shift($variableParts);
+
             return $this->parent;
         } else {
             // Look up this and all parents, if they have the variable
@@ -235,11 +236,12 @@ class Variables implements \ArrayAccess
                 }
             } while ($parent = $parent->parent);
         }
+
         return $this;
     }
 
     /**
-     * Get an expanded variable by it's path (second argument can be a default value)
+     * Get an expanded variable by it's path (second argument can be a default value).
      *
      * @param string $name The variable name
      *
@@ -266,16 +268,17 @@ class Variables implements \ArrayAccess
                 if (func_num_args() > 1) {
                     return func_get_arg(1);
                 } else {
-                    throw new Exception\MissingVariableException('Missing variable ' . $name);
+                    throw new Exception\MissingVariableException('Missing variable '.$name);
                 }
             }
             if ($parts && $value instanceof self && $value !== $this) {
                 try {
                     $args = func_get_args();
                     $args[0] = implode('.', $parts);
-                    return call_user_func_array(array($value, 'get'), $args);
+
+                    return call_user_func_array([$value, 'get'], $args);
                 } catch (Exception\MissingVariableException $e) {
-                    throw new Exception\MissingVariableException('Missing variable ' . $name);
+                    throw new Exception\MissingVariableException('Missing variable '.$name);
                 }
             }
         }
@@ -284,13 +287,13 @@ class Variables implements \ArrayAccess
     }
 
     /**
-     * Determine if a variable path is available
+     * Determine if a variable path is available.
      *
      * @param string $name The variable name
      *
      * @final See {@see Variables::get()}
      *
-     * @return boolean
+     * @return bool
      */
     final public function has($name)
     {
@@ -314,7 +317,7 @@ class Variables implements \ArrayAccess
     }
 
     /**
-     * Set a variable by it's path
+     * Set a variable by it's path.
      *
      * @param string $name  The variable name
      * @param mixed  $value The value
@@ -326,7 +329,7 @@ class Variables implements \ArrayAccess
     final public function set($name, $value)
     {
         $parts = explode('.', $name);
-        if (in_array($name, array('this', 'parent'), true)) {
+        if (in_array($name, ['this', 'parent'], true)) {
             throw new Exception('this and parent are variable names you may not override');
         }
 
@@ -349,6 +352,7 @@ class Variables implements \ArrayAccess
             }
             if ($parts && $parent instanceof self && $parent !== $this) {
                 $parent->set(implode('.', $parts), $value);
+
                 return $this;
             }
         }
@@ -358,11 +362,12 @@ class Variables implements \ArrayAccess
         } elseif (is_object($parent)) {
             $parent->$finalPart = $value;
         }
+
         return $this;
     }
 
     /**
-     * Unset a variable by it's path
+     * Unset a variable by it's path.
      *
      * @param string $name Variable name
      *
@@ -392,6 +397,7 @@ class Variables implements \ArrayAccess
             }
             if ($parts && $parent instanceof self && $parent !== $this) {
                 $parent->remove(implode('.', $parts));
+
                 return $this;
             }
         }
@@ -406,7 +412,7 @@ class Variables implements \ArrayAccess
     }
 
     /**
-     * Determine if a variable is an array or accessible as array and has the key
+     * Determine if a variable is an array or accessible as array and has the key.
      *
      * This method is required as isset returns false on existing keys with null
      * values and array_key_exists doesn't invoke {@see \ArrayAccess::offsetExists()}
@@ -428,11 +434,12 @@ class Variables implements \ArrayAccess
         } elseif ($array instanceof \ArrayAccess) {
             return $array->offsetExists($key);
         }
+
         return false;
     }
 
     /**
-     * Determine if a variable is an object and has a property
+     * Determine if a variable is an object and has a property.
      *
      * This method is required as isset returns false on existing properties with
      * null values and property_exists doesn't invoke {@see __isset()}
@@ -452,11 +459,12 @@ class Variables implements \ArrayAccess
                 return true;
             }
         }
+
         return false;
     }
 
     /**
-     * Set from array
+     * Set from array.
      *
      * @param array $values Array with key value pairs
      *
@@ -467,11 +475,12 @@ class Variables implements \ArrayAccess
         foreach ($values as $key => $value) {
             $this->set($key, $value);
         }
+
         return $this;
     }
 
     /**
-     * Expand expressions within the $value
+     * Expand expressions within the $value.
      *
      * @param mixed $value The value
      *
@@ -483,11 +492,12 @@ class Variables implements \ArrayAccess
         if (!$expressionEngine) {
             $expressionEngine = new ExpressionLanguage();
         }
+
         return $expressionEngine->evaluate($value, [ExpressionLanguage::VARIABLES_KEY => $this]);
     }
 
     /**
-     * Handles special variable names
+     * Handles special variable names.
      *
      * @param string $key   Current part of the complete variable name
      * @param mixed  $value The value
@@ -498,10 +508,10 @@ class Variables implements \ArrayAccess
     {
         if ($key === 'node' && is_array($value)) {
             $key = 'nodes';
-            $value = array($value);
+            $value = [$value];
         }
         if ($key === 'nodes') {
-            $nodes = array();
+            $nodes = [];
             foreach ($value as $id => $options) {
                 if ($options instanceof Node) {
                     $node = $options;
@@ -516,4 +526,3 @@ class Variables implements \ArrayAccess
         }
     }
 }
-?>

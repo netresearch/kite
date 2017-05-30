@@ -1,34 +1,32 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Workflow
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Workflow;
-use Netresearch\Kite\Service\Factory;
-use Netresearch\Kite\Task;
 
-use Netresearch\Kite\Workflow;
 use Netresearch\Kite\Exception;
-
+use Netresearch\Kite\Task;
+use Netresearch\Kite\Workflow;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Run a task for each stage until the selected stage
+ * Run a task for each stage until the selected stage.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Workflow
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class StageSelect extends Workflow
@@ -41,47 +39,47 @@ class StageSelect extends Workflow
     protected $task;
 
     /**
-     * Configures the arguments/options
+     * Configures the arguments/options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'stage' => array(
-                'type' => 'string',
+        return [
+            'stage' => [
+                'type'     => 'string',
                 'argument' => true,
-                'label' => 'Preselect a stage - otherwise you\'ll be asked'
-            ),
-            'stages' => array(
-                'type' => 'array',
+                'label'    => 'Preselect a stage - otherwise you\'ll be asked',
+            ],
+            'stages' => [
+                'type'     => 'array',
                 'required' => true,
-                'label' => 'Array of stages - keys are the stages names and the values are arrays which\'s contain variables that will be set when the according stage was selected'
-            ),
-            'sliding' => array(
-                'type' => 'bool',
-                'label' => 'Whether all stages until the selected should be used'
-            ),
-            'task' => array(
-                'type' => 'array',
+                'label'    => 'Array of stages - keys are the stages names and the values are arrays which\'s contain variables that will be set when the according stage was selected',
+            ],
+            'sliding' => [
+                'type'  => 'bool',
+                'label' => 'Whether all stages until the selected should be used',
+            ],
+            'task' => [
+                'type'     => 'array',
                 'required' => true,
-                'label' => 'The task to invoke for each selected stage'
-            ),
-            'message' => array(
-                'type' => 'string',
-                'label' => 'Message to output before each executed stage - %s will be replaced with stage name'
-            ),
-            'question' => array(
-                'type' => 'string',
+                'label'    => 'The task to invoke for each selected stage',
+            ],
+            'message' => [
+                'type'  => 'string',
+                'label' => 'Message to output before each executed stage - %s will be replaced with stage name',
+            ],
+            'question' => [
+                'type'    => 'string',
                 'default' => 'Select stage',
-                'label' => 'Question to ask before stage select'
-            ),
-            '--'
-        ) + parent::configureVariables();
+                'label'   => 'Question to ask before stage select',
+            ],
+            '--',
+        ] + parent::configureVariables();
     }
 
     /**
-     * Don't show message before all stages but before each stage
+     * Don't show message before all stages but before each stage.
      *
      * @return void
      */
@@ -90,7 +88,7 @@ class StageSelect extends Workflow
     }
 
     /**
-     * Override to create the tasks from the according options
+     * Override to create the tasks from the according options.
      *
      * @param string $name  Variable name
      * @param mixed  $value Variable value
@@ -99,14 +97,13 @@ class StageSelect extends Workflow
      */
     public function offsetSet($name, $value)
     {
-
         if ($name === 'task') {
             $this->task = $value;
+
             return;
         }
         parent::offsetSet($name, $value);
     }
-
 
     /**
      * Called from parent task as soon as task is ready to run - which doesn't
@@ -122,9 +119,8 @@ class StageSelect extends Workflow
         $this->job->addVariablesFromTask($this->task);
     }
 
-
     /**
-     * Assemble this workflow
+     * Assemble this workflow.
      *
      * @return void
      */
@@ -133,7 +129,7 @@ class StageSelect extends Workflow
         $this->callback(
             function () {
                 $stages = $this->get('stages');
-                $stageOptions = array();
+                $stageOptions = [];
                 // Begin keys from 1
                 foreach (array_keys($stages) as $i => $stage) {
                     $stageOptions[$i + 1] = $stage;
@@ -154,7 +150,7 @@ class StageSelect extends Workflow
 
                 $this->console->output("Selected stage <comment>$selectedStage</comment>", OutputInterface::VERBOSITY_VERBOSE);
 
-                $selectedStages = array();
+                $selectedStages = [];
                 if ($this->get('sliding')) {
                     foreach ($stageOptions as $stage) {
                         $selectedStages[] = $stage;
@@ -176,7 +172,7 @@ class StageSelect extends Workflow
                     $task = clone $this->task;
                     foreach ($stages[$stage] as $key => $value) {
                         // Avoid variables overriding parent variables, by prefixing with this
-                        $task->set('this.' . $key, $value);
+                        $task->set('this.'.$key, $value);
                     }
                     $this->addTask($task);
                 }
@@ -184,4 +180,3 @@ class StageSelect extends Workflow
         );
     }
 }
-?>

@@ -1,60 +1,61 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Task;
+
 use Netresearch\Kite\Exception;
 use Netresearch\Kite\Node;
 
 /**
- * Up/download via SCP
+ * Up/download via SCP.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class ScpTask extends \Netresearch\Kite\Task\RemoteShellTask
 {
     /**
-     * Configure the options
+     * Configure the options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'from' => array(
-                'type' => 'string',
+        return [
+            'from' => [
+                'type'     => 'string',
                 'required' => true,
-                'label' => 'Path to the source (prefix with {node}: to download from a node)'
-            ),
-            'to' => array(
-                'type' => 'string',
+                'label'    => 'Path to the source (prefix with {node}: to download from a node)',
+            ],
+            'to' => [
+                'type'     => 'string',
                 'required' => true,
-                'label' => 'Path to the target (prefix with {node}: to upload to a node)'
-            ),
-            'options' => null,
+                'label'    => 'Path to the target (prefix with {node}: to upload to a node)',
+            ],
+            'options'   => null,
             'arguments' => null,
-            'optArg' => null,
-            '--'
-        ) + parent::configureVariables();
+            'optArg'    => null,
+            '--',
+        ] + parent::configureVariables();
     }
 
     /**
-     * Create all necessary commands
+     * Create all necessary commands.
      *
      * @return array|string
      */
@@ -76,32 +77,32 @@ class ScpTask extends \Netresearch\Kite\Task\RemoteShellTask
         }
 
         $cwd = $this->expand($this->cwd);
-        $cwdCmd = $cwd ? 'cd ' . escapeshellarg($cwd) . '; ' : null;
+        $cwdCmd = $cwd ? 'cd '.escapeshellarg($cwd).'; ' : null;
         $toDirParent = dirname(array_pop(explode(':', $to, 2)));
         if ($toDirParent !== '/') {
-            $prepareDirCmd = 'mkdir -p ' . escapeshellarg($toDirParent);
+            $prepareDirCmd = 'mkdir -p '.escapeshellarg($toDirParent);
             if ($toNode) {
                 $prepareDirCmd = $this->getSshCommand($prepareDirCmd, $toNode);
             } elseif ($cwd && $toDirParent[0] !== '/') {
-                $prepareDirCmd = $cwdCmd . $prepareDirCmd;
+                $prepareDirCmd = $cwdCmd.$prepareDirCmd;
             }
         }
 
-        $scpCommand = $this->getScpCommand($node) . ' ' . escapeshellarg($from) . ' ' . escapeshellarg($to);
+        $scpCommand = $this->getScpCommand($node).' '.escapeshellarg($from).' '.escapeshellarg($to);
 
         if ($node) {
             $this->addExpect($scpCommand, $node);
         }
 
         if ($cwdCmd) {
-            $scpCommand = $cwdCmd . $scpCommand;
+            $scpCommand = $cwdCmd.$scpCommand;
         }
 
-        return isset($prepareDirCmd) ? array($prepareDirCmd, $scpCommand) : $scpCommand;
+        return isset($prepareDirCmd) ? [$prepareDirCmd, $scpCommand] : $scpCommand;
     }
 
     /**
-     * Create the scp command
+     * Create the scp command.
      *
      * @param Node $node The node
      *
@@ -109,11 +110,11 @@ class ScpTask extends \Netresearch\Kite\Task\RemoteShellTask
      */
     protected function getScpCommand(Node $node)
     {
-        return rtrim('scp -r ' . trim($node->get('scpOptions')));
+        return rtrim('scp -r '.trim($node->get('scpOptions')));
     }
 
     /**
-     * Get the node from a path (by it's url)
+     * Get the node from a path (by it's url).
      *
      * @param string $path The path
      *
@@ -123,7 +124,7 @@ class ScpTask extends \Netresearch\Kite\Task\RemoteShellTask
     {
         if (strpos($path, ':')) {
             /* @var Node[] $nodes */
-            $nodes = $this->get('nodes', array());
+            $nodes = $this->get('nodes', []);
             $url = array_shift(explode(':', $path, 2));
             foreach ($nodes as $node) {
                 if ($node->get('url') === $url) {
@@ -131,7 +132,5 @@ class ScpTask extends \Netresearch\Kite\Task\RemoteShellTask
                 }
             }
         }
-        return null;
     }
 }
-?>

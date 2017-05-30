@@ -1,21 +1,20 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Service
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Service;
 
 use Netresearch\Kite\Console\Output\Output;
-
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,13 +22,13 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * A shell command service
+ * A shell command service.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Service
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class Console
@@ -59,7 +58,7 @@ class Console
      */
     private $outputType = OutputInterface::OUTPUT_NORMAL;
 
-    private $previousVerbosities = array();
+    private $previousVerbosities = [];
 
     /**
      * @var Filesystem
@@ -84,7 +83,7 @@ class Console
     }
 
     /**
-     * Get the config
+     * Get the config.
      *
      * @return Config
      */
@@ -94,7 +93,7 @@ class Console
     }
 
     /**
-     * Get the factory
+     * Get the factory.
      *
      * @return Factory
      */
@@ -103,11 +102,12 @@ class Console
         if (!$this->factory) {
             $this->factory = new Factory($this);
         }
+
         return $this->factory;
     }
 
     /**
-     * Get the filesystem service
+     * Get the filesystem service.
      *
      * @return Filesystem
      */
@@ -116,11 +116,12 @@ class Console
         if (!$this->filesystem) {
             $this->filesystem = new Filesystem($this);
         }
+
         return $this->filesystem;
     }
 
     /**
-     * Get a new process
+     * Get a new process.
      *
      * @param string $command The command to execute
      * @param string $cwd     The directory to execute the command in
@@ -133,7 +134,7 @@ class Console
     }
 
     /**
-     * Get the debug output
+     * Get the debug output.
      *
      * @return Output
      */
@@ -143,7 +144,7 @@ class Console
     }
 
     /**
-     * Set debug output
+     * Set debug output.
      *
      * @param Output $debugOutput The output
      *
@@ -155,7 +156,7 @@ class Console
     }
 
     /**
-     * Set the application
+     * Set the application.
      *
      * @param Application $application The application
      *
@@ -164,11 +165,12 @@ class Console
     public function setApplication($application)
     {
         $this->application = $application;
+
         return $this;
     }
 
     /**
-     * Get the application
+     * Get the application.
      *
      * @return Application
      */
@@ -178,7 +180,7 @@ class Console
     }
 
     /**
-     * Set the output
+     * Set the output.
      *
      * @param BufferedOutput|OutputInterface $output The output
      *
@@ -187,11 +189,12 @@ class Console
     public function setOutput(Output $output)
     {
         $this->output = $output;
+
         return $this;
     }
 
     /**
-     * Get the output
+     * Get the output.
      *
      * @return \Symfony\Component\Console\Output\Output
      */
@@ -201,20 +204,21 @@ class Console
     }
 
     /**
-     * Set the input
+     * Set the input.
      *
      * @param InputInterface $input The input
-     *                              
+     *
      * @return Console
      */
     public function setInput($input)
     {
         $this->input = $input;
+
         return $this;
     }
 
     /**
-     * Get the input
+     * Get the input.
      *
      * @return \Symfony\Component\Console\Input\InputInterface
      */
@@ -224,7 +228,7 @@ class Console
     }
 
     /**
-     * Get a console helper
+     * Get a console helper.
      *
      * @param string $name Helper name
      *
@@ -236,7 +240,7 @@ class Console
     }
 
     /**
-     * Increase indention for all following lines
+     * Increase indention for all following lines.
      *
      * @param int $tabs The tabs
      *
@@ -253,7 +257,7 @@ class Console
     }
 
     /**
-     * Decrease indention for all following lines
+     * Decrease indention for all following lines.
      *
      * @param int $tabs The tabs
      *
@@ -270,7 +274,7 @@ class Console
     }
 
     /**
-     * Set a new minimum severity for messages to be shown
+     * Set a new minimum severity for messages to be shown.
      *
      * @param int $verbosity The verbosity
      *
@@ -280,11 +284,12 @@ class Console
     {
         $this->previousVerbosities[] = $this->output->getVerbosity();
         $this->output->setVerbosity($verbosity);
+
         return $this;
     }
 
     /**
-     * Get verbosity for messages to be shown
+     * Get verbosity for messages to be shown.
      *
      * @return int
      */
@@ -294,7 +299,7 @@ class Console
     }
 
     /**
-     * Restore the verbosity that was set before the last call to setSeverity
+     * Restore the verbosity that was set before the last call to setSeverity.
      *
      * @return $this
      */
@@ -303,11 +308,12 @@ class Console
         if ($this->previousVerbosities) {
             $this->output->setVerbosity(array_pop($this->previousVerbosities));
         }
+
         return $this;
     }
 
     /**
-     * Output a string
+     * Output a string.
      *
      * @param string   $message            The message
      * @param int|bool $verbosityOrNewLine Severity or whether to print a newline
@@ -334,4 +340,3 @@ class Console
         }
     }
 }
-?>

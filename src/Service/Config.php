@@ -1,26 +1,29 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Service;
+
 use Netresearch\Kite\Exception;
 
 /**
- * Central config class
+ * Central config class.
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class Config extends \ArrayObject
@@ -32,13 +35,13 @@ class Config extends \ArrayObject
     {
         parent::__construct(
             [
-                'jobs' => []
+                'jobs' => [],
             ]
         );
     }
 
     /**
-     * Include the main or any other config file
+     * Include the main or any other config file.
      *
      * @param string $path Path to file
      *
@@ -54,7 +57,7 @@ class Config extends \ArrayObject
     }
 
     /**
-     * Load a preset
+     * Load a preset.
      *
      * @param string $name Basename of the file (lowerCamelCase)
      *
@@ -62,11 +65,11 @@ class Config extends \ArrayObject
      */
     public function loadPreset($name)
     {
-        include dirname(dirname(__DIR__)) . '/presets/' . $name . '.php';
+        include dirname(dirname(__DIR__)).'/presets/'.$name.'.php';
     }
 
     /**
-     * Get config of a particular or all jobs
+     * Get config of a particular or all jobs.
      *
      * @param string $job The job name
      *
@@ -78,13 +81,15 @@ class Config extends \ArrayObject
             if (!array_key_exists($job, $this['jobs'])) {
                 throw new Exception("Job $job is not configured");
             }
+
             return $this['jobs'][$job];
         }
+
         return $this['jobs'];
     }
 
     /**
-     * Configure a job
+     * Configure a job.
      *
      * @param string $name   The job name
      * @param array  $config The config
@@ -97,7 +102,7 @@ class Config extends \ArrayObject
     }
 
     /**
-     * Recursively merge an array into another
+     * Recursively merge an array into another.
      *
      * @param array $to   To (by reference)
      * @param array $from From
@@ -118,4 +123,3 @@ class Config extends \ArrayObject
         reset($to);
     }
 }
-?>

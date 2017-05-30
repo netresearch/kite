@@ -1,26 +1,24 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Task;
 
-
-use Netresearch\Kite\Exception;
 use Netresearch\Kite\Task;
 
 /**
- * Filesystem task - calls methods on {@see \Netresearch\Kite\Service\Filesystem}
- * 
+ * Filesystem task - calls methods on {@see \Netresearch\Kite\Service\Filesystem}.
+ *
  * @method Task|void delete($file) {@see \Netresearch\Kite\Service\Filesystem::remove()}
  * @method Task|bool isDirEmpty($dir) {@see \Netresearch\Kite\Service\Filesystem::isDirEmpty()}
  * @method Task|bool removeDirectory($directory) {@see \Netresearch\Kite\Service\Filesystem::removeDirectory()}
@@ -36,10 +34,10 @@ use Netresearch\Kite\Task;
  * @method Task|string normalizePath($path) {@see \Netresearch\Kite\Service\Filesystem::normalizePath()}
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class FsTask extends Task
@@ -47,39 +45,40 @@ class FsTask extends Task
     protected $started = false;
 
     /**
-     * Configure the options
+     * Configure the options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'action' => array(
-                'type' => 'string',
+        return [
+            'action' => [
+                'type'     => 'string',
                 'required' => true,
-                'label' => 'Method of \Netresearch\Kite\Service\Filesystem to execute',
-            ),
-            'arguments' => array(
-                'type' => 'array',
-                'default' => array(),
-                'label' => 'Arguments for action method',
-            )
-        ) + parent::configureVariables();
+                'label'    => 'Method of \Netresearch\Kite\Service\Filesystem to execute',
+            ],
+            'arguments' => [
+                'type'    => 'array',
+                'default' => [],
+                'label'   => 'Arguments for action method',
+            ],
+        ] + parent::configureVariables();
     }
 
     /**
-     * Call the action method or set it for later execution
+     * Call the action method or set it for later execution.
      *
      * @param string $name      The method name
      * @param array  $arguments The arguments
      *
      * @return $this|mixed
      */
-    function __call($name, $arguments)
+    public function __call($name, $arguments)
     {
         if (!$this->started) {
             $this->offsetSet('action', $name);
             $this->offsetSet('arguments', $arguments);
+
             return $this;
         }
 
@@ -88,13 +87,13 @@ class FsTask extends Task
         }
 
         return call_user_func_array(
-            array($this->console->getFilesystem(), $name),
+            [$this->console->getFilesystem(), $name],
             $arguments
         );
     }
 
     /**
-     * Call the method or return $this for later method execution
+     * Call the method or return $this for later method execution.
      *
      * @return $this|mixed
      */
@@ -110,4 +109,3 @@ class FsTask extends Task
         return $this->__call($this->get('action'), $this->offsetGet('arguments'));
     }
 }
-?>

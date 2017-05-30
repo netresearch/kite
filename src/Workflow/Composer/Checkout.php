@@ -1,65 +1,66 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite\Workflow
- * @subpackage Composer
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Workflow\Composer;
+
 use Netresearch\Kite\Exception;
 use Netresearch\Kite\Service\Composer\Package;
 
 /**
- * Checkout a branch and eventually merge it with the previously checked out branch
+ * Checkout a branch and eventually merge it with the previously checked out branch.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite\Workflow
- * @subpackage Composer
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class Checkout extends Base
 {
     /**
-     * Configures the arguments/options
+     * Configures the arguments/options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'branch' => array(
-                'type' => 'string|array',
-                'label' => 'The branch(es) to check out (fallback is always master)',
+        return [
+            'branch' => [
+                'type'     => 'string|array',
+                'label'    => 'The branch(es) to check out (fallback is always master)',
                 'argument' => true,
-                'required' => true
-            ),
-            'merge' => array(
-                'type' => 'bool',
-                'label' => 'Whether to merge the checked out branch with the previously checked out branch',
-                'option' => true,
-                'shortcut' => 'm'
-            ),
-            'create' => array(
-                'type' => 'bool',
-                'label' => 'Create branch if not exists',
-                'option' => true,
-                'shortcut' => 'c'
-            ),
-            '--'
-        ) + parent::configureVariables();
+                'required' => true,
+            ],
+            'merge' => [
+                'type'     => 'bool',
+                'label'    => 'Whether to merge the checked out branch with the previously checked out branch',
+                'option'   => true,
+                'shortcut' => 'm',
+            ],
+            'create' => [
+                'type'     => 'bool',
+                'label'    => 'Create branch if not exists',
+                'option'   => true,
+                'shortcut' => 'c',
+            ],
+            '--',
+        ] + parent::configureVariables();
     }
 
     /**
-     * Override to assemble the tasks
+     * Override to assemble the tasks.
      *
      * @return void
      */
@@ -77,7 +78,7 @@ class Checkout extends Base
     }
 
     /**
-     * Go through all packages and check it out in the first matching branch
+     * Go through all packages and check it out in the first matching branch.
      *
      * @param array $branches The branches to try
      * @param bool  $merge    Whether to merge the new branch with the previously
@@ -91,7 +92,7 @@ class Checkout extends Base
     protected function checkoutPackages(array $branches, $merge = false, $create = false)
     {
         /* @var $packages \Netresearch\Kite\Service\Composer\Package[] */
-        $packages = array();
+        $packages = [];
         foreach ($this->getPackages() as $package) {
             foreach ($branches as $branch) {
                 $oldBranch = $package->branch;
@@ -109,10 +110,11 @@ class Checkout extends Base
             $lastBranch = array_pop($branches);
             $message = 'Could not find branch ';
             if ($branches) {
-                $message .= implode(', ', $branches) . ' or ';
+                $message .= implode(', ', $branches).' or ';
             }
-            $message .= $lastBranch . ' in any installed package';
+            $message .= $lastBranch.' in any installed package';
             $this->console->output("<warning>$message</warning>");
+
             return;
         }
 
@@ -125,5 +127,3 @@ class Checkout extends Base
         $this->doComposerUpdate();
     }
 }
-
-?>

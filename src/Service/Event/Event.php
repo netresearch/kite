@@ -1,25 +1,27 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Service\Event
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Service\Event;
 
 /**
- * Class Event
+ * Class Event.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Service\Event
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class Event
@@ -30,12 +32,12 @@ class Event
     protected $name;
 
     /**
-     * @var boolean
+     * @var bool
      */
     protected $propagationStopped;
 
     /**
-     * Construct
+     * Construct.
      *
      * @param string $name The event name
      */
@@ -45,7 +47,7 @@ class Event
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -55,9 +57,9 @@ class Event
     }
 
     /**
-     * Determine if propagation was stopped
+     * Determine if propagation was stopped.
      *
-     * @return boolean
+     * @return bool
      */
     public function isPropagationStopped()
     {
@@ -65,7 +67,7 @@ class Event
     }
 
     /**
-     * Stop the propagation
+     * Stop the propagation.
      *
      * @return void
      */
@@ -74,4 +76,3 @@ class Event
         $this->propagationStopped = true;
     }
 }
-?>

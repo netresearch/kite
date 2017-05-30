@@ -1,34 +1,33 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage ExpressionLanguage
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\ExpressionLanguage;
-use Netresearch\Kite\Task;
 
-use Symfony\Component\Console\Question\ChoiceQuestion;
+use Netresearch\Kite\Task;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\ExpressionLanguage\ParserCache\ParserCacheInterface;
 
 /**
  * Extension of Symfonies expression language to inject our custom
- * lexer and register some functions
+ * lexer and register some functions.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage ExpressionLanguage
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\ExpressionLanguage
@@ -49,7 +48,7 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
      * @param ParserCacheInterface|null $cache     The cache
      * @param array                     $providers Providers
      */
-    public function __construct(ParserCacheInterface $cache = null, array $providers = array())
+    public function __construct(ParserCacheInterface $cache = null, array $providers = [])
     {
         parent::__construct($cache, $providers);
 
@@ -59,7 +58,7 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
     }
 
     /**
-     * Reevaluate parents evaluation results as expressions could be nested
+     * Reevaluate parents evaluation results as expressions could be nested.
      *
      * Don't parse expression strings which were the final result of an evaluation
      * ( As for example, given a variable "char" that is "\{",
@@ -91,12 +90,12 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
                 }
             } while (true);
         }
+
         return $expression;
     }
 
-
     /**
-     * Ask a question
+     * Ask a question.
      *
      * @param Task     $task     The task on which the question was asked
      * @param Question $question The question
@@ -106,6 +105,7 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
     protected function ask(Task $task, $question)
     {
         $console = $task->console;
+
         return $console->getHelper('question')->ask(
             $console->getInput(),
             $console->getOutput(),
@@ -114,7 +114,7 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
     }
 
     /**
-     * Register functions
+     * Register functions.
      *
      * @return void
      */
@@ -128,6 +128,7 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
                     array_unshift($args, $values);
                     $function = $this->functions[$function]['evaluator'];
                 }
+
                 return call_user_func_array($function, $args);
             },
             'isset' => function (array $values, $var) {
@@ -141,6 +142,7 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
             },
             'set' => function (array $values, $var, $value) {
                 $values[self::VARIABLES_KEY]->set($var, $value);
+
                 return $value;
             },
             'confirm' => function (array $values, $question) {
@@ -155,7 +157,7 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
             'replace' => function (array $values, $search, $replace, $subject, $regex = false) {
                 $values[self::VARIABLES_KEY]->console->output(
                     '<warning>Expression language function "replace" is deprecated '
-                    . 'and will be removed in 1.6.0 - use preg_replace or str_replace</warning>'
+                    .'and will be removed in 1.6.0 - use preg_replace or str_replace</warning>'
                 );
                 if ($regex) {
                     return preg_replace($search, $replace, $subject);
@@ -168,11 +170,9 @@ class ExpressionLanguage extends \Symfony\Component\ExpressionLanguage\Expressio
             $this->register(
                 $name,
                 function () {
-
                 },
                 $function
             );
         }
     }
 }
-?>

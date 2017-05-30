@@ -1,34 +1,35 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Task;
+
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
- * Ask a confirmation question and return the answer
+ * Ask a confirmation question and return the answer.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class ConfirmTask extends AnswerTask
 {
     /**
-     * Create a question
+     * Create a question.
      *
      * @param string $question The question
      * @param mixed  $default  Default value
@@ -38,10 +39,10 @@ class ConfirmTask extends AnswerTask
     protected function createQuestion($question, $default)
     {
         $default = $default !== false;
+
         return new ConfirmationQuestion(
             $this->formatQuestion($question, $default ? 'y' : 'n'),
             $default
         );
     }
 }
-?>

@@ -11,10 +11,10 @@
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Service
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    https://github.com/composer/composer/blob/master/LICENSE Composer license
+ *
  * @link       http://www.netresearch.de
  */
 
@@ -24,15 +24,15 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
- * A shell command service
+ * A shell command service.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Service
+ *
  * @author     Jordi Boggiano <j.boggiano@seld.be>
  * @author     Johannes M. Schmitt <schmittjoh@gmail.com>
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    https://github.com/composer/composer/blob/master/LICENSE Composer license
+ *
  * @link       http://www.netresearch.de
  */
 class Filesystem
@@ -43,7 +43,7 @@ class Filesystem
     protected $console;
 
     /**
-     * Construct Filesystem
+     * Construct Filesystem.
      *
      * @param Console $console The console
      */
@@ -52,9 +52,8 @@ class Filesystem
         $this->console = $console;
     }
 
-
     /**
-     * Remove a file
+     * Remove a file.
      *
      * @param string $file The file or dir
      *
@@ -74,7 +73,7 @@ class Filesystem
     }
 
     /**
-     * Checks if a directory is empty
+     * Checks if a directory is empty.
      *
      * @param string $dir The dir
      *
@@ -84,11 +83,11 @@ class Filesystem
     {
         $dir = rtrim($dir, '/\\');
 
-        return count(glob($dir . '/*') ?: array()) === 0 && count(glob($dir . '/.*') ?: array()) === 2;
+        return count(glob($dir.'/*') ?: []) === 0 && count(glob($dir.'/.*') ?: []) === 2;
     }
 
     /**
-     * Recursively remove a directory
+     * Recursively remove a directory.
      *
      * Uses the process component if proc_open is enabled on the PHP
      * installation.
@@ -104,7 +103,7 @@ class Filesystem
         }
 
         if (preg_match('{^(?:[a-z]:)?[/\\\\]+$}i', $directory)) {
-            throw new \RuntimeException('Aborting an attempted deletion of ' . $directory . ', this was probably not intended, if it is a real use case please report it.');
+            throw new \RuntimeException('Aborting an attempted deletion of '.$directory.', this was probably not intended, if it is a real use case please report it.');
         }
 
         if (!function_exists('proc_open')) {
@@ -150,7 +149,7 @@ class Filesystem
     }
 
     /**
-     * Ensures a dir exists
+     * Ensures a dir exists.
      *
      * @param string $directory The dir
      *
@@ -161,12 +160,12 @@ class Filesystem
         if (!is_dir($directory)) {
             if (file_exists($directory)) {
                 throw new \RuntimeException(
-                    $directory . ' exists and is not a directory.'
+                    $directory.' exists and is not a directory.'
                 );
             }
             if (!@mkdir($directory, 0777, true)) {
                 throw new \RuntimeException(
-                    $directory . ' does not exist and could not be created.'
+                    $directory.' does not exist and could not be created.'
                 );
             }
         }
@@ -190,7 +189,7 @@ class Filesystem
     }
 
     /**
-     * Copy a file or folder to a target destination
+     * Copy a file or folder to a target destination.
      *
      * @param string $source The source
      * @param string $target The target
@@ -207,7 +206,7 @@ class Filesystem
             $this->ensureDirectoryExists($target);
 
             foreach ($ri as $file) {
-                $targetPath = $target . DIRECTORY_SEPARATOR . $ri->getSubPathName();
+                $targetPath = $target.DIRECTORY_SEPARATOR.$ri->getSubPathName();
                 if ($file->isDir()) {
                     $this->ensureDirectoryExists($targetPath);
                 } else {
@@ -221,7 +220,7 @@ class Filesystem
     }
 
     /**
-     * Rename a file or folder to a target destination
+     * Rename a file or folder to a target destination.
      *
      * @param string $source The source
      * @param string $target The target
@@ -259,6 +258,7 @@ class Filesystem
                 $this->console->createProcess($command)->run();
                 // clear stat cache because external processes aren't tracked by the php stat cache
                 clearstatcache();
+
                 return;
             } catch (\Exception $e) {
                 // do copyThenRemove
@@ -269,7 +269,7 @@ class Filesystem
     }
 
     /**
-     * Returns the shortest path from $from to $to
+     * Returns the shortest path from $from to $to.
      *
      * @param string $from        From
      * @param string $to          To
@@ -293,11 +293,11 @@ class Filesystem
         }
 
         if (dirname($from) === dirname($to)) {
-            return './' . basename($to);
+            return './'.basename($to);
         }
 
         $commonPath = $to;
-        while (strpos($from . '/', $commonPath . '/') !== 0 && '/' !== $commonPath && !preg_match('{^[a-z]:/?$}i', $commonPath)) {
+        while (strpos($from.'/', $commonPath.'/') !== 0 && '/' !== $commonPath && !preg_match('{^[a-z]:/?$}i', $commonPath)) {
             $commonPath = strtr(dirname($commonPath), '\\', '/');
         }
 
@@ -305,15 +305,15 @@ class Filesystem
             return $to;
         }
 
-        $commonPath = rtrim($commonPath, '/') . '/';
+        $commonPath = rtrim($commonPath, '/').'/';
         $sourcePathDepth = substr_count(substr($from, strlen($commonPath)), '/');
         $commonPathCode = str_repeat('../', $sourcePathDepth);
 
-        return ($commonPathCode . substr($to, strlen($commonPath))) ?: './';
+        return ($commonPathCode.substr($to, strlen($commonPath))) ?: './';
     }
 
     /**
-     * Returns PHP code that, when executed in $from, will return the path to $to
+     * Returns PHP code that, when executed in $from, will return the path to $to.
      *
      * @param string $from        From
      * @param string $to          To
@@ -337,7 +337,7 @@ class Filesystem
         }
 
         $commonPath = $to;
-        while (strpos($from . '/', $commonPath . '/') !== 0 && '/' !== $commonPath && !preg_match('{^[a-z]:/?$}i', $commonPath) && '.' !== $commonPath) {
+        while (strpos($from.'/', $commonPath.'/') !== 0 && '/' !== $commonPath && !preg_match('{^[a-z]:/?$}i', $commonPath) && '.' !== $commonPath) {
             $commonPath = strtr(dirname($commonPath), '\\', '/');
         }
 
@@ -345,19 +345,19 @@ class Filesystem
             return var_export($to, true);
         }
 
-        $commonPath = rtrim($commonPath, '/') . '/';
-        if (strpos($to, $from . '/') === 0) {
-            return '__DIR__ . ' . var_export(substr($to, strlen($from)), true);
+        $commonPath = rtrim($commonPath, '/').'/';
+        if (strpos($to, $from.'/') === 0) {
+            return '__DIR__ . '.var_export(substr($to, strlen($from)), true);
         }
         $sourcePathDepth = substr_count(substr($from, strlen($commonPath)), '/') + $directories;
-        $commonPathCode = str_repeat('dirname(', $sourcePathDepth) . '__DIR__' . str_repeat(')', $sourcePathDepth);
+        $commonPathCode = str_repeat('dirname(', $sourcePathDepth).'__DIR__'.str_repeat(')', $sourcePathDepth);
         $relTarget = substr($to, strlen($commonPath));
 
-        return $commonPathCode . (strlen($relTarget) ? '.' . var_export('/' . $relTarget, true) : '');
+        return $commonPathCode.(strlen($relTarget) ? '.'.var_export('/'.$relTarget, true) : '');
     }
 
     /**
-     * Checks if the given path is absolute
+     * Checks if the given path is absolute.
      *
      * @param string $path Path
      *
@@ -400,7 +400,7 @@ class Filesystem
      */
     public function normalizePath($path)
     {
-        $parts = array();
+        $parts = [];
         $path = strtr($path, '\\', '/');
         $prefix = '';
         $absolute = false;
@@ -426,11 +426,11 @@ class Filesystem
             }
         }
 
-        return $prefix . ($absolute ? '/' : '') . implode('/', $parts);
+        return $prefix.($absolute ? '/' : '').implode('/', $parts);
     }
 
     /**
-     * Get directory size
+     * Get directory size.
      *
      * @param string $directory The dir
      *
@@ -451,4 +451,3 @@ class Filesystem
         return $size;
     }
 }
-?>

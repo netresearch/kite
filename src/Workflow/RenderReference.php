@@ -1,30 +1,34 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Workflow
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Workflow;
+
 use Netresearch\Kite\Exception;
 use Netresearch\Kite\Service\Descriptor;
 use Netresearch\Kite\Task;
 use Netresearch\Kite\Workflow;
 
 /**
- * Renders the Task and Workflows reference
+ * Renders the Task and Workflows reference.
  *
  * @internal Used to render the kite reference
+ *
  * @category Netresearch
- * @package  Netresearch\Kite\Workflow
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class RenderReference extends Workflow
@@ -35,7 +39,7 @@ class RenderReference extends Workflow
     protected $loaders = [];
 
     /**
-     * Configure variables
+     * Configure variables.
      *
      * @return array
      */
@@ -43,17 +47,17 @@ class RenderReference extends Workflow
     {
         return [
             'file' => [
-                'type' => 'string',
-                'option' => true,
+                'type'     => 'string',
+                'option'   => true,
                 'shortcut' => 'f',
                 'required' => true,
-                'label' => 'File to write to'
-            ]
+                'label'    => 'File to write to',
+            ],
         ] + parent::configureVariables();
     }
 
     /**
-     * Assemble the task
+     * Assemble the task.
      *
      * @return void
      */
@@ -70,7 +74,7 @@ class RenderReference extends Workflow
     }
 
     /**
-     * Render the reference
+     * Render the reference.
      *
      * @return string
      */
@@ -98,7 +102,7 @@ class RenderReference extends Workflow
             '',
             '   .. contents::',
             '      :depth: 2',
-            ''
+            '',
         ];
         $commonVars = $this->getCommonVariables();
         $lines[] = 'Common options';
@@ -109,7 +113,7 @@ class RenderReference extends Workflow
 
         foreach (['task', 'workflow'] as $type) {
             $lines[] = '';
-            $lines[] = ucfirst($type) . 's';
+            $lines[] = ucfirst($type).'s';
             $lines[] = str_repeat('=', strlen($type) + 1);
             $lines[] = '';
             $taskObjects = $this->loadTaskObjects($type);
@@ -139,7 +143,7 @@ class RenderReference extends Workflow
                     $lines[] = 'Options';
                     $lines[] = '```````';
                     $lines[] = '';
-                    $this->renderVariables($lines, $taskVariables, $type . '-' . $name);
+                    $this->renderVariables($lines, $taskVariables, $type.'-'.$name);
                 }
                 if ($taskCommonVariables) {
                     $lines[] = 'Common options';
@@ -158,7 +162,7 @@ class RenderReference extends Workflow
     }
 
     /**
-     * Render the variables
+     * Render the variables.
      *
      * @param array  $lines        The lines
      * @param array  $variables    The variables
@@ -175,7 +179,7 @@ class RenderReference extends Workflow
         $keys = ['type', 'default', 'required', 'label'];
         $lines[] = '   * - Name';
         foreach ($keys as $key) {
-            $lines[] = '     - ' . ucfirst($key);
+            $lines[] = '     - '.ucfirst($key);
         }
 
         foreach ($variables as $configName => $config) {
@@ -184,11 +188,11 @@ class RenderReference extends Workflow
             }
             $lines[] = '   * - ';
             $lines[] = '';
-            $lines[] = '       .. |' . $anchorPrefix . '-' . $configName . '| replace:: ' . $configName;
+            $lines[] = '       .. |'.$anchorPrefix.'-'.$configName.'| replace:: '.$configName;
             $lines[] = '';
-            $lines[] = '       .. _' . $anchorPrefix . '-' . $configName . ':';
+            $lines[] = '       .. _'.$anchorPrefix.'-'.$configName.':';
             $lines[] = '';
-            $lines[] = '       ' . $configName;
+            $lines[] = '       '.$configName;
             $lines[] = '';
             foreach ($keys as $key) {
                 if (!array_key_exists($key, $config)) {
@@ -197,7 +201,7 @@ class RenderReference extends Workflow
                     $v = $config[$key];
                     $value = $v === null ? 'null' : ($v === true ? 'true' : ($v === false ? 'false' : $v));
                     if (is_string($value)) {
-                        $value = ':code:`' . $value . '`';
+                        $value = ':code:`'.$value.'`';
                     }
                 } elseif ($key === 'required') {
                     $value = $config[$key] === true ? 'X' : $config[$key];
@@ -205,19 +209,19 @@ class RenderReference extends Workflow
                     $value = $config[$key];
                 }
                 if (is_array($value)) {
-                    $value = "\n\n       .. code::php\n\n           " . str_replace("\n", "\n\n           ", call_user_func('print' . '_r', $value, true)) . "\n\n";
+                    $value = "\n\n       .. code::php\n\n           ".str_replace("\n", "\n\n           ", call_user_func('print'.'_r', $value, true))."\n\n";
                 } else {
                     $value = str_replace("\n", "\n\n       ", $value);
                 }
-                $value = preg_replace('/\{@see\s+(' . implode('|', array_keys($variables)) . ')\}/', '|' . $anchorPrefix . '-$1|_', $value);
-                $lines[] = '     - ' . $value;
+                $value = preg_replace('/\{@see\s+('.implode('|', array_keys($variables)).')\}/', '|'.$anchorPrefix.'-$1|_', $value);
+                $lines[] = '     - '.$value;
             }
         }
         $lines[] = '';
     }
 
     /**
-     * Get the common variables
+     * Get the common variables.
      *
      * @return mixed
      */
@@ -225,16 +229,17 @@ class RenderReference extends Workflow
     {
         static $commonVars;
         if (!is_array($commonVars)) {
-            $className = 'NetresearchKiteTask' . uniqid();
-            eval('class ' . $className . ' extends \\Netresearch\\Kite\\Task {}');
+            $className = 'NetresearchKiteTask'.uniqid();
+            eval('class '.$className.' extends \\Netresearch\\Kite\\Task {}');
             $instance = new $className($this);
             $commonVars = $instance->get('_variableConfiguration');
         }
+
         return $commonVars;
     }
 
     /**
-     * Load task objects
+     * Load task objects.
      *
      * @param string $type workflow or task
      *
@@ -243,7 +248,7 @@ class RenderReference extends Workflow
     protected function loadTaskObjects($type)
     {
         $objects = [];
-        $requiredType = 'Netresearch\\Kite\\' . ucfirst($type);
+        $requiredType = 'Netresearch\\Kite\\'.ucfirst($type);
         foreach ($this->factory->getNamespaces($type) as $namespace) {
             $namespaceLength = strlen($namespace);
             if ($dir = $this->findDirectoryForNamespace($namespace)) {
@@ -251,7 +256,7 @@ class RenderReference extends Workflow
                     if (substr($file, -4) !== '.php') {
                         continue;
                     }
-                    $class = $namespace . '\\' . substr(strtr($file, '/', '\\'), 0, -4);
+                    $class = $namespace.'\\'.substr(strtr($file, '/', '\\'), 0, -4);
                     $reflectionClass = new \ReflectionClass($class);
                     if (!$reflectionClass->isSubclassOf($requiredType) || !$reflectionClass->isInstantiable()) {
                         continue;
@@ -274,11 +279,12 @@ class RenderReference extends Workflow
             }
         }
         ksort($objects);
+
         return $objects;
     }
 
     /**
-     * Find the loaders
+     * Find the loaders.
      *
      * @return void
      */
@@ -297,7 +303,7 @@ class RenderReference extends Workflow
     }
 
     /**
-     * Get the files within a directory
+     * Get the files within a directory.
      *
      * @param string $dir The directory
      *
@@ -316,11 +322,12 @@ class RenderReference extends Workflow
                 $files[] = $iterator->getSubPathName();
             }
         }
+
         return $files;
     }
 
     /**
-     * Find the base directory of a namespace
+     * Find the base directory of a namespace.
      *
      * @param string $namespace The namespace
      *
@@ -338,7 +345,7 @@ class RenderReference extends Workflow
                     continue;
                 }
                 foreach ($dirs as $dir) {
-                    if (file_exists($file = $dir . DIRECTORY_SEPARATOR . substr($logicalPathPsr4, $length))) {
+                    if (file_exists($file = $dir.DIRECTORY_SEPARATOR.substr($logicalPathPsr4, $length))) {
                         return $file;
                     }
                 }
@@ -346,7 +353,7 @@ class RenderReference extends Workflow
 
             // PSR-4 fallback dirs
             foreach ($loader->getFallbackDirsPsr4() as $dir) {
-                if (file_exists($file = $dir . DIRECTORY_SEPARATOR . $logicalPathPsr4)) {
+                if (file_exists($file = $dir.DIRECTORY_SEPARATOR.$logicalPathPsr4)) {
                     return $file;
                 }
             }
@@ -355,7 +362,7 @@ class RenderReference extends Workflow
             if (false !== $pos = strrpos($namespace, '\\')) {
                 // namespaced class name
                 $logicalPathPsr0 = substr($logicalPathPsr4, 0, $pos + 1)
-                    . strtr(substr($logicalPathPsr4, $pos + 1), '_', DIRECTORY_SEPARATOR);
+                    .strtr(substr($logicalPathPsr4, $pos + 1), '_', DIRECTORY_SEPARATOR);
             } else {
                 // PEAR-like class name
                 $logicalPathPsr0 = strtr($namespace, '_', DIRECTORY_SEPARATOR);
@@ -364,7 +371,7 @@ class RenderReference extends Workflow
             foreach ($loader->getPrefixes() as $prefix => $dirs) {
                 if (0 === strpos($namespace, $prefix)) {
                     foreach ($dirs as $dir) {
-                        if (file_exists($file = $dir . DIRECTORY_SEPARATOR . $logicalPathPsr0)) {
+                        if (file_exists($file = $dir.DIRECTORY_SEPARATOR.$logicalPathPsr0)) {
                             return $file;
                         }
                     }
@@ -373,7 +380,7 @@ class RenderReference extends Workflow
 
             // PSR-0 fallback dirs
             foreach ($loader->getFallbackDirs() as $dir) {
-                if (file_exists($file = $dir . DIRECTORY_SEPARATOR . $logicalPathPsr0)) {
+                if (file_exists($file = $dir.DIRECTORY_SEPARATOR.$logicalPathPsr0)) {
                     return $file;
                 }
             }
@@ -385,5 +392,3 @@ class RenderReference extends Workflow
         }
     }
 }
-
-?>

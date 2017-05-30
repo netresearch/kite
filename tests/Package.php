@@ -1,25 +1,27 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Test
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Test;
 
 /**
- * Class Package
+ * Class Package.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Test
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class Package
@@ -42,7 +44,5 @@ class Package
     /**
      * @var Package[]
      */
-    public $dependencies = array();
+    public $dependencies = [];
 }
-
-?>

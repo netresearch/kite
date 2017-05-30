@@ -1,18 +1,19 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage ExpressionLanguage
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\ExpressionLanguage;
+
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use Symfony\Component\ExpressionLanguage\Token;
 use Symfony\Component\ExpressionLanguage\TokenStream;
@@ -22,7 +23,7 @@ use Symfony\Component\ExpressionLanguage\TokenStream;
  * For example:
  *   "The job {job.name} is {job.getWorkflow().isRunning() ? 'currently' : 'not'} running"
  * will be transformed into that:
- *   "'The job ' ~ (variables.getExpanded('job.name')) ~ ' is ' ~ (variables.getExpanded('job').getWorkflow().isRunning() ? 'currently' : 'not') ~ 'running'"
+ *   "'The job ' ~ (variables.getExpanded('job.name')) ~ ' is ' ~ (variables.getExpanded('job').getWorkflow().isRunning() ? 'currently' : 'not') ~ 'running'".
  *
  * When there is only one expression, the expression type is not casted to string
  * "{{foo: 'bar'}}" will return the specified hash
@@ -33,10 +34,10 @@ use Symfony\Component\ExpressionLanguage\TokenStream;
  * way
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage ExpressionLanguage
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
@@ -46,9 +47,9 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
      *
      * @param string $expression The expression to tokenize
      *
-     * @return TokenStream A token stream instance
-     *
      * @throws SyntaxError
+     *
+     * @return TokenStream A token stream instance
      */
     public function tokenize($expression)
     {
@@ -56,7 +57,7 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
         $stringsAndExpressions = $this->splitIntoStringsAndActualExpressions($expression, $length);
 
         // Actually tokenize all remaining expressions
-        $tokens = array();
+        $tokens = [];
         $isMultipleExpressions = isset($stringsAndExpressions[1]);
         foreach ($stringsAndExpressions as $i => $item) {
             if ($isMultipleExpressions && $i > 0) {
@@ -89,7 +90,7 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
      *   [ "string with an ",   false, 0  ],
      *   [ "expression",        true,  12 ],
      *   [ " and string parts", false, 23 ]
-     * ]
+     * ].
      *
      * @param string $expression The mixed expression string
      * @param int    $length     Length beginning from 0 to analyze
@@ -134,12 +135,13 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
                 unset($expressions[$i]);
             }
         }
+
         return array_values($expressions);
     }
 
     /**
      * Actually tokenize an expression - at this point object and property access is
-     * transformed, so that "this.property" will be "get('this.propery')"
+     * transformed, so that "this.property" will be "get('this.propery')".
      *
      * Also all function calls (but isset and empty) will be rewritten from
      * function(abc) to call("function", abc) to make dynamic functions possible
@@ -151,7 +153,7 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
     protected function tokenizeExpression($expression)
     {
         $stream = parent::tokenize($expression);
-        $tokens = array();
+        $tokens = [];
         $previousWasDot = false;
         $ignorePrimaryExpressions = array_flip(['null', 'NULL', 'false', 'FALSE', 'true', 'TRUE']);
         while (!$stream->isEOF()) {
@@ -184,7 +186,7 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
                         continue;
                     }
                 }
-                $names = array($token->value);
+                $names = [$token->value];
                 $isFunctionCall = false;
                 while (!$stream->isEOF() && $stream->current->type === Token::PUNCTUATION_TYPE && $stream->current->value === '.') {
                     $stream->next();
@@ -204,10 +206,10 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
                 }
                 if ($isTest) {
                     if ($isFunctionCall) {
-                        throw new SyntaxError('Can\'t use function return value in write context',  $stream->current->cursor);
+                        throw new SyntaxError('Can\'t use function return value in write context', $stream->current->cursor);
                     }
                     if (!$stream->current->test(Token::PUNCTUATION_TYPE, ')')) {
-                        throw new SyntaxError('Expected )',  $stream->current->cursor);
+                        throw new SyntaxError('Expected )', $stream->current->cursor);
                     }
                     $tokens[] = new Token(Token::STRING_TYPE, implode('.', $names), $token->cursor);
                 } else {
@@ -229,5 +231,3 @@ class Lexer extends \Symfony\Component\ExpressionLanguage\Lexer
         return $tokens;
     }
 }
-
-?>

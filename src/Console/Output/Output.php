@@ -1,29 +1,31 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Console\Output
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Console\Output;
-use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 
-use Symfony\Component\Console\Output\StreamOutput;
+use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Output\StreamOutput;
 
 /**
- * Class Output
+ * Class Output.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Console\Output
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class Output extends StreamOutput
@@ -65,13 +67,13 @@ class Output extends StreamOutput
     {
         parent::__construct($stream, $verbosity, $decorated, $formatter);
         $formatter = $this->getFormatter();
-        $formatter->setStyle('cmd', new OutputFormatterStyle('black', null, array('bold')));
+        $formatter->setStyle('cmd', new OutputFormatterStyle('black', null, ['bold']));
         $formatter->setStyle('warning', new OutputFormatterStyle('black', 'yellow'));
         $formatter->setStyle('step', new OutputFormatterStyle('green', 'black'));
     }
 
     /**
-     * Set terminal dimensions
+     * Set terminal dimensions.
      *
      * @param array $terminalDimensions Dimensions
      *
@@ -83,7 +85,7 @@ class Output extends StreamOutput
     }
 
     /**
-     * Increase indention for all following lines
+     * Increase indention for all following lines.
      *
      * @param int $tabs The tabs
      *
@@ -95,7 +97,7 @@ class Output extends StreamOutput
     }
 
     /**
-     * Decrease indention for all following lines
+     * Decrease indention for all following lines.
      *
      * @param int $tabs The tabs
      *
@@ -110,7 +112,7 @@ class Output extends StreamOutput
     }
 
     /**
-     * Get the current indention (this actually indents further/back when required)
+     * Get the current indention (this actually indents further/back when required).
      *
      * @return string
      */
@@ -124,11 +126,12 @@ class Output extends StreamOutput
             }
         }
         $this->lastIndention = $this->indention;
-        return str_repeat(" ", $this->actualIndention * 2);
+
+        return str_repeat(' ', $this->actualIndention * 2);
     }
 
     /**
-     * Write to output
+     * Write to output.
      *
      * @param array|string $messages Messages
      * @param bool         $newline  Whether to append a newline
@@ -149,10 +152,10 @@ class Output extends StreamOutput
                     $newline = true;
                 }
                 if ($this->previousWasNewLine && $l >= 0 && $message[0] !== "\n") {
-                    $message = $this->getIndention() . $message;
+                    $message = $this->getIndention().$message;
                 }
                 if (strpos($message, "\n") !== false) {
-                    $message = str_replace("\n", "\n" . $this->getIndention(), $message);
+                    $message = str_replace("\n", "\n".$this->getIndention(), $message);
                 }
 
                 // TODO: Indent wrapped lines - that's just not that easy because of the ANSI color escape codes
@@ -163,8 +166,4 @@ class Output extends StreamOutput
 
         $this->previousWasNewLine = $newline;
     }
-
-
 }
-
-?>
