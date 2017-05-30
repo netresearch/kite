@@ -1,25 +1,27 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Service
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Service\Event;
 
 /**
- * Class EventDispatcher
+ * Class EventDispatcher.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Service
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 trait Dispatcher
@@ -30,7 +32,7 @@ trait Dispatcher
     private $listeners = [];
 
     /**
-     * Dispatch an event
+     * Dispatch an event.
      *
      * @param Event|string $event The event or the name
      *
@@ -50,11 +52,12 @@ trait Dispatcher
                 }
             }
         }
+
         return $this;
     }
 
     /**
-     * Register an event handler
+     * Register an event handler.
      *
      * @param string   $event    The event name
      * @param callable $callback The callback to call
@@ -67,8 +70,7 @@ trait Dispatcher
             $this->listeners[$event] = [];
         }
         $this->listeners[$event][] = $callback;
+
         return $this;
     }
 }
-
-?>

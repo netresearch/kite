@@ -1,27 +1,27 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Task;
 
 /**
- * RSync from/to the current node or all nodes if no current
+ * RSync from/to the current node or all nodes if no current.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class RsyncTask extends \Netresearch\Kite\Task\ScpTask
@@ -29,28 +29,28 @@ class RsyncTask extends \Netresearch\Kite\Task\ScpTask
     /**
      * @var array
      */
-    protected $defaultOptions = array(
-        'compress' => true,
-        'rsh' => 'ssh{node.sshOptions}',
+    protected $defaultOptions = [
+        'compress'  => true,
+        'rsh'       => 'ssh{node.sshOptions}',
         'recursive' => true,
-        'times' => true,
+        'times'     => true,
         // 'perms',
-        'links' => true
+        'links' => true,
         /* 'delete',
         'delete-excluded' */
-    );
+    ];
 
     /**
      * @var array
      */
-    protected $defaultRules = array(
-        'exclude' => array(
-            '.*'
-        ),
-        'include' => array(
-            '.htaccess'
-        )
-    );
+    protected $defaultRules = [
+        'exclude' => [
+            '.*',
+        ],
+        'include' => [
+            '.htaccess',
+        ],
+    ];
 
     /**
      * @var
@@ -58,34 +58,34 @@ class RsyncTask extends \Netresearch\Kite\Task\ScpTask
     protected $options;
 
     /**
-     * Configure the options
+     * Configure the options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'exclude' => array(
-                'type' => 'array',
-                'default' => array(),
-                'label' => 'Array with files/dirs to explicitely exclude'
-            ),
-            'include' => array(
-                'type' => 'array',
-                'default' => array(),
-                'label' => 'Array with files/dirs to explicitely include'
-            ),
-            'options' => array(
-                'type' => 'array',
-                'default' => array(),
-                'label' => 'Array with options for rsync: Elements with numeric keys or bool true values will be --switches.'
-            ),
-            '--'
-        ) + parent::configureVariables();
+        return [
+            'exclude' => [
+                'type'    => 'array',
+                'default' => [],
+                'label'   => 'Array with files/dirs to explicitely exclude',
+            ],
+            'include' => [
+                'type'    => 'array',
+                'default' => [],
+                'label'   => 'Array with files/dirs to explicitely include',
+            ],
+            'options' => [
+                'type'    => 'array',
+                'default' => [],
+                'label'   => 'Array with options for rsync: Elements with numeric keys or bool true values will be --switches.',
+            ],
+            '--',
+        ] + parent::configureVariables();
     }
 
     /**
-     * Run the task
+     * Run the task.
      *
      * @return array|mixed
      */
@@ -104,22 +104,23 @@ class RsyncTask extends \Netresearch\Kite\Task\ScpTask
         }
 
         $this->preview();
+
         return $this->execute();
     }
 
     /**
-     * Get the rsync command
+     * Get the rsync command.
      *
      * @return string
      */
     protected function getScpCommand()
     {
-        $rsyncCommand = 'rsync' . $this->renderOptions($this->options);
+        $rsyncCommand = 'rsync'.$this->renderOptions($this->options);
 
-        foreach (array('include', 'exclude') as $type) {
+        foreach (['include', 'exclude'] as $type) {
             $rules = $this->getMergedArrayOption($type, $this->defaultRules[$type]);
             foreach ($rules as $rule) {
-                $rsyncCommand .= ' --' . $type . '=' . escapeshellarg($rule);
+                $rsyncCommand .= ' --'.$type.'='.escapeshellarg($rule);
             }
         }
 
@@ -127,7 +128,7 @@ class RsyncTask extends \Netresearch\Kite\Task\ScpTask
     }
 
     /**
-     * Merge an (optional) array option into defaults
+     * Merge an (optional) array option into defaults.
      *
      * Given f.e. that the option has the following value:
      * array(
@@ -177,7 +178,7 @@ class RsyncTask extends \Netresearch\Kite\Task\ScpTask
                 }
             }
         }
+
         return $options;
     }
 }
-?>

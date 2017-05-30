@@ -1,39 +1,38 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Console
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Console\Command;
+
 use Netresearch\Kite\Console\Output\Output;
-use Netresearch\Kite\Service\Config;
-use Netresearch\Kite\Exception;
 use Netresearch\Kite\Exception\ExitException;
 use Netresearch\Kite\Job;
+use Netresearch\Kite\Service\Config;
 use Netresearch\Kite\Service\Console;
 use Netresearch\Kite\Service\Descriptor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Command to execute a job
+ * Command to execute a job.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Console
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class JobCommand extends Command
@@ -65,7 +64,7 @@ class JobCommand extends Command
     }
 
     /**
-     * Remove workflow option
+     * Remove workflow option.
      *
      * @param bool $mergeArgs mergeArgs
      *
@@ -74,7 +73,7 @@ class JobCommand extends Command
     public function mergeApplicationDefinition($mergeArgs = true)
     {
         parent::mergeApplicationDefinition($mergeArgs);
-        $options = array();
+        $options = [];
         foreach ($this->getDefinition()->getOptions() as $option) {
             if ($option->getName() !== 'workflow') {
                 $options[] = $option;
@@ -84,7 +83,7 @@ class JobCommand extends Command
     }
 
     /**
-     * Merge in job definition
+     * Merge in job definition.
      *
      * @param bool $short Whether to return short synopsis
      *
@@ -116,7 +115,7 @@ class JobCommand extends Command
     }
 
     /**
-     * Get the description
+     * Get the description.
      *
      * @return string
      */
@@ -128,6 +127,7 @@ class JobCommand extends Command
             $description = (string) $descriptor->describeTask($this->getJob());
             parent::setDescription($description);
         }
+
         return $description;
     }
 
@@ -140,15 +140,15 @@ class JobCommand extends Command
     public function getHelp()
     {
         return "\n"
-            . "The <info>%command.name%</info> command executes the according job\n"
-            . "from kite configuration:\n\n"
-            . $this->getHelper('formatter')->formatBlock($this->getDescription(), 'fg=black;bg=green', true)
-            . "\n\nThe canonicalized command is:\n\n"
-            . "  <info>php " . $_SERVER['PHP_SELF'] . ' ' . preg_replace('/^generic:([^:]+):([^ ]+)/', '--$1=$2', $this->getName()) . "</info>\n";
+            ."The <info>%command.name%</info> command executes the according job\n"
+            ."from kite configuration:\n\n"
+            .$this->getHelper('formatter')->formatBlock($this->getDescription(), 'fg=black;bg=green', true)
+            ."\n\nThe canonicalized command is:\n\n"
+            .'  <info>php '.$_SERVER['PHP_SELF'].' '.preg_replace('/^generic:([^:]+):([^ ]+)/', '--$1=$2', $this->getName())."</info>\n";
     }
 
     /**
-     * Create and return the job
+     * Create and return the job.
      *
      * @return Job
      */
@@ -157,11 +157,12 @@ class JobCommand extends Command
         if (!$this->job) {
             $this->job = $this->console->getFactory()->createJob($this->getName());
         }
+
         return $this->job;
     }
 
     /**
-     * Initialize the environment
+     * Initialize the environment.
      *
      * @param InputInterface  $input  Input
      * @param OutputInterface $output Output
@@ -178,13 +179,13 @@ class JobCommand extends Command
         if (!$input->getOption('no-debug-file') && $debugDir = $input->getOption('debug-dir')) {
             $this->console->getFilesystem()->ensureDirectoryExists($debugDir);
             // keep max 20 logs
-            $files = glob($debugDir . '/*');
+            $files = glob($debugDir.'/*');
             while (count($files) > 19) {
                 $this->console->getFilesystem()->remove(array_shift($files));
             }
             $logFile = date('YmdHis');
             $debugOutput = new Output(
-                fopen(rtrim($debugDir, '\\/') . '/' . $logFile, 'w'),
+                fopen(rtrim($debugDir, '\\/').'/'.$logFile, 'w'),
                 Output::VERBOSITY_VERY_VERBOSE,
                 true
             );
@@ -193,7 +194,7 @@ class JobCommand extends Command
             $debugOutput->writeln(
                 $this->getHelper('formatter')->formatBlock(
                     implode(' ', $_SERVER['argv']), 'fg=black;bg=white', true
-                ) . "\n"
+                )."\n"
             );
         }
     }
@@ -209,9 +210,9 @@ class JobCommand extends Command
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      *
-     * @return null|int null or 0 if everything went fine, or an error code
-     *
      * @throws \LogicException When this abstract method is not implemented
+     *
+     * @return null|int null or 0 if everything went fine, or an error code
      *
      * @see setCode()
      */
@@ -223,8 +224,9 @@ class JobCommand extends Command
         } catch (\Exception $e) {
             if ($e instanceof ExitException && $e->getCode() === 0) {
                 if ($e->getMessage()) {
-                    $output->writeln('<info>' . $e->getMessage() . '</info>');
+                    $output->writeln('<info>'.$e->getMessage().'</info>');
                 }
+
                 return 0;
             }
 
@@ -242,9 +244,8 @@ class JobCommand extends Command
             } else {
                 $exitCode = 1;
             }
+
             return $exitCode;
         }
     }
 }
-
-?>

@@ -1,29 +1,30 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Task;
+
 use Netresearch\Kite\Exception;
 use Netresearch\Kite\Task;
 
 /**
- * Run each task for each of an arrays element
+ * Run each task for each of an arrays element.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class IterateTask extends SubTask
@@ -51,34 +52,34 @@ class IterateTask extends SubTask
     private $running = false;
 
     /**
-     * Configure the options
+     * Configure the options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'array' => array(
-                'type' => 'array',
+        return [
+            'array' => [
+                'type'     => 'array',
                 'required' => true,
-                'label' => 'The array to iterate over'
-            ),
-            'as' => array(
-                'type' => 'string|array',
+                'label'    => 'The array to iterate over',
+            ],
+            'as' => [
+                'type'    => 'string|array',
                 'default' => $this->defaultAs,
-                'label' => 'String with variable name to set the VALUEs to or array which\'s key to set the KEYs  and which\'s value to set the VALUEs to'
-            ),
-            'key' => array(
-                'type' => 'string',
+                'label'   => 'String with variable name to set the VALUEs to or array which\'s key to set the KEYs  and which\'s value to set the VALUEs to',
+            ],
+            'key' => [
+                'type'    => 'string',
                 'default' => $this->defaultKey,
-                'label' => 'Variable name to set the KEYs to (ignored when "as" doesn\'t provide both'
-            ),
-            '--'
-        ) + parent::configureVariables();
+                'label'   => 'Variable name to set the KEYs to (ignored when "as" doesn\'t provide both',
+            ],
+            '--',
+        ] + parent::configureVariables();
     }
 
     /**
-     * Get the array to iterate over
+     * Get the array to iterate over.
      *
      * @return array
      */
@@ -90,11 +91,12 @@ class IterateTask extends SubTask
                 throw new Exception('Invalid array');
             }
         }
+
         return $this->array;
     }
 
     /**
-     * Get the as (key => value) config
+     * Get the as (key => value) config.
      *
      * @return array
      */
@@ -109,21 +111,22 @@ class IterateTask extends SubTask
                 $key = $this->get('key', $this->defaultKey);
                 $value = $as;
             }
-            $this->as = array();
-            foreach (array('key', 'value') as $name) {
+            $this->as = [];
+            foreach (['key', 'value'] as $name) {
                 if ($$name) {
                     if ($this->has($$name)) {
-                        throw new Exception('Variable ' . $$name . ' is already present');
+                        throw new Exception('Variable '.$$name.' is already present');
                     }
                     $this->as[$name] = $$name;
                 }
             }
         }
+
         return $this->as;
     }
 
     /**
-     * Run the task
+     * Run the task.
      *
      * @param Task $task The task
      *
@@ -171,4 +174,3 @@ class IterateTask extends SubTask
         }
     }
 }
-?>

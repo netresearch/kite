@@ -1,17 +1,19 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Test\Workflow\Composer
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Test\Workflow\Composer;
+
 use Netresearch\Kite\Test\Package;
 use Netresearch\Kite\Test\TestCase;
 use Netresearch\Kite\Workflow\Composer\Checkout;
@@ -20,12 +22,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 
 /**
- * Class CheckoutTest
+ * Class CheckoutTest.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Test\Workflow\Composer
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class CheckoutTest extends TestCase
@@ -37,40 +40,41 @@ class CheckoutTest extends TestCase
     const QUESTION_MERGE_COMMIT_MESSAGE = 'Enter commit message:.+merg(ed?|ing).+';
 
     /**
-     * Provide scenarios for the checkout stuff
+     * Provide scenarios for the checkout stuff.
      *
      * @return array
      */
     public static function provideCheckoutScenarios()
     {
         $branch = 'testbranch';
+
         return [
             [
                 $branch,
                 function (Package $package) use ($branch) {
                     // Branch is available on remote
                     self::cmd('git push origin master:?', $package->path, $branch);
-                }
+                },
             ],
             [
                 $branch,
                 function (Package $package) use ($branch) {
                     // Branch is available locally but not checked out
                     self::cmd('git checkout -b ?; git checkout master', $package->path, $branch);
-                }
+                },
             ],
             [
                 $branch,
                 function (Package $package) use ($branch) {
                     // Branch is available locally and checked out
                     self::cmd('git checkout -b ?', $package->path, $branch);
-                }
-            ]
+                },
+            ],
         ];
     }
 
     /**
-     * Run a workflow
+     * Run a workflow.
      *
      * @param array $options
      * @param array $answers
@@ -81,11 +85,10 @@ class CheckoutTest extends TestCase
     {
         $job = $this->getJobMock(
             function (InputInterface $input, OutputInterface $output, Question $question) use ($options, $answers) {
-
                 $question = rtrim(strip_tags($question->getQuestion()));
                 foreach ($answers as $pattern => $answer) {
                     foreach ($options as $option => $value) {
-                        $placeHolder = '{' . $option . '}';
+                        $placeHolder = '{'.$option.'}';
                         if (strpos($pattern, $placeHolder) !== false) {
                             if (!is_string($value) && !is_numeric($value)) {
                                 $this->fail('Can only replace string and number options');
@@ -93,11 +96,11 @@ class CheckoutTest extends TestCase
                             $pattern = str_replace($placeHolder, preg_quote($value, '#'), $pattern);
                         }
                     }
-                    if (preg_match('#^' . $pattern . '$#i', $question)) {
+                    if (preg_match('#^'.$pattern.'$#i', $question)) {
                         return $answer;
                     }
                 }
-                $this->fail('Unexpected question: "' . $question . '"');
+                $this->fail('Unexpected question: "'.$question.'"');
             }
         );
         $workflow = new Checkout($job);
@@ -114,24 +117,23 @@ class CheckoutTest extends TestCase
     protected function assertBranch(Package $package, $branch, $checkedOut = true)
     {
         $this->assertContains(
-            ($checkedOut ? '*' : ' ') . ' ' . $branch,
+            ($checkedOut ? '*' : ' ').' '.$branch,
             explode("\n", $this->cmd('git branch -a', $package->path))
         );
         $this->assertContains(
-            '  ' . $branch,
+            '  '.$branch,
             explode("\n", $this->cmd('git branch -a', $package->remote))
         );
     }
 
     /**
      * Test the checkout: Checkout one package and assert, that all other packages
-     * are checked out at the given branch and the dependencies have been changed
+     * are checked out at the given branch and the dependencies have been changed.
      *
      * @param string   $branch   The branch
      * @param callable $scenario The scenario
      *
      * @dataProvider provideCheckoutScenarios
-     *
      */
     public function testCheckoutSimple($branch, $scenario)
     {
@@ -146,13 +148,13 @@ class CheckoutTest extends TestCase
 
         $this->runWorkflow(
             ['branch' => $branch],
-            [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM . '(project|package-[1-2]).+' => 'master']
+            [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM.'(project|package-[1-2]).+' => 'master']
         );
 
         foreach ($allPackages as $package) {
             if ($package->dependencies) {
-                $composerJson = json_decode(file_get_contents($package->path . '/composer.json'), true);
-                $this->assertEquals('dev-' . $branch, current($composerJson['require']));
+                $composerJson = json_decode(file_get_contents($package->path.'/composer.json'), true);
+                $this->assertEquals('dev-'.$branch, current($composerJson['require']));
                 $this->assertBranch($package, $branch);
             }
         }
@@ -160,7 +162,7 @@ class CheckoutTest extends TestCase
 
     /**
      * Test the checkout with merging the previous checked out branch into the branch
-     * to check out
+     * to check out.
      *
      * @param Package $project
      */
@@ -189,19 +191,19 @@ class CheckoutTest extends TestCase
 
         $n = "\n";
         $this->assertEquals(
-            '*   ' . $heads->current . $n
-            . '|\\  '
-            . str_replace($n, $n . '| * ', $n . trim($heads->featurebranch))
-            . str_replace($n, $n . '* | ', $n . trim($heads->topicbranch)) . $n
-            . '|/  ' . $n
-            . '* ' . trim($heads->master),
+            '*   '.$heads->current.$n
+            .'|\\  '
+            .str_replace($n, $n.'| * ', $n.trim($heads->featurebranch))
+            .str_replace($n, $n.'* | ', $n.trim($heads->topicbranch)).$n
+            .'|/  '.$n
+            .'* '.trim($heads->master),
             $this->cmd('git log --graph --pretty=format:\'%H\' --no-color', $project->path)
         );
     }
 
     /**
      * Check that merging still works even when CRLFs were introduced in the feature
-     * branch
+     * branch.
      *
      * @return void
      */
@@ -211,7 +213,7 @@ class CheckoutTest extends TestCase
 
         $this->cmd('git checkout -b featurebranch', $project->path);
         file_put_contents(
-            $composer = $project->path . '/composer.json',
+            $composer = $project->path.'/composer.json',
             str_replace("\n", "\r\n", file_get_contents($composer))
         );
         $this->cmd('git config core.autocrlf false', $project->path);
@@ -224,7 +226,7 @@ class CheckoutTest extends TestCase
 
     /**
      * Test that conflicts in composer.json outside the require object are detected
-     * and an exception is thrown
+     * and an exception is thrown.
      *
      * @expectedException \Netresearch\Kite\Exception
      * @expectedExceptionCode 1458307516
@@ -233,7 +235,6 @@ class CheckoutTest extends TestCase
      */
     public function testCheckoutWithUnsolvableMergeConflictInComposerJson()
     {
-
         $project = $this->getProject();
 
         foreach (['topicbranch', 'featurebranch'] as $i => $branch) {
@@ -242,14 +243,14 @@ class CheckoutTest extends TestCase
                 [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM => 'master']
             );
             file_put_contents(
-                $project->path . '/composer.json',
+                $project->path.'/composer.json',
                 str_replace(
                     '"minimum-stability": "dev"',
-                    '"minimum-stability": "' . ($i ? 'stable' : 'beta'). '"',
-                    file_get_contents($project->path . '/composer.json')
+                    '"minimum-stability": "'.($i ? 'stable' : 'beta').'"',
+                    file_get_contents($project->path.'/composer.json')
                 )
             );
-            $this->cmd('git commit -anm "Introducing conflict in ' . $branch . '"; git push', $project->path);
+            $this->cmd('git commit -anm "Introducing conflict in '.$branch.'"; git push', $project->path);
         }
 
         // featurebranch is checked out
@@ -259,7 +260,7 @@ class CheckoutTest extends TestCase
 
     /**
      * Test that conflicts in composer.json outside the require object are detected
-     * and an exception is thrown
+     * and an exception is thrown.
      *
      * @expectedException \Netresearch\Kite\Exception
      * @expectedExceptionCode 1458307785
@@ -268,7 +269,6 @@ class CheckoutTest extends TestCase
      */
     public function testCheckoutWithConflictsBesidesComposerJson()
     {
-
         $project = $this->getProject();
 
         foreach (['topicbranch', 'featurebranch'] as $branch) {
@@ -276,8 +276,8 @@ class CheckoutTest extends TestCase
                 ['branch' => $branch, 'create' => true, 'whitelistNames' => 'netresearch/(project|package-1)'],
                 [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM => 'master']
             );
-            file_put_contents($project->path . '/conflictingFile.txt', $branch);
-            $this->cmd('git add -A; git commit -nm "Introducing conflict in ' . $branch . '"; git push', $project->path);
+            file_put_contents($project->path.'/conflictingFile.txt', $branch);
+            $this->cmd('git add -A; git commit -nm "Introducing conflict in '.$branch.'"; git push', $project->path);
         }
 
         // featurebranch is checked out
@@ -286,7 +286,7 @@ class CheckoutTest extends TestCase
     }
 
     /**
-     * Provide configuration for testCheckoutWithWhitelists
+     * Provide configuration for testCheckoutWithWhitelists.
      *
      * @return array
      */
@@ -301,7 +301,7 @@ class CheckoutTest extends TestCase
     }
 
     /**
-     * Test that only white listed packages are used
+     * Test that only white listed packages are used.
      *
      * @param string $type         The type
      * @param string $pattern      The pattern
@@ -322,21 +322,21 @@ class CheckoutTest extends TestCase
 
         $branch = 'testbranch';
         $this->runWorkflow(
-            ['branch' => $branch, 'create' => true, 'whitelist' . ucfirst($type) . 's' => $pattern],
+            ['branch' => $branch, 'create' => true, 'whitelist'.ucfirst($type).'s' => $pattern],
             [self::QUESTION_FIX_REQUIREMENTS => true, self::QUESTION_CREATE_BRANCH_FROM => 'master']
         );
 
         foreach ($allPackages as $package) {
             $expectedBranch = in_array($package->name, $packageNames, true) ? $branch : 'master';
             $this->assertContains(
-                '* ' . $expectedBranch,
+                '* '.$expectedBranch,
                 explode("\n", $this->cmd('git branch -a', $package->path))
             );
         }
     }
 
     /**
-     * Test that attempt to checkout packages not in white list fails
+     * Test that attempt to checkout packages not in white list fails.
      *
      * @expectedException \Netresearch\Kite\Exception
      * @expectedExceptionMessage Package netresearch/package-2 is not in white list
@@ -352,4 +352,3 @@ class CheckoutTest extends TestCase
         );
     }
 }
-?>

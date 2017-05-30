@@ -1,85 +1,86 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Task;
+
 use Netresearch\Kite\Exception;
 
 /**
- * Executes a command locally and returns the output
+ * Executes a command locally and returns the output.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class ShellTask extends \Netresearch\Kite\Task
 {
     /**
-     * Configure the options
+     * Configure the options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'command' => array(
-                'type' => 'string|array',
-                'label' => 'Command(s) to execute',
+        return [
+            'command' => [
+                'type'     => 'string|array',
+                'label'    => 'Command(s) to execute',
                 'required' => true,
-            ),
-            'cwd' => array(
-                'type' => 'string',
-                'label' => 'The directory to change to before running the command'
-            ),
-            'argv' => array(
-                'type' => 'array|string',
+            ],
+            'cwd' => [
+                'type'  => 'string',
+                'label' => 'The directory to change to before running the command',
+            ],
+            'argv' => [
+                'type'  => 'array|string',
                 'label' => 'String with all options and arguments for the command or an array in the same format as $argv. '
-                    . 'Attention: Values won\'t be escaped!'
-            ),
-            'options' => array(
-                'type' => 'array',
-                'default' => array(),
-                'label' => 'Array with options: Elements with numeric keys or bool true values will be --switches.'
-            ),
-            'arguments' => array(
-                'type' => 'array',
-                'default' => array(),
-                'label' => 'Arguments to pass to the cmd'
-            ),
-            'optArg' => array(
-                'type' => 'array|string',
+                    .'Attention: Values won\'t be escaped!',
+            ],
+            'options' => [
+                'type'    => 'array',
+                'default' => [],
+                'label'   => 'Array with options: Elements with numeric keys or bool true values will be --switches.',
+            ],
+            'arguments' => [
+                'type'    => 'array',
+                'default' => [],
+                'label'   => 'Arguments to pass to the cmd',
+            ],
+            'optArg' => [
+                'type'  => 'array|string',
                 'label' => 'Arguments and options in one array. '
-                    . 'When array, elements with numeric keys will be added as {@see arguments} and elements with string keys will be added as {@see options}. '
-                    . 'When string, {@see argv} will be set to this value'
-            ),
-            'errorMessage' => array(
-                'type' => 'string',
-                'label' => 'Message to display when the command failed'
-            ),
-            'processSettings' => array(
-                'type' => 'array',
-                'default' => array(),
-                'label' => 'Settings for symfony process class'
-            ),
+                    .'When array, elements with numeric keys will be added as {@see arguments} and elements with string keys will be added as {@see options}. '
+                    .'When string, {@see argv} will be set to this value',
+            ],
+            'errorMessage' => [
+                'type'  => 'string',
+                'label' => 'Message to display when the command failed',
+            ],
+            'processSettings' => [
+                'type'    => 'array',
+                'default' => [],
+                'label'   => 'Settings for symfony process class',
+            ],
             '--',
-        ) + parent::configureVariables();
+        ] + parent::configureVariables();
     }
 
     /**
-     * Handle arguments, options and optArg
+     * Handle arguments, options and optArg.
      *
      * @param string $option Option name
      * @param mixed  $value  Option value
@@ -91,18 +92,20 @@ class ShellTask extends \Netresearch\Kite\Task
         if ($option === 'processSettings') {
             $value = array_merge($this->offsetGet('processSettings'), $value);
         }
-        if (in_array($option, array('arguments', 'options', 'optArg'), true)) {
+        if (in_array($option, ['arguments', 'options', 'optArg'], true)) {
             if ($value === null) {
                 if ($option === 'optArg' || $option === 'options') {
-                    parent::offsetSet('options', array());
+                    parent::offsetSet('options', []);
                 }
                 if ($option === 'optArg' || $option === 'arguments') {
-                    parent::offsetSet('arguments', array());
+                    parent::offsetSet('arguments', []);
                 }
+
                 return;
             }
             if ($option === 'optArg' && is_string($value)) {
                 parent::offsetSet('argv', $value);
+
                 return;
             }
             $arguments = $this->get('arguments');
@@ -128,13 +131,14 @@ class ShellTask extends \Netresearch\Kite\Task
             }
             parent::offsetSet('arguments', $arguments);
             parent::offsetSet('options', $options);
+
             return;
         }
         parent::offsetSet($option, $value);
     }
 
     /**
-     * Execute the command
+     * Execute the command.
      *
      * @return mixed
      */
@@ -143,13 +147,14 @@ class ShellTask extends \Netresearch\Kite\Task
         $process = $this->console->createProcess($this->getCommand(), $this->get('cwd'));
         $process->setDryRun(!$this->shouldExecute());
         foreach ($this->get('processSettings') as $key => $value) {
-            $process->{'set' . ucfirst($key)}($value);
+            $process->{'set'.ucfirst($key)}($value);
         }
+
         return $process->run();
     }
 
     /**
-     * Get the command with options and arguments
+     * Get the command with options and arguments.
      *
      * @return string
      */
@@ -169,7 +174,7 @@ class ShellTask extends \Netresearch\Kite\Task
                 if ($options || $arguments) {
                     throw new Exception('Can not combine argv with options or arguments');
                 }
-                $cmd .= ' ' . (is_array($argv) ? implode(' ', $argv) : $argv);
+                $cmd .= ' '.(is_array($argv) ? implode(' ', $argv) : $argv);
             } else {
                 $cmd .= $this->renderOptions($options);
                 $cmd .= $this->renderArguments($arguments);
@@ -180,7 +185,7 @@ class ShellTask extends \Netresearch\Kite\Task
     }
 
     /**
-     * Render options as options for the command
+     * Render options as options for the command.
      *
      * @param array $options The options
      *
@@ -209,11 +214,12 @@ class ShellTask extends \Netresearch\Kite\Task
                 $optionString .= escapeshellarg($value);
             }
         }
+
         return $optionString;
     }
 
     /**
-     * Render arguments for the command
+     * Render arguments for the command.
      *
      * @param array $arguments The arguments
      *
@@ -224,13 +230,14 @@ class ShellTask extends \Netresearch\Kite\Task
         $argumentString = '';
         foreach ($arguments as $argument) {
             $value = $this->expand($argument);
-            $argumentString .= ' ' . escapeshellarg($value);
+            $argumentString .= ' '.escapeshellarg($value);
         }
+
         return $argumentString;
     }
 
     /**
-     * Run the command
+     * Run the command.
      *
      * @return string
      */
@@ -238,11 +245,12 @@ class ShellTask extends \Netresearch\Kite\Task
     {
         $this->preview();
         $res = $this->execute();
+
         return $res;
     }
 
     /**
-     * Execute the command
+     * Execute the command.
      *
      * @return string
      */
@@ -251,4 +259,3 @@ class ShellTask extends \Netresearch\Kite\Task
         return $this->executeCommand();
     }
 }
-?>

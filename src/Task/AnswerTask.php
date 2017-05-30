@@ -1,56 +1,57 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Task;
+
 use Netresearch\Kite\Task;
 use Symfony\Component\Console\Question\Question;
 
 /**
- * Ask a question and return the answer
+ * Ask a question and return the answer.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class AnswerTask extends Task
 {
     /**
-     * Configure the variables
+     * Configure the variables.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'question' => array(
-                'type' => 'string',
+        return [
+            'question' => [
+                'type'     => 'string',
                 'required' => true,
-                'label' => 'The question to ask'
-            ),
-            'default' => array(
-                'type' => 'string|numeric',
-                'label' => 'Default value (shown to the user as well)'
-            ),
-            '--'
-        ) + parent::configureVariables();
+                'label'    => 'The question to ask',
+            ],
+            'default' => [
+                'type'  => 'string|numeric',
+                'label' => 'Default value (shown to the user as well)',
+            ],
+            '--',
+        ] + parent::configureVariables();
     }
 
     /**
-     * Format a question
+     * Format a question.
      *
      * @param string $question The question
      * @param mixed  $default  Default value
@@ -59,12 +60,12 @@ class AnswerTask extends Task
      */
     protected function formatQuestion($question, $default = null)
     {
-        return '<question>' . $question . '</question> '
-        . ($default !== null && $default !== '' ? "[{$default}] " : '');
+        return '<question>'.$question.'</question> '
+        .($default !== null && $default !== '' ? "[{$default}] " : '');
     }
 
     /**
-     * Create a question
+     * Create a question.
      *
      * @param string $question The question
      * @param mixed  $default  Default value
@@ -77,7 +78,7 @@ class AnswerTask extends Task
     }
 
     /**
-     * Execute the task
+     * Execute the task.
      *
      * @return mixed
      */
@@ -92,4 +93,3 @@ class AnswerTask extends Task
         return $answer;
     }
 }
-?>

@@ -1,30 +1,31 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite\Workflow
- * @subpackage Composer
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Workflow\Composer;
+
+use Netresearch\Kite\Exception;
 use Netresearch\Kite\Service\Composer\Package;
 use Netresearch\Kite\Workflow;
-use Netresearch\Kite\Exception;
 
 /**
- * Abstract for composer workflows
+ * Abstract for composer workflows.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite\Workflow
- * @subpackage Composer
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 abstract class Base extends Workflow
@@ -32,7 +33,7 @@ abstract class Base extends Workflow
     /**
      * @var Package[]
      */
-    protected $pushPackages = array();
+    protected $pushPackages = [];
 
     /**
      * @var array
@@ -45,7 +46,7 @@ abstract class Base extends Workflow
     protected $packageNames;
 
     /**
-     * Configure the variables
+     * Configure the variables.
      *
      * @return array
      */
@@ -57,42 +58,41 @@ abstract class Base extends Workflow
         }
         foreach (['whitelistNames', 'whitelistPaths', 'whitelistRemotes'] as $key) {
             if (!array_key_exists($key, $config['composer'])) {
-                $config['composer'][ $key ] = null;
+                $config['composer'][$key] = null;
             }
         }
 
         return [
-            'packages' => array(
-                'type' => 'array',
-                'label' => 'Package name(s) to limit this operation to',
+            'packages' => [
+                'type'     => 'array',
+                'label'    => 'Package name(s) to limit this operation to',
                 'shortcut' => 'p',
-                'option' => true
-            ),
-            'whitelistNames' => array(
+                'option'   => true,
+            ],
+            'whitelistNames' => [
                 'default' => '{config["composer"]["whitelistNames"]}',
-                'type' => 'string',
-                'label' => 'Regular expression for package names, to limit this operation to',
-                'option' => true
-            ),
-            'whitelistPaths' => array(
+                'type'    => 'string',
+                'label'   => 'Regular expression for package names, to limit this operation to',
+                'option'  => true,
+            ],
+            'whitelistPaths' => [
                 'default' => '{config["composer"]["whitelistPaths"]}',
-                'type' => 'string',
-                'label' => 'Regular expression for package paths, to limit this operation to',
-                'option' => true
-            ),
-            'whitelistRemotes' => array(
+                'type'    => 'string',
+                'label'   => 'Regular expression for package paths, to limit this operation to',
+                'option'  => true,
+            ],
+            'whitelistRemotes' => [
                 'default' => '{config["composer"]["whitelistRemotes"]}',
-                'type' => 'string',
-                'label' => 'Regular expression for package remote urls, to limit this operation to',
-                'option' => true
-            ),
-            '--'
+                'type'    => 'string',
+                'label'   => 'Regular expression for package remote urls, to limit this operation to',
+                'option'  => true,
+            ],
+            '--',
         ] + parent::configureVariables();
     }
 
-
     /**
-     * Push all packages marked to be pushed
+     * Push all packages marked to be pushed.
      *
      * @return void
      */
@@ -101,17 +101,17 @@ abstract class Base extends Workflow
         foreach ($this->pushPackages as $i => $package) {
             $this->assertPackageIsWhiteListed($package);
             $this->console->output("Pushing <comment>$package->name</comment>", false);
-            $this->git('push', $package->path, array('u' => 'origin', $package->branch));
+            $this->git('push', $package->path, ['u' => 'origin', $package->branch]);
             $this->console->output(
                 str_repeat(chr(8), strlen($package->name))
-                . '<info>' . $package->name . '</info>'
+                .'<info>'.$package->name.'</info>'
             );
-            unset($this->pushPackages[ $i ]);
+            unset($this->pushPackages[$i]);
         }
     }
 
     /**
-     * doComposerUpdateIfNecessary and possible
+     * doComposerUpdateIfNecessary and possible.
      *
      * @return void
      */
@@ -147,12 +147,12 @@ abstract class Base extends Workflow
         $checkedOutPackages = array_keys($packages);
         $unfixedRequirements = 0;
         while ($packageName = array_shift($checkedOutPackages)) {
-            $branch = $packages[ $packageName ]->branch;
-            $version = 'dev-' . $branch;
+            $branch = $packages[$packageName]->branch;
+            $version = 'dev-'.$branch;
             foreach ($this->getPackages(false, false) as $package) {
                 if (array_key_exists($packageName, $package->requires)) {
                     // TODO: Set required version to branch alias, if any
-                    $requiredVersion = $package->requires[ $packageName ];
+                    $requiredVersion = $package->requires[$packageName];
                     if ($requiredVersion === '@dev') {
                         $requiredVersion = 'dev-master';
                     }
@@ -174,9 +174,9 @@ abstract class Base extends Workflow
                                 $checkedOutPackages[] = $package->name;
                             }
                             if (!array_key_exists($package->name, $packages)) {
-                                $packages[ $package->name ] = $package;
+                                $packages[$package->name] = $package;
                             }
-                            $this->pushPackages[ $packageName ] = $packages[ $packageName ];
+                            $this->pushPackages[$packageName] = $packages[$packageName];
                             $this->rewriteRequirement($package, $packageName, $version);
                         } else {
                             $unfixedRequirements++;
@@ -194,7 +194,7 @@ abstract class Base extends Workflow
 
     /**
      * Change the require statement for $requiredPackage to the newVersion in
-     * $package
+     * $package.
      *
      * @param Package $package         The package
      * @param string  $requiredPackage The required package
@@ -206,8 +206,8 @@ abstract class Base extends Workflow
     {
         $this->assertPackageIsWhiteListed($package);
 
-        $currentVersion = $package->requires[ $requiredPackage ];
-        $composerFile = $package->path . '/composer.json';
+        $currentVersion = $package->requires[$requiredPackage];
+        $composerFile = $package->path.'/composer.json';
         $composerFileContents = file_get_contents($composerFile);
         $newComposerFileContents = preg_replace(
             sprintf(
@@ -215,31 +215,31 @@ abstract class Base extends Workflow
                 preg_quote($requiredPackage, '/'),
                 preg_quote($currentVersion, '/')
             ),
-            '$1' . $newVersion,
+            '$1'.$newVersion,
             $composerFileContents
         );
         file_put_contents($composerFile, $newComposerFileContents);
         $package->reloadRequires();
-        if ($package->requires[ $requiredPackage ] !== $newVersion) {
+        if ($package->requires[$requiredPackage] !== $newVersion) {
             file_put_contents($composerFile, $composerFileContents);
             $this->output('<error>Could not replace version</error> - generated composer.json was:');
             $this->output($newComposerFileContents);
             throw new Exception('Replacing version failed');
         }
 
-        $this->git('commit', $package->path, array('n' => true, 'm' => "Change required version of $requiredPackage to $newVersion", 'composer.json'));
+        $this->git('commit', $package->path, ['n' => true, 'm' => "Change required version of $requiredPackage to $newVersion", 'composer.json']);
         if (!isset($package->source)) {
             $package->source = new \stdClass();
         }
-        $package->source->reference = $this->git('rev-parse', $package->path, array('HEAD'));
+        $package->source->reference = $this->git('rev-parse', $package->path, ['HEAD']);
 
         $this->console->output("Made <comment>$package->name</comment> require <comment>$requiredPackage $newVersion</comment>");
 
-        $this->pushPackages[ $package->name ] = $package;
+        $this->pushPackages[$package->name] = $package;
     }
 
     /**
-     * Reload the requires from $package composer.json to $package->requires
+     * Reload the requires from $package composer.json to $package->requires.
      *
      * If $detectChanges, and there are changes on the requirements not in
      * $ignorePackages composer update is requested
@@ -256,7 +256,7 @@ abstract class Base extends Workflow
     }
 
     /**
-     * Checkout a package at a branch
+     * Checkout a package at a branch.
      *
      * @param Package $package The package
      * @param string  $branch  The branch
@@ -270,17 +270,17 @@ abstract class Base extends Workflow
         $this->assertPackageIsWhiteListed($package);
 
         if ($package->branch === $branch) {
-            return null;
+            return;
         }
         if (!$package->git) {
             throw new Exception('Non git package can not be checked out');
         }
-        $remoteBranch = 'origin/' . $branch;
+        $remoteBranch = 'origin/'.$branch;
         $isRemote = in_array($remoteBranch, $package->branches, true);
         if (in_array($branch, $package->branches, true)) {
             $this->git('checkout', $package->path, $branch);
         } elseif ($isRemote) {
-            $this->git('checkout', $package->path, array('b' => $branch, $remoteBranch));
+            $this->git('checkout', $package->path, ['b' => $branch, $remoteBranch]);
         } elseif ($create) {
             $branches = array_unique(
                 array_map(
@@ -300,16 +300,16 @@ abstract class Base extends Workflow
             if ($inferFromBranch !== $package->branch) {
                 $this->checkoutPackage($package, $inferFromBranch);
             }
-            $this->git('checkout', $package->path, array('b' => $branch));
+            $this->git('checkout', $package->path, ['b' => $branch]);
             $package->branches[] = $branch;
         } else {
             return false;
         }
 
         if ($isRemote) {
-            if (!isset($package->upstreams[ $branch ]) || $package->upstreams[ $branch ] !== $remoteBranch) {
-                $this->git('branch', $package->path, array('u' => $remoteBranch));
-                $package->upstreams[ $branch ] = $remoteBranch;
+            if (!isset($package->upstreams[$branch]) || $package->upstreams[$branch] !== $remoteBranch) {
+                $this->git('branch', $package->path, ['u' => $remoteBranch]);
+                $package->upstreams[$branch] = $remoteBranch;
             }
             $this->git('rebase', $package->path);
         }
@@ -317,14 +317,14 @@ abstract class Base extends Workflow
         $this->console->output("Checked out <comment>{$package->name}</comment> at <comment>$branch</comment>");
 
         $package->reloadRequires();
-        $package->version = 'dev-' . $branch;
+        $package->version = 'dev-'.$branch;
         $package->branch = $branch;
 
         return true;
     }
 
     /**
-     * Merge a $branch into $package's current branch
+     * Merge a $branch into $package's current branch.
      *
      * @param Package $package The package
      * @param string  $branch  The branch
@@ -345,32 +345,32 @@ abstract class Base extends Workflow
             $conflictedFiles = $this->resolveMergeConflicts($package);
         }
 
-        if (isset($conflictedFiles) || $this->git('status', $package->path, array('porcelain' => true))) {
-            $this->console->output('You are merging package <comment>' . $package->name . '</comment> from <comment>' . $branch . '</comment> into <comment>' . $package->branch . "</comment>.\n");
+        if (isset($conflictedFiles) || $this->git('status', $package->path, ['porcelain' => true])) {
+            $this->console->output('You are merging package <comment>'.$package->name.'</comment> from <comment>'.$branch.'</comment> into <comment>'.$package->branch."</comment>.\n");
             if (!$message) {
                 $message = $this->answer(
                     'Enter commit message:',
-                    'Merged ' . $branch . ' into ' . $package->branch
+                    'Merged '.$branch.' into '.$package->branch
                 );
             }
-            $this->git('commit', $package->path, array('n' => true, 'm' => $message));
+            $this->git('commit', $package->path, ['n' => true, 'm' => $message]);
         }
 
         $this->console->output("Merged with <comment>$branch</comment> in <comment>{$package->name}</comment>");
 
         $package->reloadRequires();
-        $this->pushPackages[ $package->name ] = $package;
+        $this->pushPackages[$package->name] = $package;
     }
 
     /**
-     * Check that package is white-listed, is git-package and up-to-date
+     * Check that package is white-listed, is git-package and up-to-date.
      *
      * @param $package
      * @param $branch
      *
-     * @return void
-     *
      * @throws Exception
+     *
+     * @return void
      */
     private function preparePackageForMerge($package, $branch)
     {
@@ -380,11 +380,11 @@ abstract class Base extends Workflow
             throw new Exception('Non git package can not be merged');
         }
 
-        $this->git('fetch', $package->path, array('force' => true, 'origin', $branch . ':' . $branch));
+        $this->git('fetch', $package->path, ['force' => true, 'origin', $branch.':'.$branch]);
     }
 
     /**
-     * Set the options for the merge command
+     * Set the options for the merge command.
      *
      * @param string $branch branch to merge
      * @param bool   $squash is --squash-option set
@@ -393,7 +393,7 @@ abstract class Base extends Workflow
      */
     private function setMergeOptions($branch, $squash)
     {
-        $mergeOptions = array();
+        $mergeOptions = [];
 
         if ($squash) {
             $mergeOptions['squash'] = true;
@@ -401,7 +401,7 @@ abstract class Base extends Workflow
         } else {
             $mergeOptions['no-commit'] = true;
             $ff = $branch == 'master' ? 'ff' : 'no-ff';
-            $mergeOptions[ $ff ] = true;
+            $mergeOptions[$ff] = true;
         }
 
         $mergeOptions[] = $branch;
@@ -420,7 +420,7 @@ abstract class Base extends Workflow
      */
     private function resolveMergeConflicts($package)
     {
-        $diff = $this->git('diff', $package->path, array('name-only' => true, 'diff-filter' => 'U'));
+        $diff = $this->git('diff', $package->path, ['name-only' => true, 'diff-filter' => 'U']);
         $conflictedFiles = array_flip(explode("\n", $diff));
         if (array_key_exists('composer.json', $conflictedFiles)) {
             try {
@@ -443,7 +443,7 @@ abstract class Base extends Workflow
 
     /**
      * Try to solve conflicts inside the require section of the $package
-     * composer.json
+     * composer.json.
      *
      * @param Package $package The package
      *
@@ -451,7 +451,7 @@ abstract class Base extends Workflow
      */
     private function resolveRequirementsConflict($package)
     {
-        $contents = file_get_contents($package->path . '/composer.json');
+        $contents = file_get_contents($package->path.'/composer.json');
         $ours = @json_decode(
             preg_replace('/^<{7}.+\n(.+)\n(\|{7}|={7}).+>{7}.+$/smU', '$1', $contents)
         );
@@ -463,20 +463,20 @@ abstract class Base extends Workflow
         }
         $diff = array_diff_key($theirs = get_object_vars($theirs), $ours = get_object_vars($ours));
         foreach ($ours as $key => $value) {
-            if ($key !== 'require' && (!array_key_exists($key, $theirs) || serialize($value) !== serialize($theirs[ $key ]))) {
-                $diff[ $key ] = $value;
+            if ($key !== 'require' && (!array_key_exists($key, $theirs) || serialize($value) !== serialize($theirs[$key]))) {
+                $diff[$key] = $value;
             }
         }
-        if ($diff !== array()) {
+        if ($diff !== []) {
             throw new Exception('Can not automerge composer.json due to conflicts outside require object', 1458307516);
         }
 
         $theirs['require'] = $this->mergeRequirements($package, $ours, $theirs);
-        file_put_contents($package->path . '/composer.json', $this->jsonEncode($theirs));
+        file_put_contents($package->path.'/composer.json', $this->jsonEncode($theirs));
     }
 
     /**
-     * Encode a variable for JSON file
+     * Encode a variable for JSON file.
      *
      * @param mixed $var The var
      *
@@ -486,11 +486,11 @@ abstract class Base extends Workflow
     {
         return json_encode(
             $var, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-        ) . "\n";
+        )."\n";
     }
 
     /**
-     * Merge the requirements from different sides of the current $package
+     * Merge the requirements from different sides of the current $package.
      *
      * @param Package $package The current package
      * @param array   $ours    Our composer.json as array
@@ -504,17 +504,17 @@ abstract class Base extends Workflow
         $theirsRequire = isset($theirs['require']) && is_object($theirs['require']) ? get_object_vars($theirs['require']) : [];
         $mergedRequires = array_merge($oursRequire, $theirsRequire);
         $packages = $this->getPackages(false, false);
-        $preferredVersion = 'dev-' . $package->branch;
+        $preferredVersion = 'dev-'.$package->branch;
         foreach ($mergedRequires as $packageName => $version) {
             $actualVersion = ($version === '@dev') ? 'dev-master' : $version;
             if (array_key_exists($packageName, $oursRequire)
-                && $version !== $oursRequire[ $packageName ]
-                && $actualVersion !== $oursRequire[ $packageName ]
+                && $version !== $oursRequire[$packageName]
+                && $actualVersion !== $oursRequire[$packageName]
                 && $actualVersion !== $preferredVersion
                 && array_key_exists($packageName, $packages)
-                && in_array($package->branch, $packages[ $packageName ]->branches, true)
+                && in_array($package->branch, $packages[$packageName]->branches, true)
             ) {
-                $mergedRequires[ $packageName ] = $preferredVersion;
+                $mergedRequires[$packageName] = $preferredVersion;
             }
         }
 
@@ -522,7 +522,7 @@ abstract class Base extends Workflow
     }
 
     /**
-     * Get the allowed packages
+     * Get the allowed packages.
      *
      * @param bool $gitOnly     If git packages should be returned only
      * @param bool $allowedOnly If allowed packages should be returned only
@@ -533,10 +533,10 @@ abstract class Base extends Workflow
     {
         /* @var $packages \Netresearch\Kite\Service\Composer\Package[] */
         /* @var $package \Netresearch\Kite\Service\Composer\Package */
-        $packages = array();
+        $packages = [];
         foreach ($this->get('composer.packages') as $package) {
             if ((!$gitOnly || $package->git) && (!$allowedOnly || $this->isPackageAllowed($package))) {
-                $packages[ $package->name ] = $package;
+                $packages[$package->name] = $package;
             }
         }
 
@@ -544,7 +544,7 @@ abstract class Base extends Workflow
     }
 
     /**
-     * Assert that package is in white lists
+     * Assert that package is in white lists.
      *
      * @param Package $package The package
      *
@@ -560,7 +560,7 @@ abstract class Base extends Workflow
     }
 
     /**
-     * Determine if a package is not excluded by the packages option or white lists
+     * Determine if a package is not excluded by the packages option or white lists.
      *
      * @param Package $package The package
      *
@@ -569,7 +569,7 @@ abstract class Base extends Workflow
     protected function isPackageAllowed(Package $package)
     {
         if (!is_array($this->packageNames)) {
-            $this->packageNames = array_fill_keys($this->get('packages') ? : [], null);
+            $this->packageNames = array_fill_keys($this->get('packages') ?: [], null);
         }
 
         if ($this->packageNames) {
@@ -577,11 +577,11 @@ abstract class Base extends Workflow
                 return false;
             }
             if ($this->isPackageWhiteListed($package) === false) {
-                if ($this->packageNames[ $package->name ] === null) {
-                    $this->packageNames[ $package->name ] = $this->confirm("The package $package->name is excluded by your whitelist configuration - are you sure you want to include it anyway?");
+                if ($this->packageNames[$package->name] === null) {
+                    $this->packageNames[$package->name] = $this->confirm("The package $package->name is excluded by your whitelist configuration - are you sure you want to include it anyway?");
                 }
 
-                return $this->packageNames[ $package->name ];
+                return $this->packageNames[$package->name];
             }
 
             return true;
@@ -591,7 +591,7 @@ abstract class Base extends Workflow
     }
 
     /**
-     * Determine if package is white listed
+     * Determine if package is white listed.
      *
      * @param Package $package The package
      *
@@ -602,9 +602,9 @@ abstract class Base extends Workflow
         if (!is_array($this->whitelists)) {
             $this->whitelists = [];
             foreach (['path', 'remote', 'name'] as $whiteListType) {
-                $option = $this->get('whitelist' . ucfirst($whiteListType) . 's');
+                $option = $this->get('whitelist'.ucfirst($whiteListType).'s');
                 if ($option) {
-                    $this->whitelists[ $whiteListType ] = '#^' . $option . '$#';
+                    $this->whitelists[$whiteListType] = '#^'.$option.'$#';
                 }
             }
         }
@@ -629,5 +629,3 @@ abstract class Base extends Workflow
         return $this->whitelists ? false : null;
     }
 }
-
-?>

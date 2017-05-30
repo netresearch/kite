@@ -1,33 +1,31 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Workflow
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Workflow;
+
 use Netresearch\Kite\Task;
-
 use Netresearch\Kite\Workflow;
-use Netresearch\Kite\Exception;
-
 use Symfony\Component\Console\Input\InputOption;
 
 /**
- * Deploy the current application to a certain stage
+ * Deploy the current application to a certain stage.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Workflow
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class Deployment extends Workflow
@@ -38,42 +36,42 @@ class Deployment extends Workflow
     protected $release;
 
     /**
-     * Configures the arguments/options
+     * Configures the arguments/options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'rollback' => array(
-                'type' => 'bool',
-                'label' => 'Makes previous release current and current release next',
-                'option' => true,
-                'mode' => InputOption::VALUE_NONE,
-                'shortcut' => 'r'
-            ),
-            'activate' => array(
-                'type' => 'bool',
-                'label' => 'Makes next release current and current release previous',
-                'option' => true,
+        return [
+            'rollback' => [
+                'type'     => 'bool',
+                'label'    => 'Makes previous release current and current release next',
+                'option'   => true,
+                'mode'     => InputOption::VALUE_NONE,
+                'shortcut' => 'r',
+            ],
+            'activate' => [
+                'type'     => 'bool',
+                'label'    => 'Makes next release current and current release previous',
+                'option'   => true,
                 'shortcut' => 'a',
-                'mode' => InputOption::VALUE_NONE,
-            ),
-            'rsync' => array(
-                'type' => 'array',
-                'label' => 'Options for the rsync task (can contain keys options, exclude, and include - see rsync task for their descriptions)'
-            ),
-            'shared' => array(
-                'type' => 'array',
-                'label' => 'Array of files (in key "files") and directories (in key "dirs") to share between releases - share directory is in node.deployDir/shared',
-                'default' => array()
-            ),
-            '--'
-        ) + parent::configureVariables();
+                'mode'     => InputOption::VALUE_NONE,
+            ],
+            'rsync' => [
+                'type'  => 'array',
+                'label' => 'Options for the rsync task (can contain keys options, exclude, and include - see rsync task for their descriptions)',
+            ],
+            'shared' => [
+                'type'    => 'array',
+                'label'   => 'Array of files (in key "files") and directories (in key "dirs") to share between releases - share directory is in node.deployDir/shared',
+                'default' => [],
+            ],
+            '--',
+        ] + parent::configureVariables();
     }
 
     /**
-     * Assemble this workflow
+     * Assemble this workflow.
      *
      * @return void
      */
@@ -85,7 +83,7 @@ class Deployment extends Workflow
         if (!$rollback && !$restore) {
             $this->checkout();
             $this->release = date($this->get('releaseFormat', 'YmdHis'));
-            $this->set('releaseDir', 'releases/' . $this->release);
+            $this->set('releaseDir', 'releases/'.$this->release);
             $this->release();
             $this->shareResources();
         }
@@ -97,7 +95,7 @@ class Deployment extends Workflow
     }
 
     /**
-     * Checkout (forwards branch and merge in the stage configuration)
+     * Checkout (forwards branch and merge in the stage configuration).
      *
      * @return \Netresearch\Kite\Workflow\Composer\Checkout
      */
@@ -123,16 +121,16 @@ class Deployment extends Workflow
 
         return $this->sub(
             'Netresearch\\Kite\\Workflow\\Composer\\Checkout',
-            array(
+            [
                 'branch' => $this->get('branch', null),
-                'merge' => $this->get('merge', false),
-                'create' => $this->get('createBranch', false)
-            )
+                'merge'  => $this->get('merge', false),
+                'create' => $this->get('createBranch', false),
+            ]
         );
     }
 
     /**
-     * Check out initial branch and install the state before the first checkout
+     * Check out initial branch and install the state before the first checkout.
      *
      * @return Task\SubTask
      */
@@ -150,7 +148,7 @@ class Deployment extends Workflow
     }
 
     /**
-     * Create the next release from the current code base
+     * Create the next release from the current code base.
      *
      * @return \Netresearch\Kite\Task\SubTask
      */
@@ -173,23 +171,23 @@ class Deployment extends Workflow
         $sub->output('<step>Synchronizing sources</step>');
         $sub->rsync(
             '.', '{node}:{node.deployPath}/next',
-            $this->get('rsync.options', array()),
-            $this->get('rsync.exclude', array()),
-            $this->get('rsync.include', array())
+            $this->get('rsync.options', []),
+            $this->get('rsync.exclude', []),
+            $this->get('rsync.include', [])
         );
 
         return $sub;
     }
 
     /**
-     * Activate the next release
+     * Activate the next release.
      *
      * @return \Netresearch\Kite\Task\SubTask
      */
     protected function activate()
     {
         $sub = $this->iterate('{nodes}', 'node');
-        $sub->message('<step>Activating ' . ($this->release ? 'new' : 'latest') . ' release</step>');
+        $sub->message('<step>Activating '.($this->release ? 'new' : 'latest').' release</step>');
         $sub->callback(
             function (Task\IterateTask $iterator) {
                 $links = $iterator->remoteShell('echo "`readlink previous`;`readlink current`;`readlink next`"', '{node.deployPath}');
@@ -205,9 +203,9 @@ class Deployment extends Workflow
                         $iterator->doBreak("<warning>Next release on {node} is $nextRelease and not {$this->release} as expected</warning> - aborting");
                     }
 
-                    $commands = array("ln -sfn $next current; rm next");
+                    $commands = ["ln -sfn $next current; rm next"];
                     if ($current) {
-                        $from = '<comment>' . basename($current) . '</comment>';
+                        $from = '<comment>'.basename($current).'</comment>';
                         array_unshift($commands, "ln -s $current previous");
                         if ($previous) {
                             array_unshift($commands, "rm previous; rm -rf $previous");
@@ -225,7 +223,7 @@ class Deployment extends Workflow
     }
 
     /**
-     * Rollback to the previous release (makes current next again)
+     * Rollback to the previous release (makes current next again).
      *
      * In general this is as easy as:
      *
@@ -260,10 +258,10 @@ class Deployment extends Workflow
                         $iterator->doBreak("<warning>Previous release on {node} is $previousRelease and not $firstPreviousRelease as on the previous node(s)</warning> - aborting");
                     }
 
-                    $commands = array("ln -sfn $previous current; rm previous");
+                    $commands = ["ln -sfn $previous current; rm previous"];
                     if ($current) {
                         array_unshift($commands, "ln -s $current next");
-                        $from = '<comment>' . basename($current) . '</comment>';
+                        $from = '<comment>'.basename($current).'</comment>';
                     } else {
                         $from = '<warning>none</warning>';
                     }
@@ -277,18 +275,18 @@ class Deployment extends Workflow
     }
 
     /**
-     * Setup shared resources
+     * Setup shared resources.
      *
      * @return void
      */
     protected function shareResources()
     {
-        $sub = $this->iterate('{shared}', array('type' => 'entries'));
+        $sub = $this->iterate('{shared}', ['type' => 'entries']);
         $sub->message('<step>Linking shared resources</step>');
         $sub->callback(
             function (Task\IterateTask $iterator) {
                 $type = $iterator->get('type');
-                if (!in_array($type, array('dirs', 'files'), true)) {
+                if (!in_array($type, ['dirs', 'files'], true)) {
                     $iterator->doExit('shared may only contain keys "dirs" or "files"', 1);
                 }
                 $isFile = substr($type, 0, 4) === 'file';
@@ -297,7 +295,7 @@ class Deployment extends Workflow
                 foreach ($entries as $entry) {
                     $dirName = strpos($entry, '/') !== false ? dirname($entry) : null;
                     $subDirCount = substr_count($this->get('releaseDir'), '/') + 1;
-                    $commands = array();
+                    $commands = [];
                     if ($isFile) {
                         $commands[] = "if [ ! -f $shareDir/$entry ]; then mkdir -p $shareDir/$dirName; touch $shareDir/$entry; fi";
                     } else {
@@ -305,13 +303,13 @@ class Deployment extends Workflow
                     }
 
                     $commands[] = 'cd {releaseDir}';
-                    $commands[] = 'rm -rf ' . $entry;
+                    $commands[] = 'rm -rf '.$entry;
                     if ($dirName) {
-                        $commands[] = 'mkdir -p ' . $dirName;
-                        $commands[] = 'cd ' . $dirName;
+                        $commands[] = 'mkdir -p '.$dirName;
+                        $commands[] = 'cd '.$dirName;
                         $subDirCount += substr_count($dirName, '/') + 1;
                     }
-                    $commands[] = 'ln -s ' . str_repeat('../', $subDirCount) . $shareDir . '/' . $entry;
+                    $commands[] = 'ln -s '.str_repeat('../', $subDirCount).$shareDir.'/'.$entry;
 
                     $iterator->remoteShell($commands, '{node.deployPath}');
                 }
@@ -319,4 +317,3 @@ class Deployment extends Workflow
         );
     }
 }
-?>

@@ -1,18 +1,18 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite;
-
 
 use Netresearch\Kite\Service\Console;
 use Symfony\Component\Console\Input\InputArgument;
@@ -20,12 +20,13 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
- * Job - the outermost task object
+ * Job - the outermost task object.
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class Job extends Tasks
@@ -33,7 +34,7 @@ class Job extends Tasks
     /**
      * @var array
      */
-    protected $definitions = array();
+    protected $definitions = [];
 
     /**
      * @var bool
@@ -64,10 +65,10 @@ class Job extends Tasks
         $this->offsetSet('job', $this);
         $this->offsetSet('config', $console->getConfig());
         if (!$kite) {
-            $kite = array(
+            $kite = [
                 'path' => $path = dirname(__DIR__),
-                'dir' => $console->getFilesystem()->findShortestPath(getcwd(), $path)
-            );
+                'dir'  => $console->getFilesystem()->findShortestPath(getcwd(), $path),
+            ];
         }
         $this->offsetSet('kite', $kite);
 
@@ -81,7 +82,7 @@ class Job extends Tasks
     }
 
     /**
-     * Variable configuration
+     * Variable configuration.
      *
      * @return array
      */
@@ -89,31 +90,31 @@ class Job extends Tasks
     {
         return [
             'options' => [
-                'type' => 'array',
+                'type'  => 'array',
                 'label' => 'Options to expose on the console app - keys are camelCase '
-                    . " variable names, which are used as option names lowercase-dashed.\n"
-                    . "Values contain variable configuration with keys:\n"
-                    . "  'type': Variable type (array, string, etc.)\n"
-                    . "  'label': The label to show on --help\n"
-                    . "  'default': Default value (if any, invalid for booleans without explicit mode)\n"
-                    . "  'mode': Mode for the \\Symfony\\Component\\Console\\Input\\InputOption\n"
-                    . "  'shortcut': Shortcut for the \\Symfony\\Component\\Console\\Input\\InputOption"
+                    ." variable names, which are used as option names lowercase-dashed.\n"
+                    ."Values contain variable configuration with keys:\n"
+                    ."  'type': Variable type (array, string, etc.)\n"
+                    ."  'label': The label to show on --help\n"
+                    ."  'default': Default value (if any, invalid for booleans without explicit mode)\n"
+                    ."  'mode': Mode for the \\Symfony\\Component\\Console\\Input\\InputOption\n"
+                    ."  'shortcut': Shortcut for the \\Symfony\\Component\\Console\\Input\\InputOption",
             ],
             'arguments' => [
-                'type' => 'array',
+                'type'  => 'array',
                 'label' => 'Arguments to expose on the console app - keys are camelCase '
-                    . " variable names, which are used as argument names lowercase-dashed.\n"
-                    . "Values contain variable configuration with keys:\n"
-                    . "  'type': Variable type (array, string, etc.)\n"
-                    . "  'label': The label to show on --help\n"
-                    . "  'default': Default value (if any, invalid for booleans without explicit mode)\n"
-                    . "  'mode': Mode for the \\Symfony\\Component\\Console\\Input\\InputArgument"
-            ]
+                    ." variable names, which are used as argument names lowercase-dashed.\n"
+                    ."Values contain variable configuration with keys:\n"
+                    ."  'type': Variable type (array, string, etc.)\n"
+                    ."  'label': The label to show on --help\n"
+                    ."  'default': Default value (if any, invalid for booleans without explicit mode)\n"
+                    ."  'mode': Mode for the \\Symfony\\Component\\Console\\Input\\InputArgument",
+            ],
         ] + parent::configureVariables();
     }
 
     /**
-     * Configure options and arguments
+     * Configure options and arguments.
      *
      * @param string $name  The name
      * @param mixed  $value The value
@@ -125,25 +126,25 @@ class Job extends Tasks
         if ($name === 'options' || $name === 'arguments') {
             $type = substr($name, 0, -1);
             if (!is_array($value)) {
-                throw new Exception($name . ' must be array');
+                throw new Exception($name.' must be array');
             }
             foreach ($value as $variable => $config) {
                 $from = $this->camelCaseToLowerCaseDashed($variable);
-                $this->definitions[$from] = array(
-                    'context' => $this,
+                $this->definitions[$from] = [
+                    'context'  => $this,
                     'variable' => $variable,
-                    'type' => $type,
-                    'config' => $config
-                );
+                    'type'     => $type,
+                    'config'   => $config,
+                ];
             }
+
             return;
         }
         parent::offsetSet($name, $value);
     }
 
-
     /**
-     * Run an array of tasks
+     * Run an array of tasks.
      *
      * @return $this
      */
@@ -165,9 +166,9 @@ class Job extends Tasks
                     if (($value === null || is_array($value) && !isset($value[0]) && count($value) <= 1)
                         && preg_match('/(^|\|)bool(ean)?($|\|)/', $config['type']) && strpos($config['type'], '|')
                     ) {
-                        if ($input->hasParameterOption($opt = '--' . $from)
+                        if ($input->hasParameterOption($opt = '--'.$from)
                             || array_key_exists('shortcut', $config)
-                            && $input->hasParameterOption($opt = '-' . $config['shortcut'])
+                            && $input->hasParameterOption($opt = '-'.$config['shortcut'])
                         ) {
                             // Set value to true, when option has no value
                             $value = true;
@@ -184,7 +185,7 @@ class Job extends Tasks
     }
 
     /**
-     * Override get the input options and arguments for the JobCommand
+     * Override get the input options and arguments for the JobCommand.
      *
      * @param \Netresearch\Kite\Task $task The task
      *
@@ -200,7 +201,7 @@ class Job extends Tasks
     }
 
     /**
-     * Add variables from the task to the job
+     * Add variables from the task to the job.
      *
      * @param Task      $task             The task
      * @param Variables $context          Context to set the variable to, when job is run.
@@ -213,7 +214,7 @@ class Job extends Tasks
      */
     public function addVariablesFromTask(Task $task, $context = null, $overrideExisting = null)
     {
-        if ($task instanceof Job) {
+        if ($task instanceof self) {
             foreach ($task->definitions as $from => $definition) {
                 if ($context) {
                     $definition['context'] = $context;
@@ -222,6 +223,7 @@ class Job extends Tasks
                     $this->definitions[$from] = $definition;
                 }
             }
+
             return;
         }
 
@@ -245,18 +247,18 @@ class Job extends Tasks
                         continue;
                     }
                 }
-                $this->definitions[$from] = array(
-                    'context' => $context,
+                $this->definitions[$from] = [
+                    'context'  => $context,
                     'variable' => $variable,
-                    'type' => $option ? 'option' : 'argument',
-                    'config' => $config
-                );
+                    'type'     => $option ? 'option' : 'argument',
+                    'config'   => $config,
+                ];
             }
         }
     }
 
     /**
-     * camelCase to lower-case-dashed
+     * camelCase to lower-case-dashed.
      *
      * @param string $string String
      *
@@ -274,7 +276,7 @@ class Job extends Tasks
     }
 
     /**
-     * Add the retrieved options and arguments to a definition
+     * Add the retrieved options and arguments to a definition.
      *
      * @return InputDefinition
      */
@@ -331,13 +333,12 @@ class Job extends Tasks
     }
 
     /**
-     * Determine wether this job is dry run
+     * Determine wether this job is dry run.
      *
-     * @return boolean
+     * @return bool
      */
     public function isDryRun()
     {
         return $this->dryRun;
     }
 }
-?>

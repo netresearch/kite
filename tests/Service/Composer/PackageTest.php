@@ -1,33 +1,36 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Test\Service\Composer
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Test\Service\Composer;
+
 use Netresearch\Kite\Service\Composer\Package;
 use Netresearch\Kite\Test\TestCase;
 
 /**
- * Class PackageTest
+ * Class PackageTest.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Test\Service\Composer
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class PackageTest extends TestCase
 {
     /**
-     * Get package
+     * Get package.
      *
      * @param \Netresearch\Kite\Test\Package $package The test package
      * @param bool                           $isRoot  If package is root
@@ -38,11 +41,12 @@ class PackageTest extends TestCase
     {
         $job = $this->getJobMock();
         $mock = $this->getMock('\Netresearch\Kite\Service\Composer', null, [$job]);
-        return new Package($mock, $package->path . '/composer.json', $isRoot);
+
+        return new Package($mock, $package->path.'/composer.json', $isRoot);
     }
 
     /**
-     * Test basic package information
+     * Test basic package information.
      *
      * @return void
      */
@@ -63,7 +67,7 @@ class PackageTest extends TestCase
     }
 
     /**
-     * Test local only, remote only and remotely and locally available branches
+     * Test local only, remote only and remotely and locally available branches.
      *
      * @return void
      */
@@ -84,7 +88,7 @@ class PackageTest extends TestCase
     }
 
     /**
-     * Assert that a checked out tag is recognized
+     * Assert that a checked out tag is recognized.
      *
      * @return void
      */
@@ -102,7 +106,7 @@ class PackageTest extends TestCase
     }
 
     /**
-     * Assert that a checked out tag is recognized
+     * Assert that a checked out tag is recognized.
      *
      * @return void
      */
@@ -119,4 +123,3 @@ class PackageTest extends TestCase
         $this->assertNull($package->branch);
     }
 }
-?>

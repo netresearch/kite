@@ -1,28 +1,29 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Task;
+
 use Netresearch\Kite\Node;
 
 /**
- * Execute a shell command on either the current node or all nodes
+ * Execute a shell command on either the current node or all nodes.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class RemoteShellTask extends ShellTask
@@ -33,7 +34,7 @@ class RemoteShellTask extends ShellTask
     protected $cwd;
 
     /**
-     * Hide the cwd from ShellTask
+     * Hide the cwd from ShellTask.
      *
      * @param string $option Option
      * @param mixed  $value  Value
@@ -44,13 +45,14 @@ class RemoteShellTask extends ShellTask
     {
         if ($option === 'cwd') {
             $this->cwd = $value;
+
             return;
         }
         parent::offsetSet($option, $value);
     }
 
     /**
-     * Execute the task for each of the available nodes or the current node if set
+     * Execute the task for each of the available nodes or the current node if set.
      *
      * @return array|mixed Return value(s) of the command on the node(s)
      */
@@ -65,7 +67,7 @@ class RemoteShellTask extends ShellTask
         if (!$nodes) {
             throw new \Netresearch\Kite\Exception('No nodes to work on');
         }
-        $returnValues = array();
+        $returnValues = [];
         foreach ($nodes as $node) {
             $this->set('node', $node);
             try {
@@ -76,11 +78,12 @@ class RemoteShellTask extends ShellTask
             }
         }
         $this->remove('node');
+
         return $returnValues;
     }
 
     /**
-     * Get the command to execute
+     * Get the command to execute.
      *
      * @return string
      */
@@ -93,7 +96,7 @@ class RemoteShellTask extends ShellTask
     }
 
     /**
-     * Wrap the command in a ssh command
+     * Wrap the command in a ssh command.
      *
      * @param string $command The command
      * @param Node   $node    The node
@@ -104,13 +107,13 @@ class RemoteShellTask extends ShellTask
     protected function getSshCommand($command, Node $node, $cwd = null)
     {
         if ($cwd && !preg_match('#^cd\s+[\'"]?/#', $command)) {
-            $command = 'cd ' . escapeshellarg($cwd) . '; ' . $command;
+            $command = 'cd '.escapeshellarg($cwd).'; '.$command;
         }
 
         $sshCommand
-            = rtrim('ssh' . $node->get('sshOptions'))
-            . ' ' . escapeshellarg($node->get('url'))
-            . ' ' . escapeshellarg($command);
+            = rtrim('ssh'.$node->get('sshOptions'))
+            .' '.escapeshellarg($node->get('url'))
+            .' '.escapeshellarg($command);
 
         $this->addExpect($sshCommand, $node);
 
@@ -118,7 +121,7 @@ class RemoteShellTask extends ShellTask
     }
 
     /**
-     * Wrap the command in an expect command
+     * Wrap the command in an expect command.
      *
      * @param string $sshCommand The command
      * @param Node   $node       The node
@@ -135,4 +138,3 @@ class RemoteShellTask extends ShellTask
         }
     }
 }
-?>

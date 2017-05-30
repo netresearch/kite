@@ -1,30 +1,31 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Service
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Service;
+
 use Netresearch\Kite\Exception\ProcessFailedException;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A shell command service
- * (taken from TYPO3\Surf\Domain\Service\ShellCommandService)
+ * (taken from TYPO3\Surf\Domain\Service\ShellCommandService).
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Service
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class Process extends \Symfony\Component\Process\Process
@@ -66,17 +67,16 @@ class Process extends \Symfony\Component\Process\Process
         } elseif (is_array($command)) {
             $command = implode('; ', $command);
         } else {
-            throw new \Netresearch\Kite\Exception('Command must be string or array, ' . gettype($command) . ' given.', 1312454906);
+            throw new \Netresearch\Kite\Exception('Command must be string or array, '.gettype($command).' given.', 1312454906);
         }
 
         parent::__construct($command, $cwd, null, null, null);
     }
 
-
     /**
-     * Set dry run
+     * Set dry run.
      *
-     * @param boolean $dryRun Dry run
+     * @param bool $dryRun Dry run
      *
      * @return void
      */
@@ -86,9 +86,9 @@ class Process extends \Symfony\Component\Process\Process
     }
 
     /**
-     * Get if output should not be logged to debug
+     * Get if output should not be logged to debug.
      *
-     * @return boolean
+     * @return bool
      */
     public function isShy()
     {
@@ -96,9 +96,9 @@ class Process extends \Symfony\Component\Process\Process
     }
 
     /**
-     * Set if output should not be logged to debug
+     * Set if output should not be logged to debug.
      *
-     * @param boolean $shy Shyness
+     * @param bool $shy Shyness
      *
      * @return void
      */
@@ -108,9 +108,9 @@ class Process extends \Symfony\Component\Process\Process
     }
 
     /**
-     * Get whether to pass command output through to console output
+     * Get whether to pass command output through to console output.
      *
-     * @return boolean
+     * @return bool
      */
     public function isPt()
     {
@@ -118,9 +118,9 @@ class Process extends \Symfony\Component\Process\Process
     }
 
     /**
-     * Set whether to pass command output through to console output
+     * Set whether to pass command output through to console output.
      *
-     * @param boolean $pt Passthru?
+     * @param bool $pt Passthru?
      *
      * @return void
      */
@@ -130,7 +130,7 @@ class Process extends \Symfony\Component\Process\Process
     }
 
     /**
-     * Execute a shell command
+     * Execute a shell command.
      *
      * @param callable|null $callback A PHP callback to run whenever there is some
      *                                output available on STDOUT or STDERR
@@ -141,10 +141,10 @@ class Process extends \Symfony\Component\Process\Process
     {
         $command = $this->getCommandLine();
 
-        $this->console->output('<cmd>' . $this->getWorkingDirectory() . ' > ' . $command . '</cmd>', OutputInterface::VERBOSITY_VERBOSE);
+        $this->console->output('<cmd>'.$this->getWorkingDirectory().' > '.$command.'</cmd>', OutputInterface::VERBOSITY_VERBOSE);
 
         if ($this->dryRun) {
-            return null;
+            return;
         }
 
         parent::run(
@@ -165,4 +165,3 @@ class Process extends \Symfony\Component\Process\Process
         return trim($this->getOutput());
     }
 }
-?>

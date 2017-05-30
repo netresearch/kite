@@ -1,17 +1,19 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite;
+
 use Netresearch\Kite\Exception\BreakException;
 use Netresearch\Kite\Exception\ExitException;
 use Netresearch\Kite\Exception\ForcedTaskException;
@@ -19,12 +21,13 @@ use Netresearch\Kite\Task\SchemaMigrationTask;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * A task to aggregate and run a bunch of tasks
+ * A task to aggregate and run a bunch of tasks.
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 abstract class Tasks extends Task
@@ -42,12 +45,12 @@ abstract class Tasks extends Task
     /**
      * @var \Netresearch\Kite\Task[]
      */
-    private $tasks = array();
+    private $tasks = [];
 
     /**
      * @var array
      */
-    private $deferredTasks = array();
+    private $deferredTasks = [];
 
     /**
      * @var bool
@@ -76,14 +79,14 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Clone and reparent the tasks to $this
+     * Clone and reparent the tasks to $this.
      *
      * @return void
      */
-    function __clone()
+    public function __clone()
     {
         // Clone the tasks and bind (reparent) them to $this
-        $tasks = array();
+        $tasks = [];
         foreach ($this->tasks as $task) {
             $tasks[] = $clone = clone $task;
             $clone->bindTo($this);
@@ -97,33 +100,32 @@ abstract class Tasks extends Task
         parent::__clone();
     }
 
-
     /**
-     * Configures the available options
+     * Configures the available options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'tasks' => array(
-                'type' => 'array',
-                'label' => 'Array of tasks to add to the subTask'
-            ),
-            'task' => array(
-                'type' => 'mixed',
-                'label' => 'Task to run as a sub task'
-            ),
-            'workflow' => array(
-                'type' => 'array',
+        return [
+            'tasks' => [
+                'type'  => 'array',
+                'label' => 'Array of tasks to add to the subTask',
+            ],
+            'task' => [
+                'type'  => 'mixed',
+                'label' => 'Task to run as a sub task',
+            ],
+            'workflow' => [
+                'type'  => 'array',
                 'label' => 'Workflow to run as a subtask',
-            ),
-            'script' => array(
-                'type' => 'string',
-                'label' => 'Script to include which configures the tasks'
-            ),
-            '--'
-        ) + parent::configureVariables();
+            ],
+            'script' => [
+                'type'  => 'string',
+                'label' => 'Script to include which configures the tasks',
+            ],
+            '--',
+        ] + parent::configureVariables();
     }
 
     /**
@@ -135,7 +137,7 @@ abstract class Tasks extends Task
     protected function initialize()
     {
         parent::initialize();
-        
+
         $this->isWorkflow = false;
         foreach ($this->tasks as $task) {
             $task->initialize();
@@ -143,9 +145,8 @@ abstract class Tasks extends Task
         $this->initialized = true;
     }
 
-
     /**
-     * Override to create the tasks from the according options
+     * Override to create the tasks from the according options.
      *
      * @param string $name  Variable name
      * @param mixed  $value Variable value
@@ -157,6 +158,7 @@ abstract class Tasks extends Task
         if ($this->isWorkflow) {
             // Forward everything to the workflow, as soon as it is set
             $this->tasks[0]->offsetSet($name, $value);
+
             return;
         }
         if (in_array($name, ['workflow', 'script', 'task', 'tasks'], true)) {
@@ -168,32 +170,35 @@ abstract class Tasks extends Task
         if ($name === 'workflow') {
             $this->addTask($this->factory->createWorkflow($value, $this));
             $this->isWorkflow = true;
+
             return;
         }
         if ($name === 'script') {
             include $value;
+
             return;
         }
         if ($name === 'task') {
             $name = 'tasks';
-            $value = array($value);
+            $value = [$value];
         }
         if ($name === 'tasks') {
             foreach ($value as $name => $task) {
                 $task = $this->expand($task);
-                $options = array();
+                $options = [];
                 if (!is_numeric($name)) {
                     $options['name'] = $name;
                 }
                 $this->addTask($this->factory->createTask($task, $this, $options));
             }
+
             return;
         }
         parent::offsetSet($name, $value);
     }
 
     /**
-     * Run an array of tasks
+     * Run an array of tasks.
      *
      * @return $this
      */
@@ -267,7 +272,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Adds tasks that should be run before/after the task with $name
+     * Adds tasks that should be run before/after the task with $name.
      *
      * @param array  $tasks The tasks to add the deferred tasks to
      * @param string $type  "before" or "after"
@@ -280,7 +285,7 @@ abstract class Tasks extends Task
         if (!$name) {
             return 0;
         }
-        $key = $type . ':' . $name;
+        $key = $type.':'.$name;
         $tasksAdded = 0;
         if (array_key_exists($key, $this->job->deferredTasks)) {
             while ($task = array_shift($this->job->deferredTasks[$key])) {
@@ -288,11 +293,12 @@ abstract class Tasks extends Task
                 $type == ($type === 'after') ? array_push($tasks, $task) : array_unshift($tasks, $task);
             }
         }
+
         return $tasksAdded;
     }
 
     /**
-     * Run a task
+     * Run a task.
      *
      * @param Task $task The task
      *
@@ -306,11 +312,11 @@ abstract class Tasks extends Task
             if (is_bool($if)) {
                 $shouldRun = $if;
             } elseif (is_string($if)) {
-                $shouldRun = (boolean) $task->expand(
-                    '{' . $if . ' ? 1 : 0}'
+                $shouldRun = (bool) $task->expand(
+                    '{'.$if.' ? 1 : 0}'
                 );
             } else {
-                $shouldRun = call_user_func_array($if, array($task, $this->console));
+                $shouldRun = call_user_func_array($if, [$task, $this->console]);
                 if (!is_bool($shouldRun)) {
                     throw new Exception('Callback must return TRUE or FALSE');
                 }
@@ -324,13 +330,13 @@ abstract class Tasks extends Task
             if ($toVar) {
                 $task->getParent()->set($toVar, $return);
             }
+
             return $return;
         }
-        return null;
     }
 
     /**
-     * Add a task - or run it immediately when $this->started
+     * Add a task - or run it immediately when $this->started.
      *
      * @param Task $task The task
      *
@@ -339,14 +345,14 @@ abstract class Tasks extends Task
     public function addTask(Task $task)
     {
         $deferred = false;
-        foreach (array('before', 'after') as $type) {
+        foreach (['before', 'after'] as $type) {
             if ($task->get($type)) {
                 $deferred = true;
                 foreach ((array) $task->get($type) as $name) {
                     if ($name === '@self') {
                         $name = $this->get('name');
                     }
-                    $key = $type . ':' . $name;
+                    $key = $type.':'.$name;
                     $this->job->deferredTasks[$key][] = $task;
                 }
             }
@@ -363,18 +369,19 @@ abstract class Tasks extends Task
         if (!$deferred) {
             $this->tasks[] = $task;
         }
+
         return $this;
     }
 
     /**
-     * Setup and add (which eventually runs) a task
+     * Setup and add (which eventually runs) a task.
      *
      * @param string|array $type    The task type or configuration
      * @param array        $options The options
      *
      * @return \Netresearch\Kite\Task|mixed The task or the task return when !$this->prepare
      */
-    private function createAndAddTask($type, array $options = array())
+    private function createAndAddTask($type, array $options = [])
     {
         $task = $this->factory->createTask($type, $this, $options);
         if (is_array($this->isPrepare)) {
@@ -388,27 +395,30 @@ abstract class Tasks extends Task
         }
         if ($this->isPrepare === true) {
             $this->isPrepare = false;
+
             return $task;
         } else {
             $return = $this->addTask($task);
         }
+
         return $this->started ? $return : $task;
     }
 
     /**
      * Makes that the next fetched task (from the methods below)
-     * is not added to the workflow
+     * is not added to the workflow.
      *
      * @return $this
      */
     public function prepare()
     {
         $this->isPrepare = true;
+
         return $this;
     }
 
     /**
-     * Execute the next fetched task before given $task
+     * Execute the next fetched task before given $task.
      *
      * @param Task|string $task Task or task name
      *
@@ -416,12 +426,13 @@ abstract class Tasks extends Task
      */
     public function before($task)
     {
-        $this->isPrepare = array('before', $task);
+        $this->isPrepare = ['before', $task];
+
         return $this;
     }
 
     /**
-     * Execute the next fetched task after given $task
+     * Execute the next fetched task after given $task.
      *
      * @param Task|string $task Task or task name
      *
@@ -429,14 +440,15 @@ abstract class Tasks extends Task
      */
     public function after($task)
     {
-        $this->isPrepare = array('after', $task);
+        $this->isPrepare = ['after', $task];
+
         return $this;
     }
 
     // Following are shortcuts to create and eventually run tasks
 
     /**
-     * Answer a question
+     * Answer a question.
      *
      * @param string $question The question
      * @param string $default  The default value
@@ -449,7 +461,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Run a callback
+     * Run a callback.
      *
      * @param callable $callback The callback
      *
@@ -461,7 +473,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Ask a selection question
+     * Ask a selection question.
      *
      * @param string $question The question
      * @param array  $choices  The choices
@@ -475,7 +487,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Clear the TYPO3 cache
+     * Clear the TYPO3 cache.
      *
      * @param string $cmd The clearcache command
      *
@@ -483,11 +495,11 @@ abstract class Tasks extends Task
      */
     public function clearCache($cmd = null)
     {
-        return $this->createAndAddTask(__FUNCTION__, $cmd ? compact('cmd') : array());
+        return $this->createAndAddTask(__FUNCTION__, $cmd ? compact('cmd') : []);
     }
 
     /**
-     * Ask a confirmation question
+     * Ask a confirmation question.
      *
      * @param string $question The question
      * @param bool   $default  Default value
@@ -500,7 +512,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Run a composer command
+     * Run a composer command.
      *
      * @param string            $command         The command to execute
      * @param array|string|null $optArg          Options and arguments
@@ -509,13 +521,13 @@ abstract class Tasks extends Task
      *
      * @return string|\Netresearch\Kite\Task\ComposerTask
      */
-    public function composer($command, $optArg = null, array $processSettings = array())
+    public function composer($command, $optArg = null, array $processSettings = [])
     {
         return $this->createAndAddTask(__FUNCTION__, compact('command', 'optArg', 'processSettings'));
     }
 
     /**
-     * Evaluate an expression
+     * Evaluate an expression.
      *
      * {@see http://symfony.com/doc/current/components/expression_language/syntax.html}
      *
@@ -529,7 +541,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Break a tasks loop
+     * Break a tasks loop.
      *
      * @param string $message The message
      *
@@ -542,7 +554,7 @@ abstract class Tasks extends Task
 
     /**
      * Exit - return code is return code of application
-     * (thus, when it's not 0 the message will be rendered as exception)
+     * (thus, when it's not 0 the message will be rendered as exception).
      *
      * @param string $message The message
      * @param int    $code    The code
@@ -555,7 +567,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Run a git command
+     * Run a git command.
      *
      * @param string            $command         The command to execute
      * @param string|null       $cwd             The directory to change into before execution
@@ -565,7 +577,7 @@ abstract class Tasks extends Task
      *
      * @return Task\GitTask|string
      */
-    public function git($command, $cwd = null, $optArg = null, array $processSettings = array())
+    public function git($command, $cwd = null, $optArg = null, array $processSettings = [])
     {
         return $this->createAndAddTask(__FUNCTION__, compact('command', 'cwd', 'optArg', 'processSettings'));
     }
@@ -588,11 +600,12 @@ abstract class Tasks extends Task
         if ($workflow) {
             $options['workflow'] = $workflow;
         }
+
         return $this->createAndAddTask(__FUNCTION__, $options);
     }
 
     /**
-     * Do something on the filesystem
+     * Do something on the filesystem.
      *
      * @return \Netresearch\Kite\Task\FsTask
      */
@@ -602,7 +615,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Output a message
+     * Output a message.
      *
      * @param string   $message           The message
      * @param int|bool $severityOrNewLine Severity or whether to print a newline
@@ -618,11 +631,12 @@ abstract class Tasks extends Task
         } else {
             $severity = $severityOrNewLine;
         }
+
         return $this->createAndAddTask(__FUNCTION__, compact('message', 'severity', 'newLine'));
     }
 
     /**
-     * Execute a command remote
+     * Execute a command remote.
      *
      * @param string            $command         The command to execute
      * @param string|null       $cwd             The directory to change into before execution
@@ -632,13 +646,13 @@ abstract class Tasks extends Task
      *
      * @return Task\RemoteShellTask|string
      */
-    public function remoteShell($command, $cwd = null, $optArg = null, array $processSettings = array())
+    public function remoteShell($command, $cwd = null, $optArg = null, array $processSettings = [])
     {
         return $this->createAndAddTask(__FUNCTION__, compact('command', 'cwd', 'optArg', 'processSettings'));
     }
 
     /**
-     * Rsync from/to somewhere - prefix $from/$to with {node}: to rsync from/to nodes
+     * Rsync from/to somewhere - prefix $from/$to with {node}: to rsync from/to nodes.
      *
      * @param string $from    From
      * @param string $to      To
@@ -648,13 +662,13 @@ abstract class Tasks extends Task
      *
      * @return string|\Netresearch\Kite\Task\RsyncTask
      */
-    public function rsync($from, $to, array $options = array(), array $exclude = array(), array $include = array())
+    public function rsync($from, $to, array $options = [], array $exclude = [], array $include = [])
     {
         return $this->createAndAddTask(__FUNCTION__, compact('from', 'to', 'options', 'exclude', 'include'));
     }
 
     /**
-     * Migrate the TYPO3 schema definitions from ext_table.sql files
+     * Migrate the TYPO3 schema definitions from ext_table.sql files.
      *
      * @return string|SchemaMigrationTask
      */
@@ -664,7 +678,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Upload a file via scp
+     * Upload a file via scp.
      *
      * @param string $from File to upload (prefix with {node}: to download)
      * @param string $to   Path to upload to (prefix with {node}: to upload)
@@ -677,7 +691,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Execute a command locally
+     * Execute a command locally.
      *
      * @param string            $command         The command to execute
      * @param string|null       $cwd             The directory to change into before execution
@@ -687,29 +701,30 @@ abstract class Tasks extends Task
      *
      * @return Task\ShellTask|string
      */
-    public function shell($command, $cwd = null, $optArg = null, array $processSettings = array())
+    public function shell($command, $cwd = null, $optArg = null, array $processSettings = [])
     {
         return $this->createAndAddTask(__FUNCTION__, compact('command', 'cwd', 'optArg', 'processSettings'));
     }
 
     /**
-     * Run tasks as sub tasks
+     * Run tasks as sub tasks.
      *
      * @param string|array $workflowOrOptions Options for the class factory or workflow class name
      * @param array        $workflowOptions   Options for the workflow (when $workflowOrOptions is string)
      *
      * @return Task\SubTask|Workflow
      */
-    public function sub($workflowOrOptions = array(), array $workflowOptions = array())
+    public function sub($workflowOrOptions = [], array $workflowOptions = [])
     {
         if (is_string($workflowOrOptions)) {
             return $this->createAndAddTask($workflowOrOptions, $workflowOptions);
         }
+
         return $this->createAndAddTask($workflowOrOptions);
     }
 
     /**
-     * Run tasks as sub tasks and catch exceptions
+     * Run tasks as sub tasks and catch exceptions.
      *
      * @param string $errorMessage Error message to display on failure
      *
@@ -721,7 +736,7 @@ abstract class Tasks extends Task
     }
 
     /**
-     * Create a Tar archive from the file or files in $file
+     * Create a Tar archive from the file or files in $file.
      *
      * @param string|array $files  File(s) to tar
      * @param string       $toFile Path to tar file
@@ -733,4 +748,3 @@ abstract class Tasks extends Task
         return $this->createAndAddTask(__FUNCTION__, compact('files', 'toFile'));
     }
 }
-?>

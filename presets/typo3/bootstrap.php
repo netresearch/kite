@@ -1,17 +1,17 @@
 <?php
 /**
- * Bootstrap TYPO3
+ * Bootstrap TYPO3.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @author   Torsten Fink <torsten.fink@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
-
 define('TYPO3_MODE', 'BE');
 define('TYPO3_cliMode', true);
 
@@ -21,7 +21,7 @@ if (PHP_SAPI !== 'cli') {
     die('Access denied');
 }
 
-define('PATH_site', getcwd() . DIRECTORY_SEPARATOR);
+define('PATH_site', getcwd().DIRECTORY_SEPARATOR);
 
 $typo3VersionIsMinimum7 = true;
 
@@ -33,7 +33,7 @@ if (file_exists($cliBootstrapFile)) {
 }
 
 if ($typo3VersionIsMinimum7) {
-    $classLoader = include getcwd() . '/typo3_src/vendor/autoload.php';
+    $classLoader = include getcwd().'/typo3_src/vendor/autoload.php';
     \TYPO3\CMS\Core\Core\Bootstrap::getInstance()
         ->initializeClassLoader($classLoader)
         ->baseSetup(PATH_site)
@@ -55,4 +55,3 @@ if ($typo3VersionIsMinimum7) {
 }
 // Make sure output is not buffered, so command-line output and interaction can take place
 \TYPO3\CMS\Core\Utility\GeneralUtility::flushOutputBuffers();
-?>

@@ -1,22 +1,24 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Service\Composer
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Service\Composer;
+
 use Netresearch\Kite\Exception;
 use Netresearch\Kite\Service\Composer;
 
 /**
- * Class Package
+ * Class Package.
  *
  * // Composer properties, not necessarily present:
  *
@@ -26,7 +28,6 @@ use Netresearch\Kite\Service\Composer;
  *                                  (may have f.i. "reference")
  *
  * // Additional properties
- *
  * @property string      $path      Package path
  * @property bool        $isRoot    Whether package is root (project)
  * @property array       $requires  The packages from $require as array
@@ -37,11 +38,11 @@ use Netresearch\Kite\Service\Composer;
  * @property string|null $tag       The currently checked out tag, if any
  * @property string|null $remote    The remote url (no multiple urls supported)
  *
- *
  * @category Netresearch
- * @package  Netresearch\Kite\Service\Composer
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class Package
@@ -70,12 +71,12 @@ class Package
         if (is_string($composerJson)) {
             $path = realpath($composerJson);
             if (!$path) {
-                throw new Exception('Could not find ' . $composerJson);
+                throw new Exception('Could not find '.$composerJson);
             }
             $this->path = dirname($path);
             $composerJson = json_decode(file_get_contents($path));
             if (!is_object($composerJson)) {
-                throw new Exception('Could not load ' . $path);
+                throw new Exception('Could not load '.$path);
             }
         }
         foreach (get_object_vars($composerJson) as $key => $value) {
@@ -86,7 +87,7 @@ class Package
     }
 
     /**
-     * Load lazy properties
+     * Load lazy properties.
      *
      * @param string $name The property name
      *
@@ -96,7 +97,7 @@ class Package
     {
         switch ($name) {
         case 'git':
-            $gitDir = $this->path . '/.git';
+            $gitDir = $this->path.'/.git';
             $this->git = file_exists($gitDir) && is_dir($gitDir);
             break;
         case 'branches':
@@ -114,14 +115,14 @@ class Package
             $this->loadRequires();
             break;
         default:
-            throw new Exception('Invalid property ' . $name);
-
+            throw new Exception('Invalid property '.$name);
         }
+
         return $this->$name;
     }
 
     /**
-     * Mark lazy properties as present
+     * Mark lazy properties as present.
      *
      * @param string $name The name
      *
@@ -133,13 +134,13 @@ class Package
     }
 
     /**
-     * Load the requires - removes inline aliases
+     * Load the requires - removes inline aliases.
      *
      * @return void
      */
     protected function loadRequires()
     {
-        $this->requires = isset($this->require) ? get_object_vars($this->require) : array();
+        $this->requires = isset($this->require) ? get_object_vars($this->require) : [];
         foreach ($this->requires as $package => $constraint) {
             if ($pos = strpos($constraint, ' as ')) {
                 if ($hashPos = strpos($constraint, '#')) {
@@ -152,13 +153,13 @@ class Package
     }
 
     /**
-     * Reload requires from composer.json
+     * Reload requires from composer.json.
      *
      * @return $this
      */
     public function reloadRequires()
     {
-        $file = $this->path . '/composer.json';
+        $file = $this->path.'/composer.json';
         if (file_exists($file)) {
             $composerJson = json_decode(file_get_contents($file));
             unset($this->require);
@@ -167,11 +168,12 @@ class Package
             }
             $this->loadRequires();
         }
+
         return $this;
     }
 
     /**
-     * Get the remote
+     * Get the remote.
      *
      * @return void
      */
@@ -198,7 +200,7 @@ class Package
     }
 
     /**
-     * Load 'branches', 'upstreams', 'branch', 'tag', 'git'
+     * Load 'branches', 'upstreams', 'branch', 'tag', 'git'.
      *
      * @throws Exception\ProcessFailedException
      *
@@ -206,18 +208,19 @@ class Package
      */
     protected function loadGitInformation()
     {
-        $this->branches = array();
-        $this->upstreams = array();
+        $this->branches = [];
+        $this->upstreams = [];
         $this->branch = null;
         if ($this->git) {
-            $this->composer->git('fetch', $this->path, array('p' => true, 'origin'));
+            $this->composer->git('fetch', $this->path, ['p' => true, 'origin']);
             try {
-                $format = (self::$forEachRefHeadSupported ? '%(HEAD)' : '') . '|%(refname:short)|%(upstream:short)';
+                $format = (self::$forEachRefHeadSupported ? '%(HEAD)' : '').'|%(refname:short)|%(upstream:short)';
                 $gitBr = $this->composer->git('for-each-ref', $this->path, ['format' => $format, 'refs/heads/', 'refs/remotes/origin']);
             } catch (Exception\ProcessFailedException $e) {
                 if (trim($e->getProcess()->getErrorOutput()) === 'fatal: unknown field name: HEAD') {
                     self::$forEachRefHeadSupported = false;
                     $this->loadGitInformation();
+
                     return;
                 } else {
                     throw $e;
@@ -246,18 +249,16 @@ class Package
     }
 
     /**
-     * Load the currently checked out tag
+     * Load the currently checked out tag.
      *
      * @return void
      */
     protected function loadTag()
     {
         try {
-            $this->tag = trim($this->composer->git('describe', $this->path, array('exact-match' => true, 'tags' => true)));
+            $this->tag = trim($this->composer->git('describe', $this->path, ['exact-match' => true, 'tags' => true]));
         } catch (Exception\ProcessFailedException $e) {
-            $this->tag =  null;
+            $this->tag = null;
         }
     }
 }
-
-?>

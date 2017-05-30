@@ -1,28 +1,30 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Workflow\Composer
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Workflow\Composer;
-use Netresearch\Kite\Exception;
 
+use Netresearch\Kite\Exception;
 use Netresearch\Kite\Workflow;
 
 /**
- * Workflow to diagnose packages and fix found problems
+ * Workflow to diagnose packages and fix found problems.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Workflow\Composer
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 class Diagnose extends Base
@@ -30,12 +32,12 @@ class Diagnose extends Base
     /**
      * @var array
      */
-    protected $checks = array();
+    protected $checks = [];
 
     /**
      * @var array
      */
-    protected $fixes = array();
+    protected $fixes = [];
 
     /**
      * @var bool
@@ -48,7 +50,7 @@ class Diagnose extends Base
     protected $dontCheckCurrentPackageAgain = false;
 
     /**
-     * Configure the options
+     * Configure the options.
      *
      * @return array
      */
@@ -58,28 +60,28 @@ class Diagnose extends Base
             if (substr($method, 0, 5) === 'check' && $method[5] === strtoupper($method[5])) {
                 $check = substr($method, 5);
                 $this->checks[] = $check;
-                if (method_exists($this, 'fix' . $check)) {
+                if (method_exists($this, 'fix'.$check)) {
                     $this->fixes[] = $check;
                 }
             }
         }
 
-        return array(
-            'check' => array(
-                'type' => 'array',
+        return [
+            'check' => [
+                'type'   => 'array',
                 'option' => true,
-                'label' => 'Only execute these checks - available checks are ' . implode(', ', $this->checks),
-            ),
-            'fix' => array(
-                'type' => 'boolean|array',
+                'label'  => 'Only execute these checks - available checks are '.implode(', ', $this->checks),
+            ],
+            'fix' => [
+                'type'   => 'boolean|array',
                 'option' => true,
-                'label' => 'Enable fixes and optionally reduce to certain fixes - available fixes are ' . implode(', ', $this->fixes),
-            ),
-        ) + parent::configureVariables();
+                'label'  => 'Enable fixes and optionally reduce to certain fixes - available fixes are '.implode(', ', $this->fixes),
+            ],
+        ] + parent::configureVariables();
     }
 
     /**
-     * Override to assemble the tasks
+     * Override to assemble the tasks.
      *
      * @return void
      */
@@ -98,16 +100,16 @@ class Diagnose extends Base
     }
 
     /**
-     * Run the checks
+     * Run the checks.
      *
-     * @param string  $check        The check to execute
-     * @param boolean $fix          Whether to fix found problems
-     * @param array   $packageNames Package names to filter this one
-     *                              (for recursive calls only)
+     * @param string $check        The check to execute
+     * @param bool   $fix          Whether to fix found problems
+     * @param array  $packageNames Package names to filter this one
+     *                             (for recursive calls only)
      *
      * @return void
      */
-    public function doCheck($check, $fix, array $packageNames = array())
+    public function doCheck($check, $fix, array $packageNames = [])
     {
         $packages = $this->getPackages(false);
         $errors = 0;
@@ -115,16 +117,16 @@ class Diagnose extends Base
             $this->console->output($check, false);
             $this->console->indent();
         }
-        $rerunForPackages = array();
+        $rerunForPackages = [];
         foreach ($packages as $package) {
             if ($packageNames && !in_array($package->name, $packageNames, true)) {
                 continue;
             }
-            if (is_string($message = $this->{'check' . $check}($package))) {
+            if (is_string($message = $this->{'check'.$check}($package))) {
                 if (!$packageNames && !$errors) {
                     $this->console->output(
                         str_repeat(chr(8), strlen($check))
-                        . '<fg=red;bg=black>' . $check . '</>'
+                        .'<fg=red;bg=black>'.$check.'</>'
                     );
                 }
                 $message = sprintf($message, "package <comment>$package->name</>");
@@ -133,7 +135,7 @@ class Diagnose extends Base
                 if ($fix) {
                     $this->dontCheckCurrentPackageAgain = false;
                     $this->console->indent();
-                    $this->{'fix' . $check}($package);
+                    $this->{'fix'.$check}($package);
                     $this->console->outdent();
                     if (!$this->dontCheckCurrentPackageAgain) {
                         $rerunForPackages[] = $package->name;
@@ -145,6 +147,7 @@ class Diagnose extends Base
                 $this->composerUpdateRequired = false;
                 $this->doComposerUpdate();
                 $this->doCheck($check, $fix);
+
                 return;
             }
         }
@@ -155,7 +158,7 @@ class Diagnose extends Base
             if (!$errors) {
                 $this->console->output(
                     str_repeat(chr(8), strlen($check))
-                    . '<fg=green;bg=black>' . $check . '</>'
+                    .'<fg=green;bg=black>'.$check.'</>'
                 );
             }
             $this->console->outdent();
@@ -163,7 +166,7 @@ class Diagnose extends Base
     }
 
     /**
-     * Check for unstaged changes
+     * Check for unstaged changes.
      *
      * @param object $package The package
      *
@@ -172,16 +175,15 @@ class Diagnose extends Base
     protected function checkUnstagedChanges($package)
     {
         if ($package->git) {
-            $status = $this->git('status', $package->path, array('porcelain' => true));
+            $status = $this->git('status', $package->path, ['porcelain' => true]);
             if (trim($status)) {
                 return '%s has uncommited changes';
             }
         }
-        return null;
     }
 
     /**
-     * Fix unstaged changes
+     * Fix unstaged changes.
      *
      * @param object $package The package
      *
@@ -190,29 +192,29 @@ class Diagnose extends Base
     protected function fixUnstagedChanges($package)
     {
         $fix = $this->selectFixes(
-            array(
+            [
                 1 => 'Show diff (and ask again)',
                 2 => 'Withdraw changes',
                 3 => 'Stash changes',
-            )
+            ]
         );
         switch ($fix) {
         case 1:
-            $this->git('add', $package->path, array('N' => true, 'A' => true));
+            $this->git('add', $package->path, ['N' => true, 'A' => true]);
             $this->console->output('');
-            $this->git('diff', $package->path, 'HEAD', array('tty' => true));
+            $this->git('diff', $package->path, 'HEAD', ['tty' => true]);
             $this->console->output('');
             $this->fixUnstagedChanges($package);
             break;
         case 2:
-            $this->git('reset', $package->path, array('hard' => true));
-            $this->git('clean', $package->path, array('i' => true, 'd' => true), array('tty' => true));
+            $this->git('reset', $package->path, ['hard' => true]);
+            $this->git('clean', $package->path, ['i' => true, 'd' => true], ['tty' => true]);
             break;
         case 3:
             $this->git('reset', $package->path);
             $args = 'save -u';
             if ($message = $this->answer('Message for stash:')) {
-                $args .= ' ' . escapeshellarg($message);
+                $args .= ' '.escapeshellarg($message);
             }
             $this->git('stash', $package->path, $args);
             break;
@@ -220,7 +222,7 @@ class Diagnose extends Base
     }
 
     /**
-     * Check if package is ahead and/or behind remote tracking branch
+     * Check if package is ahead and/or behind remote tracking branch.
      *
      * @param object $package The package
      *
@@ -242,15 +244,15 @@ class Diagnose extends Base
             } elseif ($package->behind) {
                 $type = 'is behind';
             } else {
-                return null;
+                return;
             }
+
             return "%s $type remote tracking branch";
         }
-        return null;
     }
 
     /**
-     * Push and/or pull or show the differences
+     * Push and/or pull or show the differences.
      *
      * @param object $package The package
      *
@@ -258,17 +260,17 @@ class Diagnose extends Base
      */
     protected function fixRemoteSynchronicity($package)
     {
-        $commands = array();
+        $commands = [];
         if ($package->behind) {
             $commands[] = 'pull';
         }
         if ($package->ahead) {
             $commands[] = 'push';
         }
-        $fixes = array(
+        $fixes = [
             1 => 'Show incoming/outgoing commits (and ask again)',
             2 => ucfirst(implode(' and ', $commands)),
-        );
+        ];
         if (count($commands) > 1 && $package->branch !== 'master') {
             $fixes[3] = 'Push with <comment>--force</comment>';
         }
@@ -278,16 +280,16 @@ class Diagnose extends Base
             $this->fixRemoteSynchronicity($package);
             break;
         case 3:
-            $commands = array('push');
+            $commands = ['push'];
             $options = '--force';
         case 2:
             foreach ($commands as $command) {
                 $pck = "<comment>{$package->name}</comment>";
-                $this->console->output($msg = ucfirst($command) . "ing $pck...", false);
+                $this->console->output($msg = ucfirst($command)."ing $pck...", false);
                 $this->git($command, $package->path, isset($options) ? $options : null);
                 $this->console->output(
                     str_repeat(chr(8), strlen(strip_tags($msg)))
-                    . "<fg=green>Sucessfully {$command}ed $pck</>"
+                    ."<fg=green>Sucessfully {$command}ed $pck</>"
                 );
             }
             break;
@@ -297,7 +299,7 @@ class Diagnose extends Base
     /**
      * Checks for packages that require the package in another branch than the
      * current - or for packages that require the package in a version when
-     * the package is checked out at a branch
+     * the package is checked out at a branch.
      *
      * Further requirements checks are left to composer
      *
@@ -309,7 +311,7 @@ class Diagnose extends Base
     {
         if ($package->git && !$package->isRoot) {
             $package->requiredBranch = null;
-            $package->unsatisfiedDependentPackages = array();
+            $package->unsatisfiedDependentPackages = [];
             $package->invalidRequirements = false;
             $dependentPackages = [];
             foreach ($this->get('composer.packages') as $dependentPackage) {
@@ -330,9 +332,10 @@ class Diagnose extends Base
                         }
                         if ($package->requiredBranch && $package->requiredBranch !== $requiredBranch) {
                             $package->invalidRequirements = true;
-                            return '<error>' . array_pop($dependentPackages)
-                                . ' and ' . array_pop($dependentPackages)
-                                . ' require %s in different branches</error>';
+
+                            return '<error>'.array_pop($dependentPackages)
+                                .' and '.array_pop($dependentPackages)
+                                .' require %s in different branches</error>';
                         }
                         $package->requiredBranch = $requiredBranch;
                         if ($requiredBranch !== $package->branch) {
@@ -343,7 +346,7 @@ class Diagnose extends Base
                     }
                 }
             }
-            $constraint = $package->tag ?: 'dev-' . $package->branch;
+            $constraint = $package->tag ?: 'dev-'.$package->branch;
             if ($package->requiredBranch && $package->requiredBranch !== $package->branch) {
                 return "%s is at <comment>$constraint</comment> but is required at <comment>dev-{$package->requiredBranch}</comment>";
             }
@@ -351,7 +354,6 @@ class Diagnose extends Base
                 return "%s is at <comment>{$constraint}#{$package->source->reference}</comment> but is required at <comment>dev-{$package->requiredBranch}#{$hash}</comment>";
             }
         }
-        return null;
     }
 
     /**
@@ -367,18 +369,18 @@ class Diagnose extends Base
         if ($package->invalidRequirements) {
             $this->doExit('Can not fix that', 1);
         }
-        $currentConstraint = $package->tag ?: 'dev-' . $package->branch;
-        $requiredConstraint = 'dev-' . $package->requiredBranch;
+        $currentConstraint = $package->tag ?: 'dev-'.$package->branch;
+        $requiredConstraint = 'dev-'.$package->requiredBranch;
         if ($package->requiredBranch) {
-            $actions = array(
+            $actions = [
                 1 => "Show divergent commits between <comment>$currentConstraint</comment> and <comment>$requiredConstraint</comment> (and ask again)",
-                2 => "Checkout package at <comment>$requiredConstraint</comment>"
-            );
+                2 => "Checkout package at <comment>$requiredConstraint</comment>",
+            ];
         } else {
-            $actions = array();
+            $actions = [];
         }
         if ($count = count($package->unsatisfiedDependentPackages)) {
-            $actions[3] = "Make ";
+            $actions[3] = 'Make ';
             $git = true;
             foreach ($package->unsatisfiedDependentPackages as $i => $requirePackage) {
                 $git &= $requirePackage->git;
@@ -410,7 +412,7 @@ class Diagnose extends Base
     }
 
     /**
-     * Check if package is on another branch/tag or another commit than locked
+     * Check if package is on another branch/tag or another commit than locked.
      *
      * @param object $package The package
      *
@@ -421,7 +423,7 @@ class Diagnose extends Base
         if ($package->git && !$package->isRoot) {
             $remote = false;
             do {
-                $reference = ($remote ? 'origin/' : '') . $package->source->reference;
+                $reference = ($remote ? 'origin/' : '').$package->source->reference;
                 try {
                     $rawCounts = $this->git('rev-list', $package->path, "--count --left-right --cherry-pick {$reference}...");
                     break;
@@ -436,16 +438,16 @@ class Diagnose extends Base
             if ($counts[0] || $counts[1]) {
                 $num = $counts[0] ?: $counts[1];
                 $type = $counts[0] ? 'behind</>' : 'ahead</> of';
-                return '%s is <comment>' . $num . ' commit' . ($num > 1 ? 's ' : ' ')
-                    . $type . ' locked commit <comment>'
-                    . substr($package->source->reference, 0, 7) . '</>';
+
+                return '%s is <comment>'.$num.' commit'.($num > 1 ? 's ' : ' ')
+                    .$type.' locked commit <comment>'
+                    .substr($package->source->reference, 0, 7).'</>';
             }
         }
-        return null;
     }
 
     /**
-     * Run composer update or checkout the package at locked state
+     * Run composer update or checkout the package at locked state.
      *
      * @param object $package The package
      *
@@ -454,13 +456,13 @@ class Diagnose extends Base
     protected function fixDivergeFromLock($package)
     {
         $fix = $this->selectFixes(
-            array(
+            [
                 1 => 'Show commits between locked and current commit (and ask again)',
                 2 => 'Run <info>composer update</info> (you may loose local changes)',
                 3 => 'Checkout package at locked commit <comment>'
-                    . substr($package->source->reference, 0, 7)
-                    . "</comment> (<comment>{$package->version}</comment>)",
-            )
+                    .substr($package->source->reference, 0, 7)
+                    ."</comment> (<comment>{$package->version}</comment>)",
+            ]
         );
 
         switch ($fix) {
@@ -479,7 +481,7 @@ class Diagnose extends Base
     }
 
     /**
-     * Check if composer lock is up to date
+     * Check if composer lock is up to date.
      *
      * @param object $package The package
      *
@@ -490,16 +492,14 @@ class Diagnose extends Base
         if ($package->isRoot) {
             try {
                 $this->composer('validate', '--no-check-all --no-check-publish');
-            } catch(Exception\ProcessFailedException $e) {
+            } catch (Exception\ProcessFailedException $e) {
                 return 'The lock file is not up to date with the latest changes in root composer.json';
             }
         }
-
-        return null;
     }
 
     /**
-     * Run composer update (--lock)
+     * Run composer update (--lock).
      *
      * @param object $package The package
      *
@@ -508,9 +508,9 @@ class Diagnose extends Base
     protected function fixComposerLockActuality($package)
     {
         $fix = $this->selectFixes(
-            array(
+            [
                 1 => 'Run <info>composer update</info> (you may loose local changes)',
-            )
+            ]
         );
         if ($fix === 1) {
             $this->composerUpdateRequired = true;
@@ -518,7 +518,7 @@ class Diagnose extends Base
     }
 
     /**
-     * Select from the available fixes
+     * Select from the available fixes.
      *
      * @param array $fixes The fixes
      *
@@ -534,16 +534,18 @@ class Diagnose extends Base
         $this->console->indent();
         if ($result == 'i' || $result == 'n') {
             $this->dontCheckCurrentPackageAgain = ($result === 'i');
-            return null;
+
+            return;
         }
         if ($result == 'x') {
             $this->doExit();
         }
+
         return (int) $result;
     }
 
     /**
-     * Show commits that are not in the HEAD but in ref and vice versa
+     * Show commits that are not in the HEAD but in ref and vice versa.
      *
      * @param object $package    The package
      * @param string $ref        The ref name
@@ -558,12 +560,12 @@ class Diagnose extends Base
             $side = $i ? 'left' : 'right';
             $otherSide = $i ? 'right' : 'left';
             $args = "--$side-only --cherry-pick --pretty=format:'%C(yellow)%h %Cgreen%cd %an%Creset%n  %s' --abbrev-commit --date=local ";
-            $args .= $ref . '...';
-            $log = $this->git('log', $package->path, $args, array('shy' => true));
+            $args .= $ref.'...';
+            $log = $this->git('log', $package->path, $args, ['shy' => true]);
             if ($log) {
                 $this->console->output('');
 
-                $title = "<info>{${$side . 'Title'}}</info> > <info>{${$otherSide . 'Title'}}</info>";
+                $title = "<info>{${$side.'Title'}}</info> > <info>{${$otherSide.'Title'}}</info>";
                 $this->output($title);
                 $this->console->output(str_repeat('-', strlen(strip_tags($title))));
 
@@ -574,4 +576,3 @@ class Diagnose extends Base
         }
     }
 }
-?>

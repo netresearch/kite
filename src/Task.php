@@ -1,27 +1,29 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite;
 
 /**
- * Base Task Class
+ * Base Task Class.
  *
  * {@see configureVariables() for option information}
  *
  * @category Netresearch
- * @package  Netresearch\Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 abstract class Task extends Variables
@@ -45,65 +47,65 @@ abstract class Task extends Variables
     {
         $this->job = $parent instanceof Job ? $parent : $parent->get('job');
         $this->console = $this->job->console;
-        
+
         parent::__construct($parent);
     }
 
     /**
-     * Configures the available options
+     * Configures the available options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'name' => array(
-                'type' => 'string',
-                'label' => 'Name of the task'
-            ),
-            'after' => array(
-                'type' => 'string',
-                'label' => 'Name of the task to execute this task after'
-            ),
-            'before' => array(
-                'type' => 'string',
-                'label' => 'Name of the task to execute this task before'
-            ),
-            'onBefore' => array(
-                'type' => 'array',
-                'label' => 'Array of sub tasks to execute prior to this task'
-            ),
-            'onAfter' => array(
-                'type' => 'array',
-                'label' => 'Array of sub tasks to execute after this task'
-            ),
-            'message' => array(
-                'type' => 'string',
-                'label' => 'Message to output when job is run with --dry-run or prior to execution'
-            ),
-            'if' => array(
-                'type' => array('string', 'callback', 'bool'),
-                'label' => 'Expression string, callback returning true or false or boolean. Depending of that the task will be executed or not'
-            ),
-            'executeInPreview' => array(
-                'type' => 'bool',
+        return [
+            'name' => [
+                'type'  => 'string',
+                'label' => 'Name of the task',
+            ],
+            'after' => [
+                'type'  => 'string',
+                'label' => 'Name of the task to execute this task after',
+            ],
+            'before' => [
+                'type'  => 'string',
+                'label' => 'Name of the task to execute this task before',
+            ],
+            'onBefore' => [
+                'type'  => 'array',
+                'label' => 'Array of sub tasks to execute prior to this task',
+            ],
+            'onAfter' => [
+                'type'  => 'array',
+                'label' => 'Array of sub tasks to execute after this task',
+            ],
+            'message' => [
+                'type'  => 'string',
+                'label' => 'Message to output when job is run with --dry-run or prior to execution',
+            ],
+            'if' => [
+                'type'  => ['string', 'callback', 'bool'],
+                'label' => 'Expression string, callback returning true or false or boolean. Depending of that the task will be executed or not',
+            ],
+            'executeInPreview' => [
+                'type'    => 'bool',
                 'default' => false,
-                'label' => 'Whether to execute this task even when job is run with --dry-run'
-            ),
-            'force' => array(
-                'type' => 'bool',
+                'label'   => 'Whether to execute this task even when job is run with --dry-run',
+            ],
+            'force' => [
+                'type'    => 'bool',
                 'default' => false,
-                'label' => 'Whether this task should be run even when prior tasks (inside the current workflow) failed, exited or broke execution.'
-            ),
-            'toVar' => array(
-                'type' => 'string',
-                'label' => 'The variable to save the return value of the execute method of the task to.'
-            ),
-        );
+                'label'   => 'Whether this task should be run even when prior tasks (inside the current workflow) failed, exited or broke execution.',
+            ],
+            'toVar' => [
+                'type'  => 'string',
+                'label' => 'The variable to save the return value of the execute method of the task to.',
+            ],
+        ];
     }
 
     /**
-     * Handle onBefore, onAfter and name
+     * Handle onBefore, onAfter and name.
      *
      * @param mixed $offset The name of the variable
      * @param mixed $value  The value
@@ -128,7 +130,7 @@ abstract class Task extends Variables
     }
 
     /**
-     * Re-add the onBefore and onAfter tasks and regenerate name
+     * Re-add the onBefore and onAfter tasks and regenerate name.
      *
      * @return void
      */
@@ -144,7 +146,7 @@ abstract class Task extends Variables
     }
 
     /**
-     * Handle name
+     * Handle name.
      *
      * @param mixed $offset The variable name
      *
@@ -156,7 +158,7 @@ abstract class Task extends Variables
     }
 
     /**
-     * Generate name if it doesn't exist
+     * Generate name if it doesn't exist.
      *
      * @param mixed $offset The name of the variable
      *
@@ -167,6 +169,7 @@ abstract class Task extends Variables
         if ($offset === 'name' && !parent::offsetGet('name')) {
             parent::offsetSet('name', spl_object_hash($this));
         }
+
         return parent::offsetGet($offset);
     }
 
@@ -181,7 +184,7 @@ abstract class Task extends Variables
     }
 
     /**
-     * Shortcut to set()
+     * Shortcut to set().
      *
      * @param bool $flag The flag
      *
@@ -193,7 +196,7 @@ abstract class Task extends Variables
     }
 
     /**
-     * Shortcut to set()
+     * Shortcut to set().
      *
      * @param string $var The variable name
      *
@@ -205,7 +208,7 @@ abstract class Task extends Variables
     }
 
     /**
-     * Shortcut to set()
+     * Shortcut to set().
      *
      * @param bool $flag The flag
      *
@@ -217,7 +220,7 @@ abstract class Task extends Variables
     }
 
     /**
-     * Shortcut to set()
+     * Shortcut to set().
      *
      * @param string $message The message
      *
@@ -229,9 +232,9 @@ abstract class Task extends Variables
     }
 
     /**
-     * Shortcut to set()
+     * Shortcut to set().
      *
-     * @param string|callable|boolean $condition The condition
+     * @param string|callable|bool $condition The condition
      *
      * @return $this
      */
@@ -241,7 +244,7 @@ abstract class Task extends Variables
     }
 
     /**
-     * Run this task
+     * Run this task.
      *
      * @throws Exception
      *
@@ -256,7 +259,7 @@ abstract class Task extends Variables
     }
 
     /**
-     * Determines whether this task should be executed
+     * Determines whether this task should be executed.
      *
      * @return bool
      */
@@ -267,7 +270,7 @@ abstract class Task extends Variables
 
     /**
      * The preview for this task - this is called right before execution and
-     * in preview mode
+     * in preview mode.
      *
      * @return void
      */
@@ -280,7 +283,7 @@ abstract class Task extends Variables
     }
 
     /**
-     * Actually execute this task
+     * Actually execute this task.
      *
      * @return mixed
      */
@@ -289,4 +292,3 @@ abstract class Task extends Variables
         throw new Exception('Method not implemented');
     }
 }
-?>

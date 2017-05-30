@@ -1,13 +1,14 @@
 <?php
 /**
- * Common configuration
+ * Common configuration.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Kite
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
@@ -20,36 +21,36 @@ $this['composer']['whitelistRemotes'] = '{preg_quote(preg_replace("#/[^/]+$#s", 
 // Stages to be selectable by stageSelect workflow
 $this['stages'] = [
     'staging' => [
-        'branch' => '{replace("/", "-", composer.rootPackage.name)}-staging',
-        'merge' => true,
-        'createBranch' => '{config["composer"]["whitelistNames"] || config["composer"]["whitelistRemotes"] || config["composer"]["whitelistPaths"]}'
+        'branch'       => '{replace("/", "-", composer.rootPackage.name)}-staging',
+        'merge'        => true,
+        'createBranch' => '{config["composer"]["whitelistNames"] || config["composer"]["whitelistRemotes"] || config["composer"]["whitelistPaths"]}',
         // add nodes or node in your config
     ],
     'production' => [
         'branch' => 'master',
         // add nodes or node in your config
-    ]
+    ],
 ];
 
 // Common jobs
 $this['jobs'] = [
     'foreach-package' => [
         'description' => 'Execute a command for each package',
-        'options' => [
+        'options'     => [
             'git' => [
-                'type' => 'boolean',
-                'label' => 'Whether to work only on git packages'
-            ]
+                'type'  => 'boolean',
+                'label' => 'Whether to work only on git packages',
+            ],
         ],
         'arguments' => [
             'cmd' => [
-                'type' => 'string',
+                'type'     => 'string',
                 'required' => true,
-                'label' => 'The command to execute'
-            ]
+                'label'    => 'The command to execute',
+            ],
         ],
         'task' => [
-            'type' => 'callback',
+            'type'     => 'callback',
             'callback' => function (\Netresearch\Kite\Job $job) {
                 $git = $job->get('git');
                 $command = $job->get('cmd');
@@ -59,16 +60,16 @@ $this['jobs'] = [
                         $job->shell($command, $package->path, null, ['tty' => true]);
                     }
                 }
-            }
-        ]
+            },
+        ],
     ],
     'update' => [
         'description' => 'Update the application (git pull and composer update)',
-        'arguments' => [
+        'arguments'   => [
             'branch' => [
-                'type' => 'string',
-                'label' => 'Branch to checkout before updating'
-            ]
+                'type'  => 'string',
+                'label' => 'Branch to checkout before updating',
+            ],
         ],
         'tasks' => [
             ['type' => 'git', 'command' => 'checkout', 'argv' => '{branch}', 'if' => '!empty(branch) && composer.rootPackage.branch != branch'],
@@ -78,32 +79,31 @@ $this['jobs'] = [
     ],
     'merge' => [
         'description' => 'Merge all current git packages into current project branch',
-        'workflow' => 'Netresearch\Kite\Workflow\Composer\Merge'
+        'workflow'    => 'Netresearch\Kite\Workflow\Composer\Merge',
     ],
     'checkout' => [
         'description' => 'Checkout all packages with the given branch at this branch and update the dependencies',
-        'workflow' => 'Netresearch\Kite\Workflow\Composer\Checkout'
+        'workflow'    => 'Netresearch\Kite\Workflow\Composer\Checkout',
     ],
     'diagnose' => [
         'description' => 'Show status of packages',
-        'workflow' => 'Netresearch\Kite\Workflow\Composer\Diagnose'
+        'workflow'    => 'Netresearch\Kite\Workflow\Composer\Diagnose',
     ],
     'deploy' => [
         'description' => 'Deploy to a stage',
-        'workflow' => 'stageSelect',
-        'stages' => '{config["stages"]}',
-        'task' => [
+        'workflow'    => 'stageSelect',
+        'stages'      => '{config["stages"]}',
+        'task'        => [
             'workflow' => 'Netresearch\Kite\Workflow\Deployment',
-        ]
+        ],
     ],
     'rollout' => [
         'description' => 'Roll out along stages',
-        'workflow' => 'stageSelect',
-        'stages' => '{config["stages"]}',
-        'question' => 'Select stage until which to rollout',
-        'message' => '<step>Deploying to %s</step>',
-        'task' => '{config["jobs"]["deploy"]["task"]}',
-        'sliding' => true
-    ]
+        'workflow'    => 'stageSelect',
+        'stages'      => '{config["stages"]}',
+        'question'    => 'Select stage until which to rollout',
+        'message'     => '<step>Deploying to %s</step>',
+        'task'        => '{config["jobs"]["deploy"]["task"]}',
+        'sliding'     => true,
+    ],
 ] + $this['jobs'];
-?>

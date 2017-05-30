@@ -1,51 +1,52 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Task;
+
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Execute a callback
+ * Execute a callback.
  *
  * @category   Netresearch
- * @package    Netresearch\Kite
- * @subpackage Task
+ *
  * @author     Christian Opitz <christian.opitz@netresearch.de>
  * @license    http://www.netresearch.de Netresearch Copyright
+ *
  * @link       http://www.netresearch.de
  */
 class CallbackTask extends \Netresearch\Kite\Task
 {
     /**
-     * Configures the options
+     * Configures the options.
      *
      * @return array
      */
     protected function configureVariables()
     {
-        return array(
-            'callback' => array(
-                'type' => 'callable|string',
+        return [
+            'callback' => [
+                'type'     => 'callable|string',
                 'required' => true,
-                'label' => 'The callback or user function to run (@see GeneralUtility::callUserFunction())'
-            ),
-            '--'
-        ) + parent::configureVariables();
+                'label'    => 'The callback or user function to run (@see GeneralUtility::callUserFunction())',
+            ],
+            '--',
+        ] + parent::configureVariables();
     }
 
     /**
-     * Execute the task
+     * Execute the task.
      *
      * @return mixed
      */
@@ -57,15 +58,16 @@ class CallbackTask extends \Netresearch\Kite\Task
                 $callback = explode('::', $callback);
             } elseif (strpos($callback, '->')) {
                 $parts = explode('->', $callback);
-                $instance = new $parts[0];
-                $callback = array($instance, $parts[1]);
+                $instance = new $parts[0]();
+                $callback = [$instance, $parts[1]];
             }
         }
+
         return call_user_func($callback, $this->getParent());
     }
 
     /**
-     * Show an information of what will happen
+     * Show an information of what will happen.
      *
      * @return void
      */
@@ -76,11 +78,10 @@ class CallbackTask extends \Netresearch\Kite\Task
         if (is_string($fn)) {
             $name = $fn;
         } elseif (is_array($fn)) {
-            $name = (is_object($fn[0]) ? get_class($fn[0]) . '->' : $fn[0] . '::') . $fn[1];
+            $name = (is_object($fn[0]) ? get_class($fn[0]).'->' : $fn[0].'::').$fn[1];
         } else {
             $name = 'anonymous function';
         }
-        $this->console->output('Calling ' . $name, OutputInterface::VERBOSITY_DEBUG);
+        $this->console->output('Calling '.$name, OutputInterface::VERBOSITY_DEBUG);
     }
 }
-?>

@@ -1,33 +1,35 @@
 <?php
 /**
- * See class comment
+ * See class comment.
  *
  * PHP Version 5
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Test
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 
 namespace Netresearch\Kite\Test;
+
 use Netresearch\Kite\Console\Output\ConsoleOutput;
 use Netresearch\Kite\Job;
 use Netresearch\Kite\Service\Config;
 use Netresearch\Kite\Service\Console;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Helper;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Process\Process;
 
 /**
- * Base TestCase
+ * Base TestCase.
  *
  * @category Netresearch
- * @package  Netresearch\Kite\Test
+ *
  * @author   Christian Opitz <christian.opitz@netresearch.de>
  * @license  http://www.netresearch.de Netresearch Copyright
+ *
  * @link     http://www.netresearch.de
  */
 abstract class TestCase extends \PHPUnit_Framework_TestCase
@@ -43,7 +45,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     private $previousCwd;
 
     /**
-     * Change back directory if changed
+     * Change back directory if changed.
      *
      * @return void
      */
@@ -56,9 +58,8 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         }
     }
 
-
     /**
-     * Delete the workspace if it exists
+     * Delete the workspace if it exists.
      *
      * @return void
      */
@@ -72,7 +73,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Get a job mock
+     * Get a job mock.
      *
      * @return \PHPUnit_Framework_MockObject_MockObject|Job
      */
@@ -93,11 +94,12 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
         $job = new \Netresearch\Kite\Job($console);
         $job->get('composer')->invalidatePackages();
+
         return $job;
     }
 
     /**
-     * Create a project with single dependencies
+     * Create a project with single dependencies.
      *
      * @param int $dependenciesDepth Depth of dependency tree to generate
      *
@@ -107,11 +109,11 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     {
         static $project;
 
-        $wsPath = self::$workspacePath ?: sys_get_temp_dir() . '/' .  uniqid('kite-checkout-test-');
+        $wsPath = self::$workspacePath ?: sys_get_temp_dir().'/'.uniqid('kite-checkout-test-');
 
-        $projectPath = $wsPath . '/project';
-        $remotesPath = $wsPath . '/remotes';
-        $templatePath = $wsPath . '/.template';
+        $projectPath = $wsPath.'/project';
+        $remotesPath = $wsPath.'/remotes';
+        $templatePath = $wsPath.'/.template';
 
         if (self::$workspacePath) {
             $this->cmd('rm -rf ? ?', null, $projectPath, $remotesPath);
@@ -134,7 +136,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Clone a package and it's dependent packages
+     * Clone a package and it's dependent packages.
      *
      * @param Package $package The package
      *
@@ -143,20 +145,21 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     private function clonePackage(Package $package)
     {
         $clone = clone $package;
-        $clonedDependencies = array();
+        $clonedDependencies = [];
         foreach ($package->dependencies as $dependentPackage) {
             $clonedDependencies[] = $this->clonePackage($dependentPackage);
         }
         $clone->dependencies = $clonedDependencies;
+
         return $clone;
     }
 
     /**
-     * Create the project
+     * Create the project.
      *
-     * @param int $dependenciesDepth Depth of dependencies
-     * @param string $projectPath    Path to project
-     * @param string $remotesPath    Path to remotes
+     * @param int    $dependenciesDepth Depth of dependencies
+     * @param string $projectPath       Path to project
+     * @param string $remotesPath       Path to remotes
      *
      * @return Package
      */
@@ -168,18 +171,18 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         while ($i >= 0) {
             $isProject = $i === 0;
             $package = new Package();
-            $package->name = 'netresearch/' . ($isProject ? 'project' : 'package-' . $i);
-            $package->path = $projectPath . ($isProject ? '' : '/vendor/' . $package->name);
-            $package->remote = $remotesPath . '/' . basename($package->name);
+            $package->name = 'netresearch/'.($isProject ? 'project' : 'package-'.$i);
+            $package->path = $projectPath.($isProject ? '' : '/vendor/'.$package->name);
+            $package->remote = $remotesPath.'/'.basename($package->name);
 
-            $tmpRemote = $package->remote . '-tmp';
+            $tmpRemote = $package->remote.'-tmp';
             mkdir($tmpRemote);
 
             $this->cmd('git init', $tmpRemote);
-            $composerJson = "{\n" . '    "name": "' . $package->name . '"';
+            $composerJson = "{\n".'    "name": "'.$package->name.'"';
             if ($isProject) {
-                file_put_contents($tmpRemote . '/kite.php', '<?php $this->loadPreset("common"); $this["workspace"] = "kite-workspace"; ?>');
-                file_put_contents($tmpRemote . '/.gitignore', "/kite-workspace\n/composer.lock\n/vendor");
+                file_put_contents($tmpRemote.'/kite.php', '<?php $this->loadPreset("common"); $this["workspace"] = "kite-workspace"; ?>');
+                file_put_contents($tmpRemote.'/.gitignore', "/kite-workspace\n/composer.lock\n/vendor");
                 $composerJson .= ",\n    \"type\": \"project\"";
                 $composerJson .= ",\n    \"config\": {\"cache-files-ttl\": 0}";
                 $composerJson .= ",\n    \"minimum-stability\": \"dev\"";
@@ -189,17 +192,17 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
                     do {
                         $composerJson .= "\n        {\"type\": \"git\", \"url\": \"{$dependentPackage->remote}\"},";
                     } while ($dependentPackage = current($dependentPackage->dependencies));
-                    $composerJson = rtrim($composerJson, ',') . "\n    ]";
+                    $composerJson = rtrim($composerJson, ',')."\n    ]";
                 }
             }
             if ($lastPackage) {
-                $composerJson .= ",\n" . '    "require": {';
+                $composerJson .= ",\n".'    "require": {';
                 $composerJson .= "\n        \"{$lastPackage->name}\": \"dev-master\"";
-                $composerJson = rtrim($composerJson, ',') . "\n    }";
+                $composerJson = rtrim($composerJson, ',')."\n    }";
                 $package->dependencies[] = $lastPackage;
             }
             $composerJson .= "\n}";
-            file_put_contents($tmpRemote . '/composer.json', $composerJson);
+            file_put_contents($tmpRemote.'/composer.json', $composerJson);
             $this->cmd('git add -A; git commit -nm \'Initial import\'', $tmpRemote);
             $this->cmd('git clone --bare ? ?', null, $tmpRemote, $package->remote);
 
@@ -216,7 +219,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Execute a command
+     * Execute a command.
      *
      * @param string $cmd The command
      * @param string $cwd The working directory (workspacePath when null)
@@ -239,8 +242,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $process = new Process($cmd, $cwd);
         //$process->setTty(true);
         $process->mustRun();
+
         return $process->getOutput();
     }
 }
-
-?>
