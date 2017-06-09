@@ -24,6 +24,7 @@ if (PHP_SAPI !== 'cli') {
 define('PATH_site', getcwd() . DIRECTORY_SEPARATOR);
 
 $typo3VersionIsMinimum7 = true;
+$typo3VersionIsMinimum8 = false;
 
 $cliBootstrapFile = 'typo3/sysext/core/Classes/Core/CliBootstrap.php';
 if (file_exists($cliBootstrapFile)) {
@@ -34,11 +35,23 @@ if (file_exists($cliBootstrapFile)) {
 
 if ($typo3VersionIsMinimum7) {
     $classLoader = include getcwd() . '/typo3_src/vendor/autoload.php';
-    \TYPO3\CMS\Core\Core\Bootstrap::getInstance()
-        ->initializeClassLoader($classLoader)
-        ->baseSetup(PATH_site)
+    $bootstrap = \TYPO3\CMS\Core\Core\Bootstrap::getInstance();
+    $bootstrap->initializeClassLoader($classLoader);
+
+    $typo3VersionIsMinimum8 = defined('TYPO3_REQUESTTYPE_CLI');
+    if ($typo3VersionIsMinimum8) {
+        $_SERVER['argv'][0] = 'bin/typo3';
+        $bootstrap
+            ->setRequestType(TYPO3_REQUESTTYPE_CLI)
+            ->baseSetup(2);
+
+    } else {
+        $bootstrap->baseSetup(PATH_site);
+    }
+    $bootstrap
         ->configure()
-        ->loadExtensionTables(true);
+        ->loadExtensionTables(true)
+        ->initializeBackendUser();
 } else {
     include 'typo3/sysext/core/Classes/Core/Bootstrap.php';
     \TYPO3\CMS\Core\Core\Bootstrap::getInstance()

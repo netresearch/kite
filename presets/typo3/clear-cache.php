@@ -17,7 +17,7 @@ require __DIR__ . '/bootstrap.php';
 $dataHandler = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Core\DataHandling\DataHandler');
 $dataHandler->stripslashes_values = 0;
 
-if (!$typo3VersionIsMinimum7) {
+if (!$typo3VersionIsMinimum7 || $typo3VersionIsMinimum8) {
     $dataHandler->start(array(), array());
 }
 
