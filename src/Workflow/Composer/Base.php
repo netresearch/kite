@@ -13,6 +13,7 @@
  */
 
 namespace Netresearch\Kite\Workflow\Composer;
+
 use Netresearch\Kite\Service\Composer\Package;
 use Netresearch\Kite\Workflow;
 use Netresearch\Kite\Exception;
@@ -178,7 +179,7 @@ abstract class Base extends Workflow
                                 $packages[ $package->name ] = $package;
                             }
                             $this->pushPackages[$packageName] = $packages[$packageName];
-                            $this->rewriteRequirement($package, $packageName, $version, $aliases);
+                            $this->rewriteRequirement($package, $packageName, $version, $useNewAsCurrentBranch);
                         } else {
                             $unfixedRequirements++;
                         }
@@ -193,7 +194,8 @@ abstract class Base extends Workflow
         }
         if ($unfixedRequirements) {
             $this->doExit(
-                'It seems like a composer update is required but due to probably incorrect dependencies you have to do that manually', 1
+                'It seems like a composer update is required but due to probably incorrect dependencies you have to do that manually',
+                1
             );
         }
     }
@@ -304,7 +306,8 @@ abstract class Base extends Workflow
             sort($branches);
             $inferFromBranch = $this->choose(
                 "Select branch to create new branch '$branch' from in {$package->name}",
-                $branches, in_array('master', $branches, true) ? 'master' : $branch
+                $branches,
+                in_array('master', $branches, true) ? 'master' : $branch
             );
             if ($inferFromBranch !== $package->branch) {
                 $this->checkoutPackage($package, $inferFromBranch);
@@ -374,8 +377,8 @@ abstract class Base extends Workflow
     /**
      * Check that package is white-listed, is git-package and up-to-date
      *
-     * @param $package
-     * @param $branch
+     * @param Package $package the package
+     * @param string  $branch  branch name
      *
      * @return void
      *
@@ -418,10 +421,10 @@ abstract class Base extends Workflow
         return $mergeOptions;
     }
 
-    /**.
+    /**
      * Try to solve merge conflicts
      *
-     * @param Package $package
+     * @param Package $package the package
      *
      * @return array
      *
@@ -441,7 +444,8 @@ abstract class Base extends Workflow
         if (array_diff(array_keys($conflictedFiles), ['composer.json'])) {
             throw new Exception(
                 'There are unresolved conflicts - please resolve them and then commit the result',
-                1458307785, isset($conflictSolvingException) ? $conflictSolvingException : null
+                1458307785,
+                isset($conflictSolvingException) ? $conflictSolvingException : null
             );
         } elseif (isset($conflictSolvingException)) {
             throw $conflictSolvingException;
@@ -494,7 +498,8 @@ abstract class Base extends Workflow
     protected function jsonEncode($var)
     {
         return json_encode(
-            $var, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            $var,
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         ) . "\n";
     }
 
@@ -638,5 +643,3 @@ abstract class Base extends Workflow
         return $this->whitelists ? false : null;
     }
 }
-
-?>
