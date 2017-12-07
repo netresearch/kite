@@ -159,6 +159,47 @@ class CheckoutTest extends TestCase
     }
 
     /**
+     * Test the checkout: Checkout one package and assert, that all other packages
+     * are checked out at the given branch and the dependencies have been changed
+     *
+     * @param string   $branch   The branch
+     * @param callable $scenario The scenario
+     *
+     * @dataProvider provideCheckoutScenarios
+     *
+     */
+    public function testCheckoutWithAliases($branch, $scenario)
+    {
+        $project = $lastPackage = $this->getProject();
+        $allPackages = [];
+        while ($lastPackage->dependencies) {
+            $allPackages[] = $lastPackage;
+            $lastPackage = current($lastPackage->dependencies);
+        }
+
+        call_user_func($scenario, $lastPackage);
+
+        $this->runWorkflow(
+            [
+                'branch' => $branch,
+                'aliases' => true
+            ],
+            [
+                self::QUESTION_FIX_REQUIREMENTS => true,
+                self::QUESTION_CREATE_BRANCH_FROM . '(project|package-[1-2]).+' => 'master'
+            ]
+        );
+
+        foreach ($allPackages as $package) {
+            if ($package->dependencies) {
+                $composerJson = json_decode(file_get_contents($package->path . '/composer.json'), true);
+                $this->assertEquals('dev-' . $branch . ' as dev-master', current($composerJson['require']));
+                $this->assertBranch($package, $branch);
+            }
+        }
+    }
+
+    /**
      * Test the checkout with merging the previous checked out branch into the branch
      * to check out
      *

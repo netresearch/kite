@@ -188,7 +188,7 @@ abstract class Base extends Workflow
 
                 // if useAsCurrent-option is set, only the first package should be altered
                 if ($useNewAsCurrentBranch) {
-                    break;
+                    //break;
                 }
             }
         }
