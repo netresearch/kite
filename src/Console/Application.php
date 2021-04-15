@@ -74,7 +74,8 @@ class Application extends \Symfony\Component\Console\Application
         $expectedFile = 'kite.php';
         $app = null;
         $indicators = [
-            'TYPO3' => ['typo3conf', 'Kite.php'],
+            'TYPO3 v8' => ['typo3conf', 'Kite.php'],
+            'TYPO3 v9' => ['public/typo3conf', 'Kite.php'],
             'Magento' => ['app/etc', 'kite.php'],
         ];
         foreach ($indicators as $appName => $dirAndFile) {
@@ -93,7 +94,7 @@ class Application extends \Symfony\Component\Console\Application
                 $message = [
                     'You appear to be in a ' . $app . ' root directory but',
                     'there is no kite config file at the expected',
-                    'location (' . $expectedFile . ').'
+                    'location (' . $expectedFile . ').',
                 ];
             } else {
                 $message = [
@@ -103,9 +104,15 @@ class Application extends \Symfony\Component\Console\Application
                     'The config file path is expected to be:',
                 ];
                 foreach ($indicators as $appName => $dirAndFile) {
-                    $message[] = '  - "' . implode('/', $dirAndFile) . '" for ' . $appName . ' applications or';
+                    $message[] =
+                        '  - "' .
+                        implode('/', $dirAndFile) .
+                        '" for ' .
+                        $appName .
+                        ' applications or';
                 }
-                $message[] = '  - "' . $expectedFile . '" for any other application';
+                $message[] =
+                    '  - "' . $expectedFile . '" for any other application';
             }
             $lMax = 0;
             foreach ($message as $line) {
@@ -113,12 +120,16 @@ class Application extends \Symfony\Component\Console\Application
                     $lMax = $l;
                 }
             }
-            $this->output->writeln('<warning>' . str_repeat(' ', $lMax + 4) . '</warning>');
+            $this->output->writeln(
+                '<warning>' . str_repeat(' ', $lMax + 4) . '</warning>'
+            );
             foreach ($message as $line) {
                 $line = str_pad($line, $lMax + 2);
                 $this->output->writeln("<warning>  $line</warning>");
             }
-            $this->output->writeln('<warning>' . str_repeat(' ', $lMax + 4) . '</warning>');
+            $this->output->writeln(
+                '<warning>' . str_repeat(' ', $lMax + 4) . '</warning>'
+            );
         }
     }
 
@@ -129,14 +140,15 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function getHelp()
     {
-        $help
-            = " _  ___ _       \n"
-            . "| |/ /_| |_ ___\n"
-            . "| ' /| | __/ _ \\\n"
-            . "| . \\| | |_| __/\n"
-            . "|_|\\_|_|\\__\\___|\n\n"
-            . $this->getLongVersion() . "\n\n"
-            . $this->getSelfPackage()->description;
+        $help =
+            " _  ___ _       \n" .
+            "| |/ /_| |_ ___\n" .
+            "| ' /| | __/ _ \\\n" .
+            "| . \\| | |_| __/\n" .
+            "|_|\\_|_|\\__\\___|\n\n" .
+            $this->getLongVersion() .
+            "\n\n" .
+            $this->getSelfPackage()->description;
 
         return $help;
     }
@@ -166,7 +178,10 @@ class Application extends \Symfony\Component\Console\Application
     {
         static $package = null;
         if (!$package) {
-            $files = [__DIR__ . '/../../../../composer/installed.json', __DIR__ . '/vendor/composer/installed.json'];
+            $files = [
+                __DIR__ . '/../../../../composer/installed.json',
+                __DIR__ . '/vendor/composer/installed.json',
+            ];
             foreach ($files as $file) {
                 if (file_exists($file)) {
                     $installed = json_decode(file_get_contents($file));
@@ -180,12 +195,26 @@ class Application extends \Symfony\Component\Console\Application
             }
             if (!$package) {
                 $kitePath = dirname(dirname(__DIR__));
-                $process = new Process('git symbolic-ref -q --short HEAD || git describe --tags --exact-match; git rev-parse HEAD; git show -s --format=%ct HEAD', $kitePath);
+                $process = new Process(
+                    'git symbolic-ref -q --short HEAD || git describe --tags --exact-match; git rev-parse HEAD; git show -s --format=%ct HEAD',
+                    $kitePath
+                );
                 $process->run();
                 if ($output = $process->getOutput()) {
-                    $package = json_decode(file_get_contents($kitePath . '/composer.json'));
-                    list($name, $revision, $tstamp) = explode("\n", trim($output), 3);
-                    $package->version = preg_match('/^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+)?$/i', $name) ? $name : 'dev-' . $name;
+                    $package = json_decode(
+                        file_get_contents($kitePath . '/composer.json')
+                    );
+                    list($name, $revision, $tstamp) = explode(
+                        "\n",
+                        trim($output),
+                        3
+                    );
+                    $package->version = preg_match(
+                        '/^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+)?$/i',
+                        $name
+                    )
+                        ? $name
+                        : 'dev-' . $name;
                     $package->source = (object) ['reference' => $revision];
                     $package->time = date('Y-m-d H:i:s', $tstamp);
                 } else {
@@ -204,7 +233,14 @@ class Application extends \Symfony\Component\Console\Application
     protected function getDefaultInputDefinition()
     {
         $definition = parent::getDefaultInputDefinition();
-        $definition->addOption(new InputOption('workflow', null, InputOption::VALUE_OPTIONAL, 'Run a workflow on the fly'));
+        $definition->addOption(
+            new InputOption(
+                'workflow',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Run a workflow on the fly'
+            )
+        );
 
         if (isset($_SERVER['HOME']) && is_writable($_SERVER['HOME'])) {
             $debugDir = $_SERVER['HOME'] . '/.kite/log';
@@ -213,8 +249,10 @@ class Application extends \Symfony\Component\Console\Application
         }
         $definition->addOption(
             new InputOption(
-                'debug-dir', null, InputOption::VALUE_OPTIONAL,
-                "Path to directory to which to dump the debug output file",
+                'debug-dir',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Path to directory to which to dump the debug output file',
                 $debugDir
             )
         );
@@ -232,7 +270,6 @@ class Application extends \Symfony\Component\Console\Application
     {
         return parent::run($input, $this->output);
     }
-
 
     /**
      * Create job on the fly when workflow option is present
@@ -252,27 +289,29 @@ class Application extends \Symfony\Component\Console\Application
             }
             $workflow = $input->getParameterOption('--workflow');
             $jobName = 'generic:workflow:' . $workflow;
-            $this->config->configureJob($jobName, array('workflow' => $workflow));
+            $this->config->configureJob($jobName, ['workflow' => $workflow]);
             $command = new JobCommand($jobName, $this->config);
             $this->add($command);
 
             $parameterOption = '--workflow=' . $workflow;
             $input = new StringInput(
                 rtrim(
-                    $jobName . ' ' .
-                    str_replace(
-                        array(
-                            $parameterOption . ' ',
-                            ' ' . $parameterOption,
-                            $parameterOption
-                        ), '', $strInput
-                    )
+                    $jobName .
+                        ' ' .
+                        str_replace(
+                            [
+                                $parameterOption . ' ',
+                                ' ' . $parameterOption,
+                                $parameterOption,
+                            ],
+                            '',
+                            $strInput
+                        )
                 )
             );
         }
         return parent::doRun($input, $output);
     }
-
 
     /**
      * Gets the default commands that should always be available.
@@ -284,7 +323,10 @@ class Application extends \Symfony\Component\Console\Application
         $commands = parent::getDefaultCommands();
         $commands[] = new LogCommand();
 
-        foreach ($this->config->getJobConfiguration() as $name => $configuration) {
+        foreach (
+            $this->config->getJobConfiguration()
+            as $name => $configuration
+        ) {
             $commands[] = new JobCommand($name, $this->config);
         }
 
